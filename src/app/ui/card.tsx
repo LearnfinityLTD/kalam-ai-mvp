@@ -1,8 +1,7 @@
 "use client";
 import * as React from "react";
 
-interface CardProps extends React.HTMLAttributes<HTMLDivElement> {}
-
+type CardProps = React.ComponentPropsWithoutRef<"div">;
 export const Card = ({ children, className = "", ...props }: CardProps) => {
   const baseStyles =
     "bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden";
@@ -13,8 +12,7 @@ export const Card = ({ children, className = "", ...props }: CardProps) => {
   );
 };
 
-interface CardHeaderProps extends React.HTMLAttributes<HTMLDivElement> {}
-
+type CardHeaderProps = React.ComponentPropsWithoutRef<"div">;
 export const CardHeader = ({
   children,
   className = "",
@@ -28,8 +26,7 @@ export const CardHeader = ({
   );
 };
 
-interface CardTitleProps extends React.HTMLAttributes<HTMLHeadingElement> {}
-
+type CardTitleProps = React.ComponentPropsWithoutRef<"h3">;
 export const CardTitle = ({
   children,
   className = "",
@@ -43,8 +40,7 @@ export const CardTitle = ({
   );
 };
 
-interface CardContentProps extends React.HTMLAttributes<HTMLDivElement> {}
-
+type CardContentProps = React.ComponentPropsWithoutRef<"div">;
 export const CardContent = ({
   children,
   className = "",

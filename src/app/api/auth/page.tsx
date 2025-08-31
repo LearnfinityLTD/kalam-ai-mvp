@@ -1,33 +1,46 @@
 // app/auth/page.tsx
 "use client";
 
-import { useMemo } from "react";
+import { Suspense, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import AuthForm from "@/components/shared/AuthForm";
 import { Button } from "@/ui/button";
 
-const isUserType = (
-  v: string | null
-): v is "guard" | "professional" | "guide" =>
+type UserTypeParam = "guard" | "professional" | "guide";
+
+const isUserType = (v: string | null): v is UserTypeParam =>
   v === "guard" || v === "professional" || v === "guide";
 
 export default function AuthPage() {
+  // Wrap all usage of useSearchParams in Suspense
+  return (
+    <Suspense fallback={<main className="min-h-screen bg-gray-50" />}>
+      <AuthPageInner />
+    </Suspense>
+  );
+}
+
+function AuthPageInner() {
   const sp = useSearchParams();
   const router = useRouter();
-  const type = useMemo(
-    () =>
-      isUserType(sp.get("type"))
-        ? (sp.get("type") as "guard" | "professional" | "guide")
-        : "guard",
-    [sp]
-  );
 
+  const type = useMemo<UserTypeParam>(() => {
+    const q = sp.get("type");
+    return isUserType(q) ? q : "guard";
+  }, [sp]);
+
+  // Where to send user after auth based on selected type
   const redirectByType =
     type === "guard"
       ? "/guards/dashboard"
       : type === "guide"
       ? "/guides/dashboard"
       : "/professionals/dashboard";
+
+  // AuthForm currently accepts only "guard" | "professional".
+  // Map "guide" -> "guard" without using `any`.
+  const mappedType: "guard" | "professional" =
+    type === "guide" ? "guard" : type;
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -42,29 +55,20 @@ export default function AuthPage() {
           </Button>
           <Button
             variant={type === "guide" ? "default" : "outline"}
-            onClick={() => router.replace("/api/auth?type=guide")}
+            onClick={() => router.replace("/auth?type=guide")}
           >
             Tour Guide
           </Button>
           <Button
             variant={type === "professional" ? "default" : "outline"}
-            onClick={() => router.replace("/api/auth?type=professional")}
+            onClick={() => router.replace("/auth?type=professional")}
           >
             Professional
           </Button>
         </div>
 
         {/* Reuse your existing form; it handles sign in/up */}
-        <AuthForm
-          // Our AuthForm currently accepts only "guard" | "professional".
-          // If you’ve already extended it to include "guide", pass `userType={type as any}`.
-          userType={
-            type === "guide"
-              ? ("guard" as any)
-              : (type as "guard" | "professional")
-          }
-          redirectTo={redirectByType}
-        />
+        <AuthForm userType={mappedType} redirectTo={redirectByType} />
       </div>
     </main>
   );

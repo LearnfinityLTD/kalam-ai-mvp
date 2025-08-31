@@ -105,11 +105,15 @@ export default function AuthForm({ userType, redirectTo }: Props) {
               : "/professionals/dashboard")
         );
       }
-    } catch (err: any) {
-      toast.error(
-        err?.message ||
-          "Something went wrong. Please try again or contact support."
-      );
+    } catch (err) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : typeof err === "string"
+          ? err
+          : "Something went wrong. Please try again or contact support.";
+
+      toast.error(message);
     } finally {
       setLoading(false);
     }

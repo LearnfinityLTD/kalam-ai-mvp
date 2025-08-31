@@ -4,13 +4,7 @@
 import { useState } from "react";
 import NavBar from "@/app/components/landing/NavBar";
 import Footer from "@/app/components/shared/Footer";
-import {
-  Shield,
-  MessageSquare,
-  Target,
-  Clock,
-  CheckCircle,
-} from "lucide-react";
+import { Shield, MessageSquare, Target, CheckCircle } from "lucide-react";
 
 type FormState = {
   name: string;

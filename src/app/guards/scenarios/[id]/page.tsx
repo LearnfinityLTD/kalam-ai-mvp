@@ -6,6 +6,22 @@ import VoiceRecorder from "@/components/shared/VoiceRecorder";
 import { Button } from "@/ui/button";
 import { toast } from "react-hot-toast";
 
+type Scenario = {
+  id: string;
+  title: string;
+  scenario_text: string;
+  expected_response: string | null;
+};
+
+type TranscribeResponse = {
+  transcription?: string;
+  error?: string;
+};
+
+function isErrorLike(e: unknown): e is { message?: string } {
+  return typeof e === "object" && e !== null && "message" in e;
+}
+
 /**
  * Scenario practice page (guards)
  * - Loads scenario by id
@@ -16,7 +32,7 @@ import { toast } from "react-hot-toast";
  */
 export default function ScenarioPage({ params }: { params: { id: string } }) {
   const supabase = useMemo(() => createClient(), []);
-  const [scenario, setScenario] = useState<any>(null);
+  const [scenario, setScenario] = useState<Scenario | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [transcription, setTranscription] = useState<string>("");
@@ -49,22 +65,38 @@ export default function ScenarioPage({ params }: { params: { id: string } }) {
           .single();
 
         if (error) throw error;
-        setScenario(data);
+        // Narrow the shape to what we actually use
+        const s = data as Partial<Scenario>;
+        setScenario({
+          id: String(s.id),
+          title: String(s.title ?? ""),
+          scenario_text: String(s.scenario_text ?? ""),
+          expected_response:
+            typeof s.expected_response === "string"
+              ? s.expected_response
+              : null,
+        });
         startedAtRef.current = Date.now();
-      } catch (err: any) {
-        toast.error(err?.message ?? "Failed to load scenario.");
+      } catch (err: unknown) {
+        const msg =
+          isErrorLike(err) && err.message
+            ? err.message
+            : "Failed to load scenario.";
+        toast.error(msg);
       } finally {
         setLoading(false);
       }
     };
-    init();
+    void init();
   }, [params.id, supabase]);
 
   // Simple text similarity (Levenshtein-based) for MVP scoring
   function levenshtein(a: string, b: string) {
-    const m = a.length,
-      n = b.length;
-    const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+    const m = a.length;
+    const n = b.length;
+    const dp = Array.from({ length: m + 1 }, () =>
+      new Array<number>(n + 1).fill(0)
+    );
     for (let i = 0; i <= m; i++) dp[i][0] = i;
     for (let j = 0; j <= n; j++) dp[0][j] = j;
     for (let i = 1; i <= m; i++) {
@@ -79,6 +111,7 @@ export default function ScenarioPage({ params }: { params: { id: string } }) {
     }
     return dp[m][n];
   }
+
   function similarity(a: string, b: string) {
     const A = a.trim().toLowerCase();
     const B = b.trim().toLowerCase();
@@ -100,21 +133,32 @@ export default function ScenarioPage({ params }: { params: { id: string } }) {
       });
 
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err?.error || "Transcription failed");
+        let errMsg = "Transcription failed";
+        try {
+          const errJson = (await res.json()) as TranscribeResponse;
+          if (errJson.error) errMsg = errJson.error;
+        } catch {
+          // ignore JSON parse errors
+        }
+        throw new Error(errMsg);
       }
 
-      const { transcription } = await res.json();
-      setTranscription(transcription || "");
-      toast.success(`You said: ${transcription || "(no speech detected)"}`);
+      const { transcription: t } = (await res.json()) as TranscribeResponse;
+      const safeText = t ?? "";
+      setTranscription(safeText);
+      toast.success(`You said: ${safeText || "(no speech detected)"}`);
 
       // MVP local scoring vs expected text
-      const expected = scenario?.expected_response || "";
-      const sim = similarity(expected, transcription || "");
+      const expected = scenario?.expected_response ?? "";
+      const sim = similarity(expected, safeText);
       const computedScore = Math.round(sim * 100);
       setScore(computedScore);
-    } catch (err: any) {
-      toast.error(err?.message ?? "Could not process the recording.");
+    } catch (err: unknown) {
+      const msg =
+        isErrorLike(err) && err.message
+          ? err.message
+          : "Could not process the recording.";
+      toast.error(msg);
     }
   };
 
@@ -134,7 +178,6 @@ export default function ScenarioPage({ params }: { params: { id: string } }) {
         score != null ? Math.min(1, Math.max(0, score / 100)) : 0.6;
 
       // Prefer RPC (log_learning_session) — will trigger streak update
-      let rpcErr = null;
       const { error: rpcError } = await supabase.rpc("log_learning_session", {
         p_user_id: userId,
         p_scenario_id: scenario.id,
@@ -142,17 +185,17 @@ export default function ScenarioPage({ params }: { params: { id: string } }) {
         p_completion_rate: completionRate,
         p_pronunciation_score: score ?? null,
       });
-      rpcErr = rpcError ?? null;
 
       // Fallback to direct insert if RPC not available
-      if (rpcErr) {
+      if (rpcError) {
         const { error: insertErr } = await supabase
           .from("learning_sessions")
           .insert({
             user_id: userId,
             scenario_id: scenario.id,
             session_duration: seconds,
-            completion_rate: String(completionRate), // column is DECIMAL in SQL; Supabase typed as string
+            // if the column is DECIMAL and your client expects string, keep it stringified:
+            completion_rate: String(completionRate),
             pronunciation_score: score ?? null,
           });
         if (insertErr) throw insertErr;
@@ -173,8 +216,12 @@ export default function ScenarioPage({ params }: { params: { id: string } }) {
       if (upErr) throw upErr;
 
       toast.success("Session saved and marked complete ✅");
-    } catch (err: any) {
-      toast.error(err?.message ?? "Failed to save session.");
+    } catch (err: unknown) {
+      const msg =
+        isErrorLike(err) && err.message
+          ? err.message
+          : "Failed to save session.";
+      toast.error(msg);
     } finally {
       setSaving(false);
     }
@@ -191,12 +238,12 @@ export default function ScenarioPage({ params }: { params: { id: string } }) {
       <div className="mb-4">
         <p className="text-sm text-gray-600 mb-1">Target phrase:</p>
         <div className="p-3 rounded border bg-white">
-          {scenario.expected_response || "—"}
+          {scenario.expected_response ?? "—"}
         </div>
       </div>
 
       <VoiceRecorder
-        expectedText={scenario.expected_response || ""}
+        expectedText={scenario.expected_response ?? ""}
         onRecordingComplete={handleRecordingComplete}
       />
 

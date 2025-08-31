@@ -1036,7 +1036,7 @@ export default function AdminDashboard() {
                     Inactive Guards
                   </p>
                   <p className="text-xs text-yellow-700">
-                    14 guards haven't logged in for more than 5 days
+                    14 guards haven&apos;t logged in for more than 5 days
                   </p>
                 </div>
                 <Button size="sm" variant="outline">

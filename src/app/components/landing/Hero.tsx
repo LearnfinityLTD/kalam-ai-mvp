@@ -85,14 +85,14 @@ export default function Hero() {
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <p className="text-sm text-gray-600 mb-2">Situation:</p>
                   <p className="font-medium">
-                    "A confused family approaches the mosque entrance"
+                    &quot;A confused family approaches the mosque entrance&quot;
                   </p>
                 </div>
 
                 <div className="bg-green-50 p-4 rounded-lg">
                   <p className="text-sm text-green-600 mb-2">Your Response:</p>
                   <p className="font-medium">
-                    "Welcome to our mosque. Please come in!"
+                    &quot;Welcome to our mosque. Please come in!&quot;
                   </p>
                 </div>
 

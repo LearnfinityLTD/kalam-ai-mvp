@@ -263,13 +263,15 @@ export default function ScenarioPractice({
 
             <div>
               <h4 className="font-medium mb-2">What you said:</h4>
-              <p className="bg-gray-100 p-3 rounded italic">"{userResponse}"</p>
+              <p className="bg-gray-100 p-3 rounded italic">
+                &quot;{userResponse}&quot;
+              </p>
             </div>
 
             <div>
               <h4 className="font-medium mb-2">Expected response:</h4>
               <p className="bg-green-50 p-3 rounded">
-                "{currentScenario.expected_response}"
+                &quot;{currentScenario.expected_response}&quot;
               </p>
             </div>
 

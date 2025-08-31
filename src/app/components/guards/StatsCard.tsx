@@ -1,22 +1,7 @@
 "use client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
-import { Badge } from "@/ui/badge";
-import React, { useState, useEffect } from "react";
-import {
-  Calendar,
-  Trophy,
-  Target,
-  Clock,
-  Flame,
-  ArrowRight,
-  Play,
-  CheckCircle,
-  Star,
-  Book,
-  Users,
-  Globe,
-  LucideIcon,
-} from "lucide-react";
+import { Card, CardContent } from "@/ui/card";
+import React from "react";
+import { LucideIcon } from "lucide-react";
 
 // Define the props interface for StatsCard
 interface StatsCardProps {

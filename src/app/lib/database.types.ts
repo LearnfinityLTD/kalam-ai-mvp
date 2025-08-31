@@ -287,9 +287,10 @@ export type Database = {
         ];
       };
     };
-    Views: {};
-    Functions: {};
-    Enums: {};
-    CompositeTypes: {};
+    // Use a non-empty-object-safe type to satisfy @typescript-eslint/no-empty-object-type
+    Views: Record<string, never>;
+    Functions: Record<string, never>;
+    Enums: Record<string, never>;
+    CompositeTypes: Record<string, never>;
   };
 };

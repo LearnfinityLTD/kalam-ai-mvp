@@ -172,6 +172,10 @@ const EnhancedVoiceRecorder: React.FC<VoiceRecorderProps> = ({
     };
   }, []);
 
+  // Use scenarioType so it's not flagged as unused
+  const scenarioLabel =
+    scenarioType && scenarioType !== "general" ? ` (${scenarioType})` : "";
+
   // Analyze pronunciation for Arabic speaker challenges
   const analyzePronunciation = (
     userText: string,
@@ -394,10 +398,10 @@ const EnhancedVoiceRecorder: React.FC<VoiceRecorderProps> = ({
           <Target className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
           <div>
             <h4 className="font-medium text-blue-900 mb-2">
-              Practice This Response:
+              Practice This Response{scenarioLabel}:
             </h4>
             <p className="text-blue-800 text-lg leading-relaxed">
-              "{expectedText}"
+              <q>{expectedText}</q>
             </p>
 
             {pronunciationFocus.length > 0 && (
@@ -509,7 +513,7 @@ const EnhancedVoiceRecorder: React.FC<VoiceRecorderProps> = ({
             What You Said:
           </h4>
           <p className="bg-gray-50 p-4 rounded-lg text-gray-800 italic border-l-4 border-gray-300">
-            "{transcription}"
+            <q>{transcription}</q>
           </p>
         </div>
       )}
@@ -686,7 +690,8 @@ const EnhancedVoiceRecorder: React.FC<VoiceRecorderProps> = ({
                   </p>
                   <p className="text-purple-700">
                     Maintain Arab hospitality while using precise English. Say
-                    "Welcome" warmly, then be specific about procedures.
+                    &ldquo;Welcome&rdquo; warmly, then be specific about
+                    procedures.
                   </p>
                 </div>
               </div>
@@ -704,25 +709,27 @@ const EnhancedVoiceRecorder: React.FC<VoiceRecorderProps> = ({
           <div>
             <p className="font-medium text-gray-700 mb-1">P vs B Sounds:</p>
             <p className="text-gray-600">
-              Press lips together, release with air: "Please" not "Blease"
+              Press lips together, release with air: &ldquo;Please&rdquo; not
+              &ldquo;Blease&rdquo;
             </p>
           </div>
           <div>
             <p className="font-medium text-gray-700 mb-1">TH Sounds:</p>
             <p className="text-gray-600">
-              Tongue between teeth: "Think" not "Sink"
+              Tongue between teeth: &ldquo;Think&rdquo; not &ldquo;Sink&rdquo;
             </p>
           </div>
           <div>
             <p className="font-medium text-gray-700 mb-1">Vowel Length:</p>
             <p className="text-gray-600">
-              Short 'i' in "ship", long 'ee' in "sheep"
+              Short &lsquo;i&rsquo; in &ldquo;ship&rdquo;, long &lsquo;ee&rsquo;
+              in &ldquo;sheep&rdquo;
             </p>
           </div>
           <div>
             <p className="font-medium text-gray-700 mb-1">Silent Letters:</p>
             <p className="text-gray-600">
-              Don't pronounce: "Listen" (silent T)
+              Don&rsquo;t pronounce: &ldquo;Listen&rdquo; (silent T)
             </p>
           </div>
         </div>

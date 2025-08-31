@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Card, CardContent } from "@/ui/card";
-import { createClient, TablesRow } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase";
 import { useToast } from "@/ui/use-toast";
 
 type Coords = { lat: number; lng: number };
@@ -60,7 +60,7 @@ function parseOnDate(hhmm: string, base: Date): Date {
 /** Format time diff into Arabic "X ساعة Y دقيقة" or "الآن" */
 function formatDiffArabic(nextTime: Date): string {
   const now = new Date();
-  let diffMs = nextTime.getTime() - now.getTime();
+  const diffMs = nextTime.getTime() - now.getTime();
   if (diffMs <= 0) return "الآن";
   const totalMin = Math.floor(diffMs / 60000);
   const hours = Math.floor(totalMin / 60);

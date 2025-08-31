@@ -4,10 +4,7 @@ import { Button } from "@/ui/button";
 import { Badge } from "@/ui/badge";
 import {
   Landmark,
-  Building2,
   Users,
-  Star,
-  MapPin,
   Calendar,
   CheckCircle,
   Globe,

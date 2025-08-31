@@ -4,7 +4,6 @@ import { Button } from "@/ui/button";
 import { Badge } from "@/ui/badge";
 import {
   Building,
-  Building2,
   Users,
   Star,
   CheckCircle,
@@ -27,14 +26,16 @@ export default function CTAPage() {
           </div>
 
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            Don't Get Left Behind When
+            {"Don’t Get Left Behind When"}
             <br />
             <span className="text-yellow-300">The World Comes to You</span>
           </h1>
 
           <p className="text-xl text-green-100 mb-8 max-w-3xl mx-auto">
             In 5 years, your mosque will receive visitors from 150+ countries.
-            Will your staff be ready to serve them with confidence and dignity?
+            {
+              " Will your staff be ready to serve them with confidence and dignity?"
+            }
           </p>
 
           <div className="bg-white/10 backdrop-blur rounded-lg p-6 mb-8 max-w-2xl mx-auto">
@@ -103,9 +104,11 @@ export default function CTAPage() {
                       Tourist Frustration
                     </h3>
                     <p className="text-gray-700">
-                      International visitors get confused when you can't help
-                      them find prayer rooms, explain Islamic etiquette, or
-                      direct them during emergencies.
+                      {
+                        "International visitors get confused when you can’t help "
+                      }
+                      {"them find prayer rooms, explain Islamic etiquette, or "}
+                      {"direct them during emergencies."}
                     </p>
                   </div>
                 </div>
@@ -119,9 +122,11 @@ export default function CTAPage() {
                       Personal Embarrassment
                     </h3>
                     <p className="text-gray-700">
-                      You know what you want to say in Arabic, but struggle to
-                      express it clearly in English, leading to
-                      misunderstandings and awkward situations.
+                      {
+                        "You know what you want to say in Arabic, but struggle to "
+                      }
+                      {"express it clearly in English, leading to "}
+                      {"misunderstandings and awkward situations."}
                     </p>
                   </div>
                 </div>
@@ -135,9 +140,13 @@ export default function CTAPage() {
                       Career Limitations
                     </h3>
                     <p className="text-gray-700">
-                      Poor English communication holds you back from promotions
-                      and leadership roles in increasingly international Islamic
-                      institutions.
+                      {
+                        "Poor English communication holds you back from promotions "
+                      }
+                      {
+                        "and leadership roles in increasingly international Islamic "
+                      }
+                      {"institutions."}
                     </p>
                   </div>
                 </div>
@@ -158,8 +167,10 @@ export default function CTAPage() {
                         Confident Communication
                       </h3>
                       <p className="text-green-100">
-                        Handle any tourist interaction with professional English
-                        while maintaining Islamic dignity
+                        {
+                          "Handle any tourist interaction with professional English "
+                        }
+                        {"while maintaining Islamic dignity"}
                       </p>
                     </div>
                   </div>
@@ -169,8 +180,10 @@ export default function CTAPage() {
                     <div>
                       <h3 className="font-bold mb-1">Cultural Intelligence</h3>
                       <p className="text-green-100">
-                        Explain Islamic practices clearly to non-Muslims while
-                        respecting both cultures
+                        {
+                          "Explain Islamic practices clearly to non-Muslims while "
+                        }
+                        {"respecting both cultures"}
                       </p>
                     </div>
                   </div>
@@ -180,8 +193,8 @@ export default function CTAPage() {
                     <div>
                       <h3 className="font-bold mb-1">Career Advancement</h3>
                       <p className="text-green-100">
-                        Qualify for leadership positions in international
-                        Islamic institutions
+                        {"Qualify for leadership positions in international "}
+                        {"Islamic institutions"}
                       </p>
                     </div>
                   </div>
@@ -217,9 +230,13 @@ export default function CTAPage() {
                 2030 Deadline Approaching
               </h3>
               <p className="text-gray-700 text-sm">
-                Saudi Arabia's Vision 2030 will bring unprecedented numbers of
-                international visitors. Guards who speak English confidently
-                will be in high demand.
+                {
+                  "Saudi Arabia’s Vision 2030 will bring unprecedented numbers of "
+                }
+                {
+                  "international visitors. Guards who speak English confidently "
+                }
+                {"will be in high demand."}
               </p>
             </div>
 
@@ -229,8 +246,8 @@ export default function CTAPage() {
                 Limited Beta Access
               </h3>
               <p className="text-gray-700 text-sm">
-                Only 100 founding members get lifetime access at early-bird
-                pricing. After that, prices increase by 300%.
+                {"Only 100 founding members get lifetime access at early-bird "}
+                {"pricing. After that, prices increase by 300%."}
               </p>
             </div>
 
@@ -240,20 +257,24 @@ export default function CTAPage() {
                 Bonus Expires Soon
               </h3>
               <p className="text-gray-700 text-sm">
-                Free certification program and 1-on-1 coaching worth $500 - only
-                available for the next 5 days.
+                {
+                  "Free certification program and 1-on-1 coaching worth $500 - only "
+                }
+                {"available for the next 5 days."}
               </p>
             </div>
           </div>
 
           <div className="bg-red-100 border-l-4 border-red-500 p-6 mb-8">
             <p className="text-red-700 font-bold text-lg">
-              ⚠️ Warning: Don't wait until your mosque is overwhelmed with
-              international visitors
+              {"⚠️ Warning: Don’t wait until your mosque is overwhelmed with "}
+              {"international visitors"}
             </p>
             <p className="text-red-600 mt-2">
-              Guards who can't communicate effectively will be replaced by those
-              who can. Secure your position now.
+              {
+                "Guards who can’t communicate effectively will be replaced by those "
+              }
+              {"who can. Secure your position now."}
             </p>
           </div>
 
@@ -277,6 +298,7 @@ export default function CTAPage() {
             Real Results from Real Guards
           </h2>
 
+          {/* Cards */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             <Card className="border-2 border-green-200">
               <CardContent className="p-6">
@@ -292,10 +314,11 @@ export default function CTAPage() {
                   </div>
                 </div>
                 <blockquote className="text-gray-700 text-sm mb-4">
-                  "In just 6 weeks, I went from avoiding English conversations
-                  to confidently helping international pilgrims. Yesterday I
-                  helped a confused family from Indonesia navigate their first
-                  Hajj. The cultural context training was crucial."
+                  &ldquo;In just 6 weeks, I went from avoiding English
+                  conversations to confidently helping international pilgrims.
+                  Yesterday I helped a confused family from Indonesia navigate
+                  their first Hajj. The cultural context training was
+                  crucial.&rdquo;
                 </blockquote>
                 <div className="flex items-center justify-between">
                   <div className="flex text-yellow-400">
@@ -324,10 +347,10 @@ export default function CTAPage() {
                   </div>
                 </div>
                 <blockquote className="text-gray-700 text-sm mb-4">
-                  "The emergency communication training saved the day when we
-                  had a medical incident. I could communicate clearly with
+                  &ldquo;The emergency communication training saved the day when
+                  we had a medical incident. I could communicate clearly with
                   paramedics and comfort the family. My supervisor was impressed
-                  and I got a promotion!"
+                  and I got a promotion!&rdquo;
                 </blockquote>
                 <div className="flex items-center justify-between">
                   <div className="flex text-yellow-400">
@@ -356,10 +379,10 @@ export default function CTAPage() {
                   </div>
                 </div>
                 <blockquote className="text-gray-700 text-sm mb-4">
-                  "I was terrified of speaking English with tourists. Now I'm
-                  the go-to person for international visitor tours. The
+                  &ldquo;I was terrified of speaking English with tourists. Now
+                  I&apos;m the go-to person for international visitor tours. The
                   pronunciation coaching for Arabic speakers made all the
-                  difference."
+                  difference.&rdquo;
                 </blockquote>
                 <div className="flex items-center justify-between">
                   <div className="flex text-yellow-400">
@@ -377,7 +400,7 @@ export default function CTAPage() {
 
           <div className="text-center mt-12">
             <p className="text-gray-600 mb-6">
-              Join over 500 guards who've already transformed their careers
+              {"Join over 500 guards who’ve already transformed their careers"}
             </p>
             <Button
               asChild
@@ -401,15 +424,21 @@ export default function CTAPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-left">
-                  Will this work with my busy mosque schedule?
+                  {"Will this work with my busy mosque schedule?"}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-700">
-                  Absolutely! كلام AI is designed for working guards. Lessons
-                  are 10-15 minutes each, automatically pause for prayer times,
-                  and can be done during quiet periods. Our AI adapts to your
-                  schedule, not the other way around.
+                  {
+                    "Absolutely! كلام AI is designed for working guards. Lessons "
+                  }
+                  {
+                    "are 10-15 minutes each, automatically pause for prayer times, "
+                  }
+                  {
+                    "and can be done during quiet periods. Our AI adapts to your "
+                  }
+                  {"schedule, not the other way around."}
                 </p>
               </CardContent>
             </Card>
@@ -417,15 +446,19 @@ export default function CTAPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-left">
-                  I'm not good with technology. Is this too complicated?
+                  {"I’m not good with technology. Is this too complicated?"}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-700">
-                  Not at all! If you can use WhatsApp, you can use كلام AI. The
-                  interface is in Arabic and English, and our support team
-                  provides free setup help. Most guards are practicing within 5
-                  minutes of signing up.
+                  {
+                    "Not at all! If you can use WhatsApp, you can use كلام AI. The "
+                  }
+                  {"interface is in Arabic and English, and our support team "}
+                  {
+                    "provides free setup help. Most guards are practicing within 5 "
+                  }
+                  {"minutes of signing up."}
                 </p>
               </CardContent>
             </Card>
@@ -433,15 +466,21 @@ export default function CTAPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-left">
-                  Will this conflict with my Islamic values?
+                  {"Will this conflict with my Islamic values?"}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-700">
-                  Never. كلام AI was built by a Muslim developer specifically to
-                  respect Islamic values. All content is reviewed by Islamic
-                  scholars, prayer times are honored, and the training helps you
-                  be a better ambassador for Islam.
+                  {
+                    "Never. كلام AI was built by a Muslim developer specifically to "
+                  }
+                  {
+                    "respect Islamic values. All content is reviewed by Islamic "
+                  }
+                  {
+                    "scholars, prayer times are honored, and the training helps you "
+                  }
+                  {"be a better ambassador for Islam."}
                 </p>
               </CardContent>
             </Card>
@@ -449,15 +488,21 @@ export default function CTAPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-left">
-                  How quickly will I see results?
+                  {"How quickly will I see results?"}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-700">
-                  Most guards notice improvement within the first week. By week
-                  4, you'll handle basic tourist interactions confidently. By
-                  month 3, you'll be the go-to person for international visitor
-                  assistance.
+                  {
+                    "Most guards notice improvement within the first week. By week "
+                  }
+                  {
+                    "4, you’ll handle basic tourist interactions confidently. By "
+                  }
+                  {
+                    "month 3, you’ll be the go-to person for international visitor "
+                  }
+                  {"assistance."}
                 </p>
               </CardContent>
             </Card>
@@ -469,12 +514,12 @@ export default function CTAPage() {
       <section className="py-20 bg-gradient-to-r from-green-700 via-green-800 to-blue-700">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-4xl font-bold text-white mb-6">
-            Don't Let This Opportunity Pass
+            {"Don’t Let This Opportunity Pass"}
           </h2>
 
           <p className="text-xl text-green-100 mb-8">
-            500+ guards have already transformed their careers. Will you be
-            next?
+            {"500+ guards have already transformed their careers. Will you be "}
+            {"next?"}
           </p>
 
           <div className="bg-white/20 backdrop-blur rounded-lg p-6 mb-8">
@@ -482,21 +527,21 @@ export default function CTAPage() {
               <div>
                 <h3 className="font-bold mb-4">If You Join Today:</h3>
                 <ul className="text-left space-y-2 text-green-100">
-                  <li>✓ Confident English in 30 days</li>
-                  <li>✓ Professional certification included</li>
-                  <li>✓ Career advancement opportunities</li>
-                  <li>✓ Respect from international visitors</li>
-                  <li>✓ Pride in representing Islam professionally</li>
+                  <li>✓ {"Confident English in 30 days"}</li>
+                  <li>✓ {"Professional certification included"}</li>
+                  <li>✓ {"Career advancement opportunities"}</li>
+                  <li>✓ {"Respect from international visitors"}</li>
+                  <li>✓ {"Pride in representing Islam professionally"}</li>
                 </ul>
               </div>
               <div>
                 <h3 className="font-bold mb-4">If You Wait:</h3>
                 <ul className="text-left space-y-2 text-red-200">
-                  <li>✗ Miss the early-bird pricing</li>
-                  <li>✗ Struggle when tourism increases</li>
-                  <li>✗ Watch others get promoted instead</li>
-                  <li>✗ Continue feeling embarrassed with tourists</li>
-                  <li>✗ Risk being replaced by bilingual guards</li>
+                  <li>✗ {"Miss the early-bird pricing"}</li>
+                  <li>✗ {"Struggle when tourism increases"}</li>
+                  <li>✗ {"Watch others get promoted instead"}</li>
+                  <li>✗ {"Continue feeling embarrassed with tourists"}</li>
+                  <li>✗ {"Risk being replaced by bilingual guards"}</li>
                 </ul>
               </div>
             </div>
@@ -515,9 +560,9 @@ export default function CTAPage() {
             </Button>
 
             <div className="flex items-center justify-center space-x-6 text-green-200 text-sm">
-              <span>✓ 30-day guarantee</span>
-              <span>✓ Islamic values respected</span>
-              <span>✓ Start immediately</span>
+              <span>✓ {"30-day guarantee"}</span>
+              <span>✓ {"Islamic values respected"}</span>
+              <span>✓ {"Start immediately"}</span>
             </div>
           </div>
 

@@ -1,8 +1,8 @@
 "use client";
 import { motion } from "framer-motion";
-import { Card, CardContent } from "@/ui/card";
-import { Button } from "@/ui/button";
-import { Badge } from "@/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Shield, Briefcase, Star, Clock, MapPin } from "lucide-react";
 import Link from "next/link";
 
@@ -75,7 +75,7 @@ export default function UserTypeSelection() {
                   </div>
                 </div>
 
-                <Link href="/api/auth?type=guard">
+                <Link href="/guards">
                   <Button className="w-full bg-green-600 hover:bg-green-700 text-white py-4 text-lg">
                     Start as Mosque Guard
                   </Button>
@@ -201,7 +201,7 @@ export default function UserTypeSelection() {
                   </div>
                 </div>
 
-                <Link href="/tour-guides/signup">
+                <Link href="/tour-guides">
                   <Button className="w-full bg-amber-600 hover:bg-amber-700 text-white py-4 text-lg">
                     Start as Tour Guide
                   </Button>

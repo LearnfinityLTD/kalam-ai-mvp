@@ -1,11 +1,9 @@
-import Hero from "@/components/landing/Hero";
+import Hero from "@/app/components/landing/Hero";
 import UserTypeSelection from "@/components/landing/UserTypeSelection";
-import Features from "@/components/landing/Features";
-import Testimonials from "@/components/landing/Testimonials";
+import Features from "@/app/components/landing/shared/Features";
 import Footer from "@/app/components/shared/Footer";
-import CTA from "@/components/landing/CTA";
-import NavBar from "@/app/components/landing/NavBar";
-import CommunityStats from "./components/landing/CommunityStats";
+import NavBar from "@/app/components/landing/shared/NavBar";
+import CommunityStats from "./components/landing/shared/CommunityStats";
 
 export default function HomePage() {
   return (
@@ -13,10 +11,8 @@ export default function HomePage() {
       <NavBar />
       <Hero />
       <UserTypeSelection />
-      <Features />
       <CommunityStats />
-      <Testimonials />
-      <CTA />
+      <Features />
       <Footer />
     </div>
   );

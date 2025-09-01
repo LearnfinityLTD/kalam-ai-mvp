@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/ui/button";
-import { Badge } from "@/ui/badge";
+import { Badge } from "@/components/ui/badge";
 import {
   Building,
   Users,
@@ -13,47 +13,55 @@ import {
   ArrowRight,
   Gift,
   Globe,
+  Award,
+  Heart,
 } from "lucide-react";
 
 export default function CTAPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
-      {/* Urgent Hero Section */}
+      {/* Professional Hero Section */}
       <section className="py-16 bg-gradient-to-r from-green-600 via-green-700 to-blue-600">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="bg-yellow-400 text-yellow-900 px-6 py-3 rounded-full inline-block mb-6 font-bold">
-            🕌 2030 Vision Alert: 30M+ International Pilgrims Expected
+            🕌 2030 Vision: Preparing for 30M+ International Pilgrims
           </div>
 
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            {"Don’t Get Left Behind When"}
+            Join a Growing Community of
             <br />
-            <span className="text-yellow-300">The World Comes to You</span>
+            <span className="text-yellow-300">Professional Mosque Staff</span>
           </h1>
 
           <p className="text-xl text-green-100 mb-8 max-w-3xl mx-auto">
-            In 5 years, your mosque will receive visitors from 150+ countries.
-            {
-              " Will your staff be ready to serve them with confidence and dignity?"
-            }
+            Enhance your English communication skills to better serve
+            international visitors with dignity and confidence. Join hundreds of
+            mosque staff who are already improving their professional
+            capabilities.
           </p>
 
           <div className="bg-white/10 backdrop-blur rounded-lg p-6 mb-8 max-w-2xl mx-auto">
             <p className="text-white font-medium text-lg mb-4">
-              Limited Time: First 100 Guards Get
+              New Member Benefits Include:
             </p>
             <div className="flex items-center justify-center space-x-6">
               <div className="text-center">
-                <Gift className="w-8 h-8 text-yellow-300 mx-auto mb-2" />
-                <div className="text-yellow-300 font-bold">3 Months Free</div>
+                <Award className="w-8 h-8 text-yellow-300 mx-auto mb-2" />
+                <div className="text-yellow-300 font-bold">
+                  Professional Certificate
+                </div>
               </div>
               <div className="text-center">
                 <Shield className="w-8 h-8 text-yellow-300 mx-auto mb-2" />
-                <div className="text-yellow-300 font-bold">Certificate</div>
+                <div className="text-yellow-300 font-bold">
+                  Islamic Values Focused
+                </div>
               </div>
               <div className="text-center">
                 <Users className="w-8 h-8 text-yellow-300 mx-auto mb-2" />
-                <div className="text-yellow-300 font-bold">1-on-1 Support</div>
+                <div className="text-yellow-300 font-bold">
+                  Community Support
+                </div>
               </div>
             </div>
           </div>
@@ -65,7 +73,7 @@ export default function CTAPage() {
               className="bg-yellow-400 text-yellow-900 hover:bg-yellow-300 font-bold text-lg px-8"
             >
               <Link href="/guards/signup">
-                Claim Your Spot Now
+                Learn More About كلام AI
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Link>
             </Button>
@@ -80,7 +88,7 @@ export default function CTAPage() {
           </div>
 
           <p className="text-green-200 mt-4 text-sm">
-            Only 23 spots left • Offer expires in 5 days
+            Trusted by mosque staff across the region
           </p>
         </div>
       </section>
@@ -92,61 +100,54 @@ export default function CTAPage() {
             {/* Problem */}
             <div>
               <h2 className="text-3xl font-bold text-gray-900 mb-6">
-                The Challenge Every Mosque Guard Faces
+                Common Challenges for Mosque Staff
               </h2>
               <div className="space-y-6">
                 <div className="flex items-start space-x-4">
-                  <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center mt-1">
-                    <span className="text-red-600 font-bold">✗</span>
+                  <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center mt-1">
+                    <span className="text-orange-600 font-bold">?</span>
                   </div>
                   <div>
                     <h3 className="font-bold text-gray-900 mb-2">
-                      Tourist Frustration
+                      Communication Barriers
                     </h3>
                     <p className="text-gray-700">
-                      {
-                        "International visitors get confused when you can’t help "
-                      }
-                      {"them find prayer rooms, explain Islamic etiquette, or "}
-                      {"direct them during emergencies."}
+                      International visitors sometimes need help with
+                      directions, Islamic etiquette guidance, or emergency
+                      assistance, but language barriers can make these
+                      interactions challenging.
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start space-x-4">
-                  <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center mt-1">
-                    <span className="text-red-600 font-bold">✗</span>
+                  <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center mt-1">
+                    <span className="text-orange-600 font-bold">?</span>
                   </div>
                   <div>
                     <h3 className="font-bold text-gray-900 mb-2">
-                      Personal Embarrassment
+                      Professional Confidence
                     </h3>
                     <p className="text-gray-700">
-                      {
-                        "You know what you want to say in Arabic, but struggle to "
-                      }
-                      {"express it clearly in English, leading to "}
-                      {"misunderstandings and awkward situations."}
+                      You have deep knowledge of Islamic practices and genuine
+                      care for visitors, but expressing this clearly in English
+                      can feel challenging at times.
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start space-x-4">
-                  <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center mt-1">
-                    <span className="text-red-600 font-bold">✗</span>
+                  <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center mt-1">
+                    <span className="text-orange-600 font-bold">?</span>
                   </div>
                   <div>
                     <h3 className="font-bold text-gray-900 mb-2">
-                      Career Limitations
+                      Career Growth Opportunities
                     </h3>
                     <p className="text-gray-700">
-                      {
-                        "Poor English communication holds you back from promotions "
-                      }
-                      {
-                        "and leadership roles in increasingly international Islamic "
-                      }
-                      {"institutions."}
+                      Strong English communication skills open doors to
+                      leadership roles and specialized positions in increasingly
+                      international Islamic institutions.
                     </p>
                   </div>
                 </div>
@@ -157,7 +158,7 @@ export default function CTAPage() {
             <div>
               <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-8 text-white">
                 <h2 className="text-3xl font-bold mb-6">
-                  كلام AI Changes Everything
+                  كلام AI: Professional Development for Mosque Staff
                 </h2>
                 <div className="space-y-4">
                   <div className="flex items-start space-x-4">
@@ -167,10 +168,9 @@ export default function CTAPage() {
                         Confident Communication
                       </h3>
                       <p className="text-green-100">
-                        {
-                          "Handle any tourist interaction with professional English "
-                        }
-                        {"while maintaining Islamic dignity"}
+                        Develop professional English skills for any visitor
+                        interaction while maintaining Islamic dignity and
+                        respect
                       </p>
                     </div>
                   </div>
@@ -180,10 +180,9 @@ export default function CTAPage() {
                     <div>
                       <h3 className="font-bold mb-1">Cultural Intelligence</h3>
                       <p className="text-green-100">
-                        {
-                          "Explain Islamic practices clearly to non-Muslims while "
-                        }
-                        {"respecting both cultures"}
+                        Learn to explain Islamic practices clearly to
+                        international visitors while fostering mutual
+                        understanding and respect
                       </p>
                     </div>
                   </div>
@@ -191,10 +190,10 @@ export default function CTAPage() {
                   <div className="flex items-start space-x-4">
                     <CheckCircle className="w-6 h-6 text-yellow-300 mt-1" />
                     <div>
-                      <h3 className="font-bold mb-1">Career Advancement</h3>
+                      <h3 className="font-bold mb-1">Professional Growth</h3>
                       <p className="text-green-100">
-                        {"Qualify for leadership positions in international "}
-                        {"Islamic institutions"}
+                        Build skills that qualify you for advancement
+                        opportunities in international Islamic institutions
                       </p>
                     </div>
                   </div>
@@ -203,10 +202,10 @@ export default function CTAPage() {
                 <Button
                   asChild
                   size="lg"
-                  className="w-full mt-6 bg-black text-green-900 hover:bg-blue-100 font-bold"
+                  className="w-full mt-6 bg-yellow-400 text-yellow-900 hover:bg-yellow-300 font-bold"
                 >
-                  <Link href="/guards/signup" className="text-gray-800">
-                    Start Your Transformation Today
+                  <Link href="/guards/signup">
+                    Start Your Development Journey
                     <ArrowRight className="w-5 h-5 ml-2" />
                   </Link>
                 </Button>
@@ -216,86 +215,68 @@ export default function CTAPage() {
         </div>
       </section>
 
-      {/* Urgency Section */}
-      <section className="py-16 bg-yellow-50 border-y-4 border-yellow-400">
+      {/* Why Now Section */}
+      <section className="py-16 bg-blue-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold text-gray-900 mb-6">
-            Why You Must Act Now
+            Why Professional Development Matters Now
           </h2>
 
-          <div className="grid md:grid-cols-3 gap-6 mb-8">
+          <div className="grid md:grid-cols-2 gap-6 mb-8">
             <div className="bg-white p-6 rounded-lg shadow">
-              <Clock className="w-8 h-8 text-orange-500 mx-auto mb-4" />
+              <Globe className="w-8 h-8 text-green-600 mx-auto mb-4" />
               <h3 className="font-bold text-gray-900 mb-2">
-                2030 Deadline Approaching
+                Growing International Visitors
               </h3>
               <p className="text-gray-700 text-sm">
-                {
-                  "Saudi Arabia’s Vision 2030 will bring unprecedented numbers of "
-                }
-                {
-                  "international visitors. Guards who speak English confidently "
-                }
-                {"will be in high demand."}
+                Saudi Arabia&apos;s Vision 2030 and similar initiatives across
+                the region are increasing international religious tourism.
+                Professional communication skills help you serve visitors
+                better.
               </p>
             </div>
 
             <div className="bg-white p-6 rounded-lg shadow">
-              <Zap className="w-8 h-8 text-orange-500 mx-auto mb-4" />
+              <Heart className="w-8 h-8 text-green-600 mx-auto mb-4" />
               <h3 className="font-bold text-gray-900 mb-2">
-                Limited Beta Access
+                Serve with Excellence
               </h3>
               <p className="text-gray-700 text-sm">
-                {"Only 100 founding members get lifetime access at early-bird "}
-                {"pricing. After that, prices increase by 300%."}
-              </p>
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow">
-              <Gift className="w-8 h-8 text-orange-500 mx-auto mb-4" />
-              <h3 className="font-bold text-gray-900 mb-2">
-                Bonus Expires Soon
-              </h3>
-              <p className="text-gray-700 text-sm">
-                {
-                  "Free certification program and 1-on-1 coaching worth $500 - only "
-                }
-                {"available for the next 5 days."}
+                Every positive interaction with international visitors reflects
+                the hospitality and beauty of Islam. Professional communication
+                helps you be an excellent ambassador.
               </p>
             </div>
           </div>
 
-          <div className="bg-red-100 border-l-4 border-red-500 p-6 mb-8">
-            <p className="text-red-700 font-bold text-lg">
-              {"⚠️ Warning: Don’t wait until your mosque is overwhelmed with "}
-              {"international visitors"}
+          <div className="bg-green-100 border-l-4 border-green-500 p-6 mb-8">
+            <p className="text-green-800 font-bold text-lg">
+              💡 Investment in Your Professional Growth
             </p>
-            <p className="text-red-600 mt-2">
-              {
-                "Guards who can’t communicate effectively will be replaced by those "
-              }
-              {"who can. Secure your position now."}
+            <p className="text-green-700 mt-2">
+              Join a community of mosque staff who are investing in their
+              professional development and ability to serve with excellence.
             </p>
           </div>
 
           <Button
             asChild
             size="lg"
-            className="bg-red-600 hover:bg-red-700 text-white font-bold text-lg px-8"
+            className="bg-green-600 hover:bg-green-700 text-white font-bold text-lg px-8"
           >
-            <Link href="/guards/signup">
-              Secure My Position Now
+            <Link href="/auth/signin?type=guard">
+              Explore كلام AI Today
               <ArrowRight className="w-5 h-5 ml-2" />
             </Link>
           </Button>
         </div>
       </section>
 
-      {/* Social Proof Carousel */}
+      {/* Social Proof Section */}
       <section className="py-20 bg-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
-            Real Results from Real Guards
+            Success Stories from Our Community
           </h2>
 
           {/* Cards */}
@@ -318,7 +299,7 @@ export default function CTAPage() {
                   conversations to confidently helping international pilgrims.
                   Yesterday I helped a confused family from Indonesia navigate
                   their first Hajj. The cultural context training was
-                  crucial.&rdquo;
+                  invaluable.&rdquo;
                 </blockquote>
                 <div className="flex items-center justify-between">
                   <div className="flex text-yellow-400">
@@ -347,10 +328,11 @@ export default function CTAPage() {
                   </div>
                 </div>
                 <blockquote className="text-gray-700 text-sm mb-4">
-                  &ldquo;The emergency communication training saved the day when
-                  we had a medical incident. I could communicate clearly with
-                  paramedics and comfort the family. My supervisor was impressed
-                  and I got a promotion!&rdquo;
+                  &ldquo;The emergency communication training proved invaluable
+                  when we had a medical incident. I could communicate clearly
+                  with paramedics and comfort the family. My supervisor
+                  recognized my professional growth and offered me a
+                  promotion!&rdquo;
                 </blockquote>
                 <div className="flex items-center justify-between">
                   <div className="flex text-yellow-400">
@@ -379,10 +361,10 @@ export default function CTAPage() {
                   </div>
                 </div>
                 <blockquote className="text-gray-700 text-sm mb-4">
-                  &ldquo;I was terrified of speaking English with tourists. Now
-                  I&apos;m the go-to person for international visitor tours. The
-                  pronunciation coaching for Arabic speakers made all the
-                  difference.&rdquo;
+                  &ldquo;I was hesitant about speaking English with tourists.
+                  Now I&apos;m the preferred guide for international visitor
+                  tours. The pronunciation coaching designed for Arabic speakers
+                  made all the difference.&rdquo;
                 </blockquote>
                 <div className="flex items-center justify-between">
                   <div className="flex text-yellow-400">
@@ -400,14 +382,15 @@ export default function CTAPage() {
 
           <div className="text-center mt-12">
             <p className="text-gray-600 mb-6">
-              {"Join over 500 guards who’ve already transformed their careers"}
+              Join over 500 mosque staff members who are developing their
+              professional skills
             </p>
             <Button
               asChild
               size="lg"
               className="bg-green-600 hover:bg-green-700 text-white"
             >
-              <Link href="/guards/signup">Start Your Success Story</Link>
+              <Link href="/guards/signup">Start Your Development Journey</Link>
             </Button>
           </div>
         </div>
@@ -417,28 +400,23 @@ export default function CTAPage() {
       <section className="py-16 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
-            Common Questions from Guards
+            Frequently Asked Questions
           </h2>
 
           <div className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="text-left">
-                  {"Will this work with my busy mosque schedule?"}
+                  Will this work with my busy mosque schedule?
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-700">
-                  {
-                    "Absolutely! كلام AI is designed for working guards. Lessons "
-                  }
-                  {
-                    "are 10-15 minutes each, automatically pause for prayer times, "
-                  }
-                  {
-                    "and can be done during quiet periods. Our AI adapts to your "
-                  }
-                  {"schedule, not the other way around."}
+                  Absolutely! كلام AI is designed for working mosque staff.
+                  Lessons are 10-15 minutes each, automatically pause for prayer
+                  times, and can be completed during quiet periods. Our AI
+                  adapts to your schedule, making learning convenient and
+                  respectful.
                 </p>
               </CardContent>
             </Card>
@@ -446,19 +424,16 @@ export default function CTAPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-left">
-                  {"I’m not good with technology. Is this too complicated?"}
+                  I&apos;m not very comfortable with technology. Is this too
+                  complicated?
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-700">
-                  {
-                    "Not at all! If you can use WhatsApp, you can use كلام AI. The "
-                  }
-                  {"interface is in Arabic and English, and our support team "}
-                  {
-                    "provides free setup help. Most guards are practicing within 5 "
-                  }
-                  {"minutes of signing up."}
+                  Not at all! If you can use WhatsApp, you can use كلام AI. The
+                  interface is available in both Arabic and English, and our
+                  support team provides complimentary setup assistance. Most
+                  staff members are practicing within 5 minutes of joining.
                 </p>
               </CardContent>
             </Card>
@@ -466,21 +441,15 @@ export default function CTAPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-left">
-                  {"Will this conflict with my Islamic values?"}
+                  Will this respect my Islamic values?
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-700">
-                  {
-                    "Never. كلام AI was built by a Muslim developer specifically to "
-                  }
-                  {
-                    "respect Islamic values. All content is reviewed by Islamic "
-                  }
-                  {
-                    "scholars, prayer times are honored, and the training helps you "
-                  }
-                  {"be a better ambassador for Islam."}
+                  Absolutely. كلام AI was developed by a Muslim team
+                  specifically to honor Islamic values. All content is reviewed
+                  by Islamic scholars, prayer times are respected, and the
+                  training helps you become an even better ambassador for Islam.
                 </p>
               </CardContent>
             </Card>
@@ -488,21 +457,16 @@ export default function CTAPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-left">
-                  {"How quickly will I see results?"}
+                  How quickly will I see improvement?
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-700">
-                  {
-                    "Most guards notice improvement within the first week. By week "
-                  }
-                  {
-                    "4, you’ll handle basic tourist interactions confidently. By "
-                  }
-                  {
-                    "month 3, you’ll be the go-to person for international visitor "
-                  }
-                  {"assistance."}
+                  Most staff members notice improvement within the first week.
+                  By week 4, you&apos;ll handle basic visitor interactions with
+                  greater confidence. By month 3, you&apos;ll likely be
+                  comfortable assisting with more complex international visitor
+                  needs.
                 </p>
               </CardContent>
             </Card>
@@ -514,34 +478,34 @@ export default function CTAPage() {
       <section className="py-20 bg-gradient-to-r from-green-700 via-green-800 to-blue-700">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-4xl font-bold text-white mb-6">
-            {"Don’t Let This Opportunity Pass"}
+            Ready to Enhance Your Professional Skills?
           </h2>
 
           <p className="text-xl text-green-100 mb-8">
-            {"500+ guards have already transformed their careers. Will you be "}
-            {"next?"}
+            Join 500+ mosque staff members who are investing in their
+            professional development and ability to serve with excellence.
           </p>
 
           <div className="bg-white/20 backdrop-blur rounded-lg p-6 mb-8">
             <div className="grid md:grid-cols-2 gap-6 text-white">
               <div>
-                <h3 className="font-bold mb-4">If You Join Today:</h3>
+                <h3 className="font-bold mb-4">What You&apos;ll Gain:</h3>
                 <ul className="text-left space-y-2 text-green-100">
-                  <li>✓ {"Confident English in 30 days"}</li>
-                  <li>✓ {"Professional certification included"}</li>
-                  <li>✓ {"Career advancement opportunities"}</li>
-                  <li>✓ {"Respect from international visitors"}</li>
-                  <li>✓ {"Pride in representing Islam professionally"}</li>
+                  <li>✓ Confident English communication skills</li>
+                  <li>✓ Professional development certificate</li>
+                  <li>✓ Career advancement opportunities</li>
+                  <li>✓ Enhanced visitor service abilities</li>
+                  <li>✓ Greater confidence representing Islam</li>
                 </ul>
               </div>
               <div>
-                <h3 className="font-bold mb-4">If You Wait:</h3>
-                <ul className="text-left space-y-2 text-red-200">
-                  <li>✗ {"Miss the early-bird pricing"}</li>
-                  <li>✗ {"Struggle when tourism increases"}</li>
-                  <li>✗ {"Watch others get promoted instead"}</li>
-                  <li>✗ {"Continue feeling embarrassed with tourists"}</li>
-                  <li>✗ {"Risk being replaced by bilingual guards"}</li>
+                <h3 className="font-bold mb-4">Our Commitment:</h3>
+                <ul className="text-left space-y-2 text-green-100">
+                  <li>✓ Respect for Islamic values</li>
+                  <li>✓ Flexible learning schedule</li>
+                  <li>✓ Professional development focus</li>
+                  <li>✓ Community support network</li>
+                  <li>✓ Culturally appropriate content</li>
                 </ul>
               </div>
             </div>
@@ -554,20 +518,22 @@ export default function CTAPage() {
               className="bg-yellow-400 text-yellow-900 hover:bg-yellow-300 font-bold text-xl px-12 py-4"
             >
               <Link href="/guards/signup">
-                YES! Transform My English Now
+                Begin Your Professional Development
                 <ArrowRight className="w-6 h-6 ml-2" />
               </Link>
             </Button>
 
             <div className="flex items-center justify-center space-x-6 text-green-200 text-sm">
-              <span>✓ {"30-day guarantee"}</span>
-              <span>✓ {"Islamic values respected"}</span>
-              <span>✓ {"Start immediately"}</span>
+              <span>✓ 30-day satisfaction guarantee</span>
+              <span>✓ Islamic values respected</span>
+              <span>✓ Start immediately</span>
             </div>
           </div>
 
           <div className="mt-8 text-green-200">
-            <p className="font-bold">Only 23 spots remaining at this price</p>
+            <p className="font-medium">
+              Trusted by mosque staff across the region
+            </p>
           </div>
         </div>
       </section>

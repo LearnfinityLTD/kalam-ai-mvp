@@ -1,5 +1,5 @@
 "use client";
-import { Card, CardContent } from "@/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import React from "react";
 import { LucideIcon } from "lucide-react";
 

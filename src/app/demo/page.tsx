@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import NavBar from "@/app/components/landing/NavBar";
+import NavBar from "@/app/components/landing/shared/NavBar";
 import Footer from "@/app/components/shared/Footer";
 import { Shield, MessageSquare, Target, CheckCircle } from "lucide-react";
 

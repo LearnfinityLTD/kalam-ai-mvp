@@ -2,9 +2,9 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase";
 import VoiceRecorder from "../../components/shared/VoiceRecorder";
-import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/ui/button";
-import { Badge } from "@/ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/ui/progress";
 import { ArrowRight, ArrowLeft, RotateCcw, CheckCircle } from "lucide-react";
 import { toast } from "react-hot-toast";

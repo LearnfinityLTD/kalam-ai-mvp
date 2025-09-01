@@ -1,9 +1,9 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase";
-import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/ui/progress";
-import { Badge } from "@/ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { Flame, Target, TrendingUp, AlertCircle } from "lucide-react";
 
 interface ProgressData {

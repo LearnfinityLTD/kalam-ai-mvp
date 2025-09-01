@@ -66,6 +66,7 @@ export default function AuthForm({ userType, redirectTo }: Props) {
     if (error) throw error;
   };
 
+  // inside AuthForm
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
@@ -73,31 +74,40 @@ export default function AuthForm({ userType, redirectTo }: Props) {
     setLoading(true);
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: { user_type: userType },
-            emailRedirectTo:
-              (
-                process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
-              ).replace(/\/$/, "") + "/auth/callback",
-          },
-        });
-        if (error) throw error;
-        toast.success("Check your email to verify your account, then sign in.");
-        setMode("signin");
+        // ... your existing signup code ...
       } else {
+        // ✅ normalize email exactly like at sign-up
+        const cleanEmail = email.trim().toLowerCase();
+
         const { data, error } = await supabase.auth.signInWithPassword({
-          email,
+          email: cleanEmail,
           password,
         });
-        if (error) throw error;
+        console.log("Signing in with", email, password, data, error);
+
+        if (error) {
+          // 🔍 friendlier messages for common cases
+          const msg = String(error.message || "").toLowerCase();
+          if (msg.includes("email not confirmed")) {
+            throw new Error(
+              "Please confirm your email first. Check your inbox (or spam) for the verification link."
+            );
+          }
+          if (msg.includes("invalid login credentials")) {
+            throw new Error("Incorrect email or password.");
+          }
+          throw error;
+        }
 
         const userId = data.user?.id;
-        if (userId) await upsertProfile(userId);
+        if (userId) {
+          // keep your upsert to ensure profile exists
+          const { error: upsertErr } = await supabase
+            .from("user_profiles")
+            .upsert({ id: userId, user_type: userType }, { onConflict: "id" });
+          if (upsertErr) throw upsertErr;
+        }
 
-        toast.success("Signed in successfully.");
         router.replace(
           redirectTo ||
             (userType === "guard"
@@ -109,11 +119,10 @@ export default function AuthForm({ userType, redirectTo }: Props) {
       const message =
         err instanceof Error
           ? err.message
-          : typeof err === "string"
-          ? err
-          : "Something went wrong. Please try again or contact support.";
-
-      toast.error(message);
+          : "Something went wrong. Please try again.";
+      // show the error with your toast or inline
+      // toast.error(message)
+      console.error(message);
     } finally {
       setLoading(false);
     }

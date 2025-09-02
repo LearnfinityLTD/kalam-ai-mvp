@@ -87,6 +87,7 @@ export type Database = {
           company_id: string | null;
           created_at: string;
           updated_at: string;
+          is_admin: boolean; // ✅ new column
         };
         Insert: {
           id: string;
@@ -97,6 +98,7 @@ export type Database = {
           company_id?: string | null;
           created_at?: string;
           updated_at?: string;
+          is_admin?: boolean; // ✅ allow optional insert
         };
         Update: {
           id?: string;
@@ -107,6 +109,7 @@ export type Database = {
           company_id?: string | null;
           created_at?: string;
           updated_at?: string;
+          is_admin?: boolean; // ✅ allow updating
         };
         Relationships: [
           {

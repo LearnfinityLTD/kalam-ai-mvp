@@ -7,12 +7,14 @@ import CommunityStats from "./components/landing/shared/CommunityStats";
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen overflow-x-hidden">
       <NavBar />
-      <Hero />
-      <UserTypeSelection />
-      <CommunityStats />
-      <Features />
+      <div className="w-full">
+        <Hero />
+        <UserTypeSelection />
+        <CommunityStats />
+        <Features />
+      </div>
       <Footer />
     </div>
   );

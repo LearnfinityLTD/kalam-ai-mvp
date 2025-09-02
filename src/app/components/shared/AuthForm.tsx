@@ -1,8 +1,9 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { createClient, TablesInsert } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase";
 import type { UserType } from "@/lib/database.types";
 import { Button } from "@/ui/button";
 import { Input } from "@/ui/input";
@@ -10,8 +11,8 @@ import { toast } from "react-hot-toast";
 import { Eye, EyeOff } from "lucide-react";
 
 type Props = {
-  userType: UserType; // must be 'guard' | 'professional' per your database.types
-  redirectTo?: string; // optional override
+  userType: UserType; // "guard" | "professional" (from ?type=)
+  redirectTo?: string; // optional ?next=
 };
 
 const EMAIL_RE =
@@ -21,112 +22,101 @@ export default function AuthForm({ userType, redirectTo }: Props) {
   const supabase = useMemo(() => createClient(), []);
   const router = useRouter();
 
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const title =
-    mode === "signin"
-      ? userType === "guard"
-        ? "Guard Login"
-        : "Professional Login"
-      : userType === "guard"
-      ? "Create Guard Account"
-      : "Create Professional Account";
+  const title = userType === "guard" ? "Guard Sign In" : "Professional Sign In";
 
   const validate = useCallback(() => {
     if (!EMAIL_RE.test(email)) {
       toast.error("Please enter a valid email address.");
       return false;
     }
-    if (mode === "signup" && password.length < 8) {
-      toast.error("Password must be at least 8 characters.");
-      return false;
-    }
-    if (mode === "signin" && password.length === 0) {
+    if (!password) {
       toast.error("Please enter your password.");
       return false;
     }
     return true;
-  }, [email, password, mode]);
+  }, [email, password]);
 
-  /** Ensure user_profiles row exists */
-  const upsertProfile = async (userId: string) => {
-    const payload: TablesInsert<"user_profiles"> = {
-      id: userId,
-      user_type: userType,
-    };
-
-    const { error } = await supabase
+  // insert profile ONLY if missing; don’t clobber is_admin
+  const ensureProfile = async (userId: string) => {
+    const { data: existing, error: existErr } = await supabase
       .from("user_profiles")
-      .upsert(payload, { onConflict: "id" });
+      .select("id")
+      .eq("id", userId)
+      .maybeSingle();
+    if (existErr) throw existErr;
 
-    if (error) throw error;
+    if (!existing) {
+      const { error: insertErr } = await supabase.from("user_profiles").insert({
+        id: userId,
+        user_type: userType,
+        is_admin: false,
+      });
+      if (insertErr) throw insertErr;
+    }
   };
 
-  // inside AuthForm
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
 
     setLoading(true);
     try {
-      if (mode === "signup") {
-        // ... your existing signup code ...
-      } else {
-        // ✅ normalize email exactly like at sign-up
-        const cleanEmail = email.trim().toLowerCase();
+      const cleanEmail = email.trim().toLowerCase();
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: cleanEmail,
+        password,
+      });
 
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email: cleanEmail,
-          password,
-        });
-        console.log("Signing in with", email, password, data, error);
-
-        if (error) {
-          // 🔍 friendlier messages for common cases
-          const msg = String(error.message || "").toLowerCase();
-          if (msg.includes("email not confirmed")) {
-            throw new Error(
-              "Please confirm your email first. Check your inbox (or spam) for the verification link."
-            );
-          }
-          if (msg.includes("invalid login credentials")) {
-            throw new Error("Incorrect email or password.");
-          }
-          throw error;
+      if (error) {
+        const msg = (error.message || "").toLowerCase();
+        if (msg.includes("invalid login credentials")) {
+          throw new Error("Incorrect email or password.");
         }
-
-        const userId = data.user?.id;
-        if (userId) {
-          // keep your upsert to ensure profile exists
-          const { error: upsertErr } = await supabase
-            .from("user_profiles")
-            .upsert({ id: userId, user_type: userType }, { onConflict: "id" });
-          if (upsertErr) throw upsertErr;
+        if (msg.includes("email not confirmed")) {
+          throw new Error(
+            "Please confirm your email via the link we emailed you."
+          );
         }
-
-        router.replace(
-          redirectTo ||
-            (userType === "guard"
-              ? "/guards/dashboard"
-              : "/professionals/dashboard")
-        );
+        throw error;
       }
-    } catch (err) {
-      const message =
-        err instanceof Error
-          ? err.message
-          : "Something went wrong. Please try again.";
-      // show the error with your toast or inline
-      // toast.error(message)
-      console.error(message);
+
+      const userId = data.user?.id;
+      if (!userId) throw new Error("No user returned from sign-in.");
+
+      await ensureProfile(userId);
+
+      // read profile to decide admin vs normal destination
+      const { data: me, error: meErr } = await supabase
+        .from("user_profiles")
+        .select("user_type, is_admin")
+        .eq("id", userId)
+        .maybeSingle();
+      if (meErr) throw meErr;
+
+      const computedDest =
+        userType === "guard"
+          ? me?.is_admin
+            ? "/guards/admin"
+            : "/guards/dashboard"
+          : "/professionals/dashboard";
+
+      router.replace(redirectTo || computedDest);
+    } catch (err: unknown) {
+      const errorMessage =
+        e instanceof Error ? e.message : "Failed to load data.";
+      toast.error(errorMessage);
+      console.error("Auth error:", err);
     } finally {
       setLoading(false);
     }
   };
+
+  const nextQ = redirectTo ? `&next=${encodeURIComponent(redirectTo)}` : "";
 
   return (
     <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-lg">
@@ -147,9 +137,7 @@ export default function AuthForm({ userType, redirectTo }: Props) {
         <div className="relative">
           <Input
             type={showPw ? "text" : "password"}
-            autoComplete={
-              mode === "signin" ? "current-password" : "new-password"
-            }
+            autoComplete="current-password"
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -172,21 +160,19 @@ export default function AuthForm({ userType, redirectTo }: Props) {
         </div>
 
         <Button type="submit" disabled={loading} className="w-full">
-          {loading ? "Please wait…" : mode === "signup" ? "Sign Up" : "Sign In"}
+          {loading ? "Please wait…" : "Sign In"}
         </Button>
       </form>
 
+      {/* ↓ Keep the “Don’t have an account?” footer, linking to your signup route */}
       <p className="text-center mt-4 text-sm">
-        {mode === "signin"
-          ? "Don't have an account?"
-          : "Already have an account?"}{" "}
-        <button
-          onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
-          className="text-green-600 hover:underline"
-          disabled={loading}
+        Don&apos;t have an account?{" "}
+        <Link
+          href={`/auth/signup?type=${userType}${nextQ}`}
+          className="text-blue-600 hover:underline"
         >
-          {mode === "signin" ? "Sign Up" : "Sign In"}
-        </button>
+          Create one
+        </Link>
       </p>
 
       <p className="mt-4 text-xs text-slate-500 text-center">

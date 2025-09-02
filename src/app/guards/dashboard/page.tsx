@@ -1,18 +1,27 @@
-// app/guards/dashboard/page.tsx
+// app/guards/dashboard/page.tsx (Updated to use Enhanced Dashboard)
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase";
-import GuardDashboard from "@/components/guards/GuardDashboard";
+import EnhancedGuardDashboard from "@/components/guards/EnhancedGuardDashboard";
+import AssessmentWrapper from "@/components/assessment/AssessmentWrapper";
 import { useRouter } from "next/navigation";
+import { Button } from "@/ui/button";
 
 export default function GuardDashboardPage() {
   const supabase = useMemo(() => createClient(), []);
   const router = useRouter();
-
+  const [currentTime, setCurrentTime] = useState(new Date());
   const [userId, setUserId] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showDashboard, setShowDashboard] = useState(false);
+
+  // Tick clock
+  useEffect(() => {
+    const t = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(t);
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -40,58 +49,130 @@ export default function GuardDashboardPage() {
     try {
       await supabase.auth.signOut();
     } finally {
-      router.replace("/"); // always navigate away even if signOut throws
+      router.replace("/");
     }
+  };
+
+  const handleAssessmentComplete = () => {
+    setShowDashboard(true);
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen grid place-items-center bg-gray-50">
-        <p className="text-sm text-gray-600">Loading your dashboard…</p>
+      <div className="min-h-screen grid place-items-center bg-gradient-to-br from-emerald-50 to-blue-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-emerald-200 mx-auto"></div>
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-transparent border-t-emerald-600 mx-auto absolute"></div>
+          <p className="text-lg text-gray-700 mt-6 font-medium">
+            Loading your dashboard...
+          </p>
+        </div>
       </div>
     );
   }
 
   if (!userId) {
     return (
-      <div className="min-h-screen grid place-items-center bg-gray-50">
-        <div className="bg-white shadow rounded-lg p-6 text-center">
-          <h1 className="text-lg font-semibold mb-2">You&apos;re signed out</h1>
-          <p className="text-sm text-gray-600 mb-4">
-            Please sign in to view your guard dashboard.
+      <div className="min-h-screen grid place-items-center bg-gradient-to-br from-red-50 to-orange-50">
+        <div className="bg-white shadow-lg rounded-xl p-8 text-center border border-red-200">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg
+              className="w-8 h-8 text-red-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 15v2m0 0v2m0-2h2m-2 0H10m2-5V9m0 0V7m0 2h2m-2 0H10"
+              />
+            </svg>
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            Access Required
+          </h1>
+          <p className="text-gray-600 mb-6">
+            Please sign in to access your personalized guard dashboard.
           </p>
-          <button
+          <Button
             onClick={() => router.replace("/auth/signin?type=guard")}
-            className="inline-block bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+            className="bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-700 hover:to-blue-700"
+            size="lg"
           >
-            Sign in
-          </button>
+            Sign In to Continue
+          </Button>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* THE ONE AND ONLY HEADER */}
-      <header className="flex justify-between items-center bg-white shadow p-4">
-        <div>
-          <h1 className="text-lg font-semibold">Guard Dashboard</h1>
-          {email && (
-            <p className="text-sm text-gray-600">Signed in as {email}</p>
-          )}
-        </div>
-        <button
-          onClick={handleLogout}
-          className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 text-sm"
-        >
-          Logout
-        </button>
-      </header>
+  // Show assessment wrapper if user hasn't completed assessment
+  if (!showDashboard) {
+    return (
+      <AssessmentWrapper
+        userId={userId}
+        email={email ?? undefined}
+        onAssessmentComplete={handleAssessmentComplete}
+      />
+    );
+  }
 
-      <main className="p-6">
-        {/* Pass email only for display needs in child cards, but no header inside */}
-        <GuardDashboard userId={userId} email={email ?? undefined} />
+  // Show enhanced personalized dashboard
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50">
+      {/* Minimal Header - less prominent since dashboard is now personalized */}
+      <div className="bg-white/80 backdrop-blur-sm shadow-sm border-b border-white/20">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-blue-600 rounded flex items-center justify-center text-white text-sm font-bold">
+                كلام
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">KalamAI</h1>
+                {email && (
+                  <p className="text-xs text-gray-600">
+                    Welcome back, {email.split("@")[0]}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <div className="hidden sm:block text-right">
+                <div className="text-sm text-gray-500">
+                  {currentTime.toLocaleDateString("en-GB", {
+                    weekday: "short",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </div>
+                <div className="text-lg font-semibold text-gray-900">
+                  {currentTime.toLocaleTimeString("en-GB", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </div>
+              </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-red-300 text-red-600 hover:bg-red-50"
+                onClick={handleLogout}
+              >
+                Log out
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Enhanced Dashboard */}
+      <main>
+        <EnhancedGuardDashboard userId={userId} email={email ?? undefined} />
       </main>
     </div>
   );

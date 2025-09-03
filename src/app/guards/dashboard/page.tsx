@@ -104,7 +104,7 @@ export default function GuardDashboardPage() {
             Access Required
           </h1>
           <p className="text-gray-600 mb-6">
-            Please sign in to access your personalized guard dashboard.
+            Please sign in to access your personalized host dashboard.
           </p>
           <Button
             onClick={() => router.replace("/auth/signin?type=guard")}

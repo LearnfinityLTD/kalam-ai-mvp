@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/ui/button";
 import { useRouter } from "next/navigation";
-
+import Link from "next/link";
 export const Pricing = () => {
   const router = useRouter();
   const handleDemo = () => {
@@ -372,7 +372,7 @@ export const Pricing = () => {
 
           <div className="flex flex-col md:flex-row items-center justify-center gap-4">
             <Button className="bg-white border-2 border-green-600 !text-green-600 hover:bg-green-50 hover:!text-green-700">
-              Start Free Trial Today
+              <Link href="/#user-selection">Start Free Trial Today</Link>
             </Button>
 
             <Button

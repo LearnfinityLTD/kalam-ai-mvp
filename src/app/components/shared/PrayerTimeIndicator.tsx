@@ -1,9 +1,9 @@
 "use client";
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { Card, CardContent } from "@/ui/card";
-import { createClient } from "@/lib/supabase";
+import { Card, CardContent, CardHeader } from "@/ui/card";
 import { useToast } from "@/ui/use-toast";
-
+import { Button } from "@/ui/button";
+import { Eye, EyeOff, Settings } from "lucide-react";
 type Coords = { lat: number; lng: number };
 
 interface PrayerTimes {
@@ -37,7 +37,11 @@ const ARABIC_NAMES: Record<string, string> = {
 };
 
 type PrayerTimeIndicatorProps = {
-  mosqueId?: string;
+  calculationMethod?: number;
+  school?: number;
+  userId?: string;
+  onToggleVisibility?: (visible: boolean) => void | Promise<void>;
+  onToggleMinimized?: (minimized: boolean) => void | Promise<void>;
 };
 
 /** Extract "HH:mm" safely from strings like "05:30", "5:30", or "05:30 (AST)" */
@@ -130,14 +134,11 @@ function dayKey(d = new Date()): string {
 }
 
 export default function PrayerTimeIndicator({
-  mosqueId,
+  calculationMethod = 5,
+  school = 1,
 }: PrayerTimeIndicatorProps) {
   const { toast } = useToast();
-  const supabase = useMemo(() => createClient(), []);
   const [coords, setCoords] = useState<Coords | null>(null);
-  const [city, setCity] = useState<{ city: string; country?: string } | null>(
-    null
-  );
   const [times, setTimes] = useState<AladhanTimings | null>(null);
   const [status, setStatus] = useState<
     Pick<PrayerTimes, "current" | "next" | "timeUntilNext">
@@ -147,75 +148,101 @@ export default function PrayerTimeIndicator({
     timeUntilNext: "N/A",
   });
 
-  // Resolve location:
-  // If mosqueId: read `mosques.location` ("City, Country" recommended).
-  // Else: use cached coords or browser geolocation.
+  // ✅ Add missing states
+  const [isMinimized, setIsMinimized] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+
+  // ✅ Handlers
+  const handleMinimize = () => setIsMinimized((prev) => !prev);
+  const handleToggleVisibility = () => setIsVisible((prev) => !prev);
+
+  // Always use device geolocation first
   const resolveLocation = useCallback(async () => {
-    if (mosqueId) {
-      const { data, error } = await supabase
-        .from("mosques")
-        .select("location")
-        .eq("id", mosqueId)
-        .single();
-
-      if (error || !data?.location) {
-        toast({
-          title: "خطأ",
-          description:
-            "تعذر الحصول على موقع المسجد. سيتم استخدام الموقع الجغرافي للجهاز.",
-          variant: "destructive",
-        });
-      } else {
-        const parts = String(data.location)
-          .split(",")
-          .map((s) => s.trim());
-        const c = { city: parts[0] || "Dubai", country: parts[1] || "UAE" };
-        setCity(c);
-        localStorage.setItem("kalamai_city", JSON.stringify(c));
-        return;
-      }
-    }
-
-    // Fallback to device geolocation or cached coords
+    // Check for cached coordinates first
     const cached = localStorage.getItem("kalamai_coords");
-    if (cached) {
+    const cacheTime = localStorage.getItem("kalamai_coords_time");
+
+    if (cached && cacheTime) {
       try {
-        setCoords(JSON.parse(cached));
-        return;
+        const coords = JSON.parse(cached);
+        const now = Date.now();
+        const oneDay = 24 * 60 * 60 * 1000;
+
+        // Use cached coords if less than 24h old
+        if (now - parseInt(cacheTime) < oneDay) {
+          setCoords(coords);
+          return;
+        }
       } catch {
-        // ignore parse error
+        // ignore parse error, will get fresh location
       }
     }
 
+    // Get fresh GPS location
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
           setCoords(loc);
           localStorage.setItem("kalamai_coords", JSON.stringify(loc));
+          localStorage.setItem("kalamai_coords_time", Date.now().toString());
         },
-        () => {
+        (error) => {
+          console.warn("Geolocation error:", error);
+
+          // Fallback to cached coords if available
+          if (cached) {
+            try {
+              setCoords(JSON.parse(cached));
+              toast({
+                title: "استخدام الموقع المحفوظ",
+                description: "تم استخدام آخر موقع محفوظ",
+              });
+              return;
+            } catch {
+              // ignore
+            }
+          }
+
           // Last fallback: Dubai center
           const loc = { lat: 25.2048, lng: 55.2708 };
           setCoords(loc);
           localStorage.setItem("kalamai_coords", JSON.stringify(loc));
+          localStorage.setItem("kalamai_coords_time", Date.now().toString());
+
           toast({
             title: "تنبيه",
             description:
-              "الموقع الجغرافي غير متاح. تم استخدام موقع افتراضي (دبي).",
+              "تعذر الحصول على موقعك. تم استخدام موقع افتراضي (دبي).",
+            variant: "destructive",
           });
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 60000, // Cache for 1 minute
         }
       );
     } else {
+      // Browser doesn't support geolocation
       const loc = { lat: 25.2048, lng: 55.2708 };
       setCoords(loc);
       localStorage.setItem("kalamai_coords", JSON.stringify(loc));
+      localStorage.setItem("kalamai_coords_time", Date.now().toString());
+
+      toast({
+        title: "تنبيه",
+        description: "المتصفح لا يدعم تحديد الموقع. تم استخدام موقع افتراضي.",
+        variant: "destructive",
+      });
     }
-  }, [mosqueId, supabase, toast]);
+  }, [toast]);
 
   // Fetch timings (cache per day)
   const fetchTimings = useCallback(async () => {
-    const key = `kalamai_prayer_${dayKey()}`;
+    if (!coords) return; // Wait for coordinates
+
+    const key = `kalamai_prayer_${dayKey()}_${calculationMethod}_${school}`;
     const cache = localStorage.getItem(key);
     if (cache) {
       try {
@@ -228,17 +255,7 @@ export default function PrayerTimeIndicator({
     }
 
     try {
-      let url = "";
-      if (city) {
-        const c = encodeURIComponent(city.city);
-        const country = encodeURIComponent(city.country || "UAE");
-        url = `https://api.aladhan.com/v1/timingsByCity?city=${c}&country=${country}&method=5&school=1`;
-      } else if (coords) {
-        url = `https://api.aladhan.com/v1/timings?latitude=${coords.lat}&longitude=${coords.lng}&method=5&school=1`;
-      } else {
-        // No location resolved yet
-        return;
-      }
+      const url = `https://api.aladhan.com/v1/timings?latitude=${coords.lat}&longitude=${coords.lng}&method=${calculationMethod}&school=${school}`;
 
       const res = await fetch(url, { cache: "no-store" });
       const data: AladhanResponse = await res.json();
@@ -266,27 +283,35 @@ export default function PrayerTimeIndicator({
           "تعذر جلب أوقات الصلاة. سيتم استخدام آخر بيانات مخزنة لهذا اليوم.",
         variant: "destructive",
       });
-      const key = `kalamai_prayer_${dayKey()}`;
-      const cache = localStorage.getItem(key);
-      if (cache) {
+
+      // Try to use any cached data for today with any method/school
+      const fallbackKey = `kalamai_prayer_${dayKey()}`;
+      const keys = Object.keys(localStorage).filter((key) =>
+        key.startsWith(fallbackKey)
+      );
+
+      if (keys.length > 0) {
         try {
-          setTimes(JSON.parse(cache));
+          const fallbackData = localStorage.getItem(keys[0]);
+          if (fallbackData) {
+            setTimes(JSON.parse(fallbackData));
+          }
         } catch {
           // ignore
         }
       }
     }
-  }, [city, coords, toast]);
+  }, [coords, calculationMethod, school, toast]);
 
-  // 1) Resolve location on mount or mosqueId change
+  // 1) Resolve location on mount
   useEffect(() => {
     resolveLocation();
   }, [resolveLocation]);
 
-  // 2) Fetch timings whenever we have a location (and once per day)
+  // 2) Fetch timings whenever we have coordinates or preferences change
   useEffect(() => {
-    if (city || coords) fetchTimings();
-  }, [city, coords, fetchTimings]);
+    if (coords) fetchTimings();
+  }, [coords, calculationMethod, school, fetchTimings]);
 
   // 3) Recompute status every minute without refetching
   useEffect(() => {
@@ -315,52 +340,100 @@ export default function PrayerTimeIndicator({
       role="region"
       aria-label="مؤشر أوقات الصلاة"
     >
-      <CardContent className="py-4">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-green-800">
+              أوقات الصلاة
+            </span>
             <span
-              className="w-3 h-3 bg-green-500 rounded-full animate-pulse"
+              className="w-2 h-2 bg-green-500 rounded-full animate-pulse"
               aria-hidden="true"
             />
-            <span className="text-sm font-medium text-green-800">
-              الصلاة الحالية:{" "}
-              {ARABIC_NAMES[status.current] ?? ARABIC_NAMES.None}
-            </span>
           </div>
-          <div className="text-sm text-green-700">
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={handleMinimize}
+              variant="ghost"
+              size="sm"
+              className="h-6 w-6 p-0 text-green-700 hover:text-green-900 hover:bg-green-100"
+              title={isMinimized ? "توسيع أوقات الصلاة" : "تصغير أوقات الصلاة"}
+            >
+              {isMinimized ? (
+                <Eye className="h-3 w-3" />
+              ) : (
+                <EyeOff className="h-3 w-3" />
+              )}
+            </Button>
+            <Button
+              onClick={handleToggleVisibility}
+              variant="ghost"
+              size="sm"
+              className="h-6 w-6 p-0 text-green-700 hover:text-green-900 hover:bg-green-100"
+              title="إخفاء أوقات الصلاة"
+            >
+              <Settings className="h-3 w-3" />
+            </Button>
+          </div>
+        </div>
+      </CardHeader>
+
+      {!isMinimized && (
+        <CardContent className="pt-0">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium text-green-800">
+                الصلاة الحالية:{" "}
+                {ARABIC_NAMES[status.current] ?? ARABIC_NAMES.None}
+              </span>
+            </div>
+            <div className="text-sm text-green-700">
+              التالي:{" "}
+              <span className="font-semibold">
+                {ARABIC_NAMES[status.next] ?? ""}
+              </span>{" "}
+              في {status.timeUntilNext}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-5 gap-2 text-xs" role="list">
+            {(
+              ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"] as Array<
+                keyof PrayerTimes["allTimes"]
+              >
+            ).map((name) => {
+              const isCurrent = status.current === name;
+              return (
+                <div
+                  key={name}
+                  className={`text-center p-2 rounded transition-all ${
+                    isCurrent
+                      ? "bg-green-200 text-green-800 font-semibold shadow-sm"
+                      : "text-green-700 hover:bg-green-100"
+                  }`}
+                  role="listitem"
+                  aria-label={`${ARABIC_NAMES[name]} في ${allTimes[name]}`}
+                >
+                  <div className="font-medium">{ARABIC_NAMES[name]}</div>
+                  <div className="mt-1">{allTimes[name]}</div>
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      )}
+
+      {isMinimized && (
+        <CardContent className="pt-0 pb-3">
+          <div className="text-center text-sm text-green-700">
             التالي:{" "}
             <span className="font-semibold">
               {ARABIC_NAMES[status.next] ?? ""}
             </span>{" "}
             في {status.timeUntilNext}
           </div>
-        </div>
-
-        <div className="grid grid-cols-5 gap-2 text-xs" role="list">
-          {(
-            ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"] as Array<
-              keyof PrayerTimes["allTimes"]
-            >
-          ).map((name) => {
-            const isCurrent = status.current === name;
-            return (
-              <div
-                key={name}
-                className={`text-center p-2 rounded transition-all ${
-                  isCurrent
-                    ? "bg-green-200 text-green-800 font-semibold shadow-sm"
-                    : "text-green-700 hover:bg-green-100"
-                }`}
-                role="listitem"
-                aria-label={`${ARABIC_NAMES[name]} في ${allTimes[name]}`}
-              >
-                <div className="font-medium">{ARABIC_NAMES[name]}</div>
-                <div className="mt-1">{allTimes[name]}</div>
-              </div>
-            );
-          })}
-        </div>
-      </CardContent>
+        </CardContent>
+      )}
     </Card>
   );
 }

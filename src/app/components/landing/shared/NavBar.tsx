@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Shield, MapPin, Briefcase } from "lucide-react";
 
 export default function NavBar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -34,25 +35,20 @@ export default function NavBar() {
     {
       type: "guard",
       label: "Mosque Guard",
-      icon: "🕌",
+      icon: Shield,
+      color: "green",
       description: "Welcome tourists & manage visits",
     },
     {
       type: "guide",
       label: "Tour Guide",
-      icon: "🧭",
+      icon: MapPin,
+      color: "amber",
       description: "Lead cultural tours",
-    },
-    {
-      type: "professional",
-      label: "Business Professional",
-      icon: "💼",
-      description: "Corporate communications",
     },
   ];
 
   const handleSignIn = (userType: string) => {
-    console.log("USER TYPE", userType);
     router.push(`/auth/signin?type=${userType}`);
     setShowUserTypeMenu(false);
     setIsMobileMenuOpen(false);
@@ -126,27 +122,38 @@ export default function NavBar() {
                   <div className="px-3 py-2 text-xs font-medium text-gray-500 border-b border-gray-100">
                     Choose your role
                   </div>
-                  {userTypes.map((userType) => (
-                    <button
-                      key={userType.type}
-                      onClick={() => handleSignIn(userType.type)}
-                      className="w-full px-3 py-3 text-left hover:bg-gray-50 transition-colors flex items-start space-x-3"
-                    >
-                      <span className="text-lg">{userType.icon}</span>
-                      <div>
-                        <div className="font-medium text-gray-900 text-sm">
-                          {userType.label}
+                  {userTypes.map((userType) => {
+                    const IconComponent = userType.icon;
+                    return (
+                      <button
+                        key={userType.type}
+                        onClick={() => handleSignIn(userType.type)}
+                        className="w-full px-3 py-3 text-left hover:bg-gray-50 transition-colors flex items-start space-x-3"
+                      >
+                        <IconComponent
+                          className={`h-5 w-5 ${
+                            userType.color === "green"
+                              ? "text-green-600"
+                              : userType.color === "amber"
+                              ? "text-amber-600"
+                              : "text-blue-600"
+                          }`}
+                        />
+                        <div>
+                          <div className="font-medium text-gray-900 text-sm">
+                            {userType.label}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {userType.description}
+                          </div>
                         </div>
-                        <div className="text-xs text-gray-500">
-                          {userType.description}
-                        </div>
-                      </div>
-                    </button>
-                  ))}
+                      </button>
+                    );
+                  })}
 
                   {/* Business Professional Coming Soon */}
                   <div className="px-3 py-3 flex items-start space-x-3 opacity-60">
-                    <span className="text-lg">💼</span>
+                    <Briefcase className="w-5 h-5 text-gray-400 mt-0.5" />
                     <div>
                       <div className="font-medium text-gray-900 text-sm flex items-center">
                         Business Professional
@@ -224,17 +231,28 @@ export default function NavBar() {
                 <div className="text-xs font-medium text-gray-500 px-2">
                   Sign in as:
                 </div>
-                {userTypes.map((userType) => (
-                  <Button
-                    key={userType.type}
-                    variant="outline"
-                    className="w-full border-green-600 text-green-600 hover:bg-green-50 justify-start text-sm"
-                    onClick={() => handleSignIn(userType.type)}
-                  >
-                    <span className="mr-2">{userType.icon}</span>
-                    {userType.label}
-                  </Button>
-                ))}
+                {userTypes.map((userType) => {
+                  const IconComponent = userType.icon;
+                  return (
+                    <Button
+                      key={userType.type}
+                      variant="outline"
+                      className="w-full border-green-600 text-green-600 hover:bg-green-50 justify-start text-sm"
+                      onClick={() => handleSignIn(userType.type)}
+                    >
+                      <IconComponent
+                        className={`h-5 w-5 ${
+                          userType.color === "green"
+                            ? "text-green-600"
+                            : userType.color === "amber"
+                            ? "text-amber-600"
+                            : "text-blue-600"
+                        }`}
+                      />
+                      {userType.label}
+                    </Button>
+                  );
+                })}
               </div>
 
               <div className="border-t border-gray-200 pt-3">

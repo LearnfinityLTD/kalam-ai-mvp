@@ -22,11 +22,15 @@ import {
   Award,
   BookOpen,
   MessageCircle,
+  Eye,
+  EyeOff,
+  Sparkles,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase";
 
 import PrayerTimeIndicator from "@/components/shared/PrayerTimeIndicator";
 import AssessmentDashboardCard from "./AssessmentDashboardCard";
+import PracticeConversationButton from "../shared/PracticeConversationButton";
 
 interface UserData {
   // Assessment results
@@ -48,6 +52,12 @@ interface UserData {
   next_milestone?: string;
   weekly_goal: number;
   confidence_level: number;
+}
+
+interface UserPreferences {
+  show_prayer_times: boolean;
+  prayer_calculation_method?: number;
+  prayer_school?: number;
 }
 
 interface PersonalizedScenario {
@@ -77,6 +87,11 @@ export default function EnhancedGuardDashboard({
   email?: string;
 }) {
   const [userData, setUserData] = useState<UserData | null>(null);
+  const [userPreferences, setUserPreferences] = useState<UserPreferences>({
+    show_prayer_times: true, // Default to showing prayer times
+    prayer_calculation_method: 5, // Default method
+    prayer_school: 1, // Default school
+  });
   const [personalizedScenarios, setPersonalizedScenarios] = useState<
     PersonalizedScenario[]
   >([]);
@@ -87,7 +102,91 @@ export default function EnhancedGuardDashboard({
 
   useEffect(() => {
     fetchPersonalizedData();
+    fetchUserPreferences();
   }, [userId]);
+
+  const fetchUserPreferences = async () => {
+    try {
+      // Try to get user preferences from database
+      const { data, error } = await supabase
+        .from("user_preferences")
+        .select("*")
+        .eq("user_id", userId)
+        .single();
+
+      if (error && error.code !== "PGRST116") {
+        // PGRST116 = no rows returned, which is fine for new users
+        console.error("Error fetching user preferences:", error);
+        return;
+      }
+
+      if (data) {
+        setUserPreferences({
+          show_prayer_times: data.show_prayer_times ?? true,
+          prayer_calculation_method: data.prayer_calculation_method ?? 5,
+          prayer_school: data.prayer_school ?? 1,
+        });
+      } else {
+        // No preferences found, create default ones
+        await createDefaultPreferences();
+      }
+    } catch (error) {
+      console.error("Error fetching preferences:", error);
+    }
+  };
+
+  const createDefaultPreferences = async () => {
+    try {
+      const defaultPrefs = {
+        user_id: userId,
+        show_prayer_times: true,
+        prayer_calculation_method: 5,
+        prayer_school: 1,
+      };
+
+      const { error } = await supabase
+        .from("user_preferences")
+        .insert(defaultPrefs);
+
+      if (error) {
+        console.error("Error creating default preferences:", error);
+      }
+    } catch (error) {
+      console.error("Error creating default preferences:", error);
+    }
+  };
+
+  const togglePrayerTimes = async () => {
+    const newShowPrayerTimes = !userPreferences.show_prayer_times;
+
+    try {
+      // Update in database with proper upsert syntax
+      const { error } = await supabase.from("user_preferences").upsert(
+        {
+          user_id: userId,
+          show_prayer_times: newShowPrayerTimes,
+          prayer_calculation_method: userPreferences.prayer_calculation_method,
+          prayer_school: userPreferences.prayer_school,
+        },
+        {
+          onConflict: "user_id", // This is the key fix
+        }
+      );
+
+      if (error) {
+        console.error("Error updating preferences:", error);
+        return;
+      }
+
+      // Update local state only if database update succeeded
+      setUserPreferences((prev) => ({
+        ...prev,
+        show_prayer_times: newShowPrayerTimes,
+      }));
+    } catch (error) {
+      console.error("Error toggling prayer times:", error);
+    }
+  };
 
   const fetchPersonalizedData = async () => {
     try {
@@ -367,7 +466,7 @@ export default function EnhancedGuardDashboard({
     <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
       {/* Personalized Welcome */}
       <div
-        className={`bg-gradient-to-r ${levelInfo.color} rounded-xl p-6 text-white`}
+        className={`bg-gradient-to-r ${levelInfo.color} rounded-xl p-6 text-white relative`}
       >
         <div className="flex items-center justify-between">
           <div>
@@ -385,15 +484,44 @@ export default function EnhancedGuardDashboard({
               {motivationalMessage}
             </p>
           </div>
-          <div className="text-right">
+          <div className="text-right flex flex-col items-end">
             <div className="text-4xl font-bold">{userData.current_streak}</div>
             <div className="text-white/90">day streak</div>
+
+            {/* Prayer Times Toggle Button */}
+            <Button
+              onClick={togglePrayerTimes}
+              variant="ghost"
+              size="sm"
+              className="mt-4 text-white/80 hover:text-white hover:bg-white/20"
+              title={
+                userPreferences.show_prayer_times
+                  ? "Hide prayer times"
+                  : "Show prayer times"
+              }
+            >
+              {userPreferences.show_prayer_times ? (
+                <EyeOff className="w-4 h-4 mr-2" />
+              ) : (
+                <Eye className="w-4 h-4 mr-2" />
+              )}
+              {userPreferences.show_prayer_times
+                ? "Hide Prayers"
+                : "Show Prayers"}
+            </Button>
           </div>
         </div>
       </div>
 
-      {/* Prayer Times */}
-      <PrayerTimeIndicator />
+      {/* Conditional Prayer Times */}
+      {userPreferences.show_prayer_times && (
+        <PrayerTimeIndicator
+          calculationMethod={userPreferences.prayer_calculation_method}
+          school={userPreferences.prayer_school}
+          onToggleVisibility={togglePrayerTimes}
+          userId={userId}
+        />
+      )}
 
       {/* Assessment + Quick Stats */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -571,34 +699,40 @@ export default function EnhancedGuardDashboard({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <BookOpen className="h-5 w-5" />
+            <BookOpen className="h-7 w-7" /> {/* also slightly larger */}
             Continue Learning
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Button className="h-20 flex flex-col items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 to-blue-600">
-              <Play className="w-6 h-6" />
-              <span className="font-medium">Continue Journey</span>
-              <span className="text-xs opacity-90">
+            {/* 1) Continue Journey */}
+            <Button className="h-28 flex flex-col items-center justify-center gap-3 bg-gradient-to-r from-emerald-600 to-blue-600">
+              <Play className="w-12 h-12" /> {/* ⬅️ 48px */}
+              <span className="font-medium text-base">Continue Journey</span>
+              <span className="text-sm opacity-90">
                 Pick up where you left off
               </span>
             </Button>
+
+            {/* 2) Practice Conversation */}
+            <PracticeConversationButton
+              userId={userId}
+              segment={"guard"}
+              icon={Sparkles}
+              title="Practice Conversation"
+              subtitle="AI-powered chat"
+              className="h-28 flex flex-col items-center justify-center gap-3 border-purple-300 hover:bg-purple-50 rounded-md [&_svg]:w-12 [&_svg]:h-12"
+              onCreated={(sid) => console.log("Session:", sid)}
+            />
+
+            {/* 3) Challenge Mode */}
             <Button
               variant="outline"
-              className="h-20 flex flex-col items-center justify-center gap-2 border-purple-300 hover:bg-purple-50"
+              className="h-28 flex flex-col items-center justify-center gap-3 border-orange-300 hover:bg-orange-50"
             >
-              <MessageCircle className="w-6 h-6 text-purple-600" />
-              <span className="font-medium">Practice Conversation</span>
-              <span className="text-xs text-gray-600">AI-powered chat</span>
-            </Button>
-            <Button
-              variant="outline"
-              className="h-20 flex flex-col items-center justify-center gap-2 border-orange-300 hover:bg-orange-50"
-            >
-              <Trophy className="w-6 h-6 text-orange-600" />
-              <span className="font-medium">Challenge Mode</span>
-              <span className="text-xs text-gray-600">Test your skills</span>
+              <Trophy className="w-12 h-12 text-orange-600" /> {/* ⬅️ 48px */}
+              <span className="font-medium text-base">Challenge Mode</span>
+              <span className="text-sm text-gray-600">Test your skills</span>
             </Button>
           </div>
         </CardContent>

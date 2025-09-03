@@ -42,13 +42,13 @@ export default function AuthForm({ userType, displayType, redirectTo }: Props) {
     switch (type) {
       case "guard":
         return {
-          title: "Mosque Guard Sign In",
+          title: "Mosque Host Sign In",
           subtitle: "Welcome back! Continue your English learning journey",
           icon: Shield,
           color: "green",
           description:
             "Access your personalized mosque scenarios and tourist interaction practice",
-          signupText: "Join as Mosque Guard",
+          signupText: "Join as Mosque Host",
         };
       case "guide":
         return {

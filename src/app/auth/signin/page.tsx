@@ -8,12 +8,18 @@ import { Button } from "@/ui/button";
 import { createClient } from "@/lib/supabase";
 
 type UserTypeParam = "guard" | "professional" | "guide";
+type DatabaseUserType = "guard" | "professional";
+
 const isUserType = (v: string | null): v is UserTypeParam =>
   v === "guard" || v === "professional" || v === "guide";
 
 export default function AuthPage() {
   return (
-    <Suspense fallback={<main className="min-h-screen bg-gray-50" />}>
+    <Suspense
+      fallback={
+        <main className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100" />
+      }
+    >
       <Inner />
     </Suspense>
   );
@@ -57,12 +63,16 @@ function Inner() {
 
       if (cancel) return;
 
-      const dest =
-        me?.user_type === "guard"
-          ? me?.is_admin
-            ? "/guards/admin"
-            : "/guards/dashboard"
-          : "/professionals/dashboard";
+      // Handle routing for all user types including guides
+      let dest: string;
+      if (me?.user_type === "guard") {
+        dest = me?.is_admin ? "/guards/admin" : "/guards/dashboard";
+      } else if (type === "guide") {
+        // Guides use guard routes but we differentiate in UI
+        dest = "/guards/dashboard";
+      } else {
+        dest = "/professionals/dashboard";
+      }
 
       setSignedInDest(next || dest);
       setChecking(false);
@@ -70,26 +80,55 @@ function Inner() {
     return () => {
       cancel = true;
     };
-  }, [supabase, next]);
+  }, [supabase, next, type]);
 
-  if (checking) return <main className="min-h-screen bg-gray-50" />;
+  if (checking) {
+    return (
+      <main className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+      </main>
+    );
+  }
 
-  // Map ‘guide’ → ‘guard’ for the DB constraint expected by AuthForm
-  const mappedType: "guard" | "professional" =
-    type === "guide" ? "guard" : type;
+  // Map 'guide' → 'guard' for the DB constraint, but preserve original type for display
+  const mappedType: DatabaseUserType = type === "guide" ? "guard" : type;
 
   return (
-    <main className="min-h-screen bg-gray-50">
-      <div className="mx-auto w-full max-w-md px-6 py-12">
+    <main className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
         {/* If already signed in, show banner instead of auto-redirect */}
         {signedInDest && (
-          <div className="mb-4 rounded-lg border bg-white p-4 shadow-sm">
-            <p className="text-sm text-gray-700">
-              You’re signed in{signedInEmail ? ` as ${signedInEmail}` : ""}.
-            </p>
-            <div className="mt-3 flex gap-2">
-              <Button onClick={() => router.replace(signedInDest)}>
-                Continue to dashboard
+          <div className="mb-6 rounded-xl border bg-white p-6 shadow-xl border-gray-100">
+            <div className="text-center mb-4">
+              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <svg
+                  className="w-6 h-6 text-green-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-1">
+                Welcome Back!
+              </h3>
+              <p className="text-sm text-gray-600">
+                You&apos;re signed in
+                {signedInEmail ? ` as ${signedInEmail}` : ""}.
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button
+                onClick={() => router.replace(signedInDest)}
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+              >
+                Continue to Dashboard
               </Button>
               <Button
                 variant="outline"
@@ -97,17 +136,21 @@ function Inner() {
                   await supabase.auth.signOut();
                   setSignedInEmail(null);
                   setSignedInDest(null);
-                  // stay on /auth so user can log in
                 }}
+                className="flex-1"
               >
-                Sign out
+                Sign Out
               </Button>
             </div>
           </div>
         )}
 
-        {/* Do NOT pass a default redirect; AuthForm will compute based on profile */}
-        <AuthForm userType={mappedType} redirectTo={next || undefined} />
+        {/* Pass both the mapped type for DB and original type for display */}
+        <AuthForm
+          userType={mappedType}
+          displayType={type}
+          redirectTo={next || undefined}
+        />
       </div>
     </main>
   );

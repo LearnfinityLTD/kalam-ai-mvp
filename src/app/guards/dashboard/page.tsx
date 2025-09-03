@@ -36,6 +36,17 @@ export default function GuardDashboardPage() {
       } else {
         setUserId(data.user.id);
         setEmail(data.user.email ?? null);
+
+        // Check if user has completed assessment
+        const { data: profile } = await supabase
+          .from("user_profiles")
+          .select("assessment_completed")
+          .eq("id", data.user.id)
+          .single();
+
+        if (profile?.assessment_completed) {
+          setShowDashboard(true);
+        }
       }
       setLoading(false);
     })();
@@ -61,8 +72,7 @@ export default function GuardDashboardPage() {
     return (
       <div className="min-h-screen grid place-items-center bg-gradient-to-br from-emerald-50 to-blue-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-4 border-emerald-200 mx-auto"></div>
-          <div className="animate-spin rounded-full h-16 w-16 border-4 border-transparent border-t-emerald-600 mx-auto absolute"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto"></div>
           <p className="text-lg text-gray-700 mt-6 font-medium">
             Loading your dashboard...
           </p>

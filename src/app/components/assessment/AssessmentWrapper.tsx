@@ -27,6 +27,7 @@ export default function AssessmentWrapper({
   const [loading, setLoading] = useState(true);
   const [isNewUser, setIsNewUser] = useState(false);
   const [needsAssessment, setNeedsAssessment] = useState(false);
+  const [assessmentComplete, setAssessmentComplete] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const supabase = createClient();
@@ -67,6 +68,7 @@ export default function AssessmentWrapper({
         setNeedsAssessment(true);
       } else {
         console.log("✅ User assessment complete, proceeding to dashboard");
+        setAssessmentComplete(true);
         onAssessmentComplete();
       }
     } catch (error) {
@@ -353,13 +355,12 @@ export default function AssessmentWrapper({
   }
 
   // Enhanced loading state
-  if (loading) {
+  if (loading && !assessmentComplete) {
     return (
       <div className="min-h-screen grid place-items-center bg-gradient-to-br from-emerald-50 to-blue-50">
         <div className="text-center">
           <div className="relative">
-            <div className="animate-spin rounded-full h-16 w-16 border-4 border-emerald-200 mx-auto"></div>
-            <div className="animate-spin rounded-full h-16 w-16 border-4 border-transparent border-t-emerald-600 mx-auto absolute top-0"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto"></div>
           </div>
           <p className="text-lg text-gray-700 mt-6 font-medium">
             Preparing your personalized assessment...

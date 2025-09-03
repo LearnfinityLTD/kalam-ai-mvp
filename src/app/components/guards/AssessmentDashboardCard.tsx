@@ -77,7 +77,7 @@ export default function AssessmentDashboardCard({
 
   useEffect(() => {
     fetchAssessmentData();
-  }, [userId, fetchAssessmentData]);
+  }, [userId]);
 
   const handleRetakeAssessment = async () => {
     try {

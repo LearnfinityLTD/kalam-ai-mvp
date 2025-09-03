@@ -2,7 +2,7 @@
 import GuardsHero from "@/components/landing/guards/GuardsHero";
 import GuardsCTA from "@/components/landing/guards/GuardsCTA";
 import GuardsTestimonials from "@/components/landing/guards/GuardsTestimonials";
-import Features from "@/components/landing/shared/Features";
+import { Features } from "@/components/landing/shared/Features";
 import NavBar from "@/components/landing/shared/NavBar";
 import Footer from "@/components/shared/Footer";
 import Link from "next/link";

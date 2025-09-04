@@ -742,12 +742,22 @@ export default function EnhancedGuardDashboard({
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg w-full h-full overflow-auto">
             <div className="sticky top-0 bg-white border-b p-4 flex justify-between items-center">
-              <h2 className="text-xl font-semibold">Challenge Mode</h2>
+              {/* Header */}
+
+              <div className="flex justify-center mb-6">
+                <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center text-white font-bold text-xl shadow-lg">
+                  كلام
+                </div>
+                <span className="ml-3 text-1xl font-bold text-gray-900 self-center">
+                  AI
+                </span>
+              </div>
+
               <Button
                 variant="ghost"
                 onClick={() => setShowChallengeMode(false)}
               >
-                <X className="w-4 h-4" />
+                <X className="w-8 h-8" />
               </Button>
             </div>
             <ChallengeMode

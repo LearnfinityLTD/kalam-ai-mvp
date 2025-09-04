@@ -5,7 +5,13 @@ export const dynamic = "force-dynamic";
 
 export default function GuardsChatPage() {
   return (
-    <Suspense fallback={<div className="p-6">Loading chat…</div>}>
+    <Suspense
+      fallback={
+        <div className="relative">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto"></div>
+        </div>
+      }
+    >
       <ChatSession segment="guard" />
     </Suspense>
   );

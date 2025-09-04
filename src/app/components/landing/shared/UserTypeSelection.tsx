@@ -32,7 +32,6 @@ export const UserTypeSelection = () => {
       ],
       cta: "Start as Mosque Guard",
       href: "/guards",
-      popular: true,
     },
     {
       icon: Briefcase,
@@ -56,8 +55,10 @@ export const UserTypeSelection = () => {
           desc: "Corporate progress tracking",
         },
       ],
-      cta: "Join Waitlist",
-      comingSoon: true,
+      cta: "Start as a professional",
+      popular: true,
+      comingSoon: false,
+      href: "/professionals",
     },
     {
       icon: MapPin,
@@ -82,6 +83,7 @@ export const UserTypeSelection = () => {
           desc: "Explain etiquette and history respectfully",
         },
       ],
+      comingSoon: true,
       cta: "Start as Tour Guide",
       href: "/tour-guides",
     },

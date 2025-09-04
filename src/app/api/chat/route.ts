@@ -2,13 +2,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { createClient } from "@/lib/supabase";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+/* ===========================
+   Types
+   =========================== */
+
+type ChatRole = "user" | "assistant" | "system";
+
 interface ChatMessage {
-  role: "user" | "assistant" | "system";
+  role: ChatRole;
   content: string;
 }
 
@@ -20,6 +27,49 @@ interface ChatRequest {
   userDialect?: string;
 }
 
+type Segment = "guard" | "professional";
+
+type Level = "A1" | "A2" | "B1" | "B2" | "C1";
+type Dialect = "gulf" | "egyptian" | "levantine" | "standard";
+
+interface UserProfileRow {
+  full_name: string | null;
+  english_level: Level | null;
+  dialect: Dialect | null;
+  strengths: string[] | null;
+  recommendations: string[] | null;
+}
+
+interface ScenarioRow {
+  title: string;
+  scenario_text: string;
+  expected_response: string | null;
+  cultural_context: string | null;
+  difficulty: "beginner" | "intermediate" | "advanced";
+  pronunciation_focus: string[] | null;
+}
+
+interface ChatConversationRow {
+  conversation_data: unknown[] | null;
+  total_messages: number | null;
+}
+
+interface ParsedAnalysis {
+  grammar_score: number;
+  vocabulary_score: number;
+  fluency_score: number;
+  cultural_appropriateness_score: number;
+  strengths: string[];
+  areas_for_improvement: string[];
+  specific_feedback: string;
+  // allow any extra keys from the model output
+  [k: string]: unknown;
+}
+
+/* ===========================
+   Route
+   =========================== */
+
 export async function POST(request: NextRequest) {
   try {
     console.log("OpenAI API Key exists:", !!process.env.OPENAI_API_KEY);
@@ -27,9 +77,10 @@ export async function POST(request: NextRequest) {
       "Key starts with sk-:",
       process.env.OPENAI_API_KEY?.startsWith("sk-")
     );
-    const supabase = createClient();
 
-    // Get the Authorization header from the request
+    const supabase: SupabaseClient = createClient();
+
+    // Auth header
     const authHeader = request.headers.get("authorization");
     if (!authHeader) {
       return NextResponse.json(
@@ -38,7 +89,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Set the auth header for Supabase client
+    // Validate user
     const {
       data: { user },
       error: authError,
@@ -49,25 +100,26 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const body: ChatRequest = await request.json();
+    // Body
+    const body = (await request.json()) as ChatRequest;
     const { messages, conversationId, scenarioId, userLevel, userDialect } =
       body;
 
-    // Get user profile for personalization
+    // Profile
     const { data: profile } = await supabase
       .from("user_profiles")
       .select("full_name, english_level, dialect, strengths, recommendations")
       .eq("id", user.id)
-      .single();
+      .single<UserProfileRow>();
 
-    // Get scenario details
+    // Scenario
     const { data: scenario } = await supabase
       .from("scenarios")
       .select(
         "title, scenario_text, expected_response, cultural_context, difficulty, pronunciation_focus"
       )
       .eq("id", scenarioId)
-      .single();
+      .single<ScenarioRow>();
 
     if (!scenario) {
       return NextResponse.json(
@@ -76,24 +128,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create system prompt for the AI
+    // System prompt
     const systemPrompt = createSystemPrompt(
       scenario,
-      profile,
+      profile ?? null,
       userLevel,
       userDialect
     );
 
-    // Prepare messages for OpenAI
+    // OpenAI messages
     const aiMessages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
       { role: "system", content: systemPrompt },
       ...messages.map((msg) => ({
-        role: msg.role as "user" | "assistant" | "system",
+        role: msg.role as ChatRole,
         content: msg.content,
       })),
     ];
 
-    // Call OpenAI
+    // OpenAI call
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: aiMessages,
@@ -107,21 +159,21 @@ export async function POST(request: NextRequest) {
       completion.choices[0]?.message?.content ||
       "I'm sorry, I didn't understand that.";
 
-    // Save the conversation to database
+    // Persist chat messages
     await saveConversationMessages(supabase, conversationId, user.id, [
       { role: "user", content: messages[messages.length - 1].content },
       { role: "assistant", content: assistantMessage },
     ]);
 
-    // Analyze user's message for feedback (optional, runs async)
-    analyzeUserMessage(
+    // Fire-and-forget analysis (no await by design)
+    void analyzeUserMessage(
       supabase,
       conversationId,
       user.id,
       scenarioId,
       messages[messages.length - 1].content,
       scenario,
-      profile
+      profile ?? null
     );
 
     return NextResponse.json({
@@ -129,8 +181,9 @@ export async function POST(request: NextRequest) {
       conversationId,
       usage: completion.usage,
     });
-  } catch (error) {
-    console.error("Chat API error:", error);
+  } catch (error: unknown) {
+    const err = error instanceof Error ? error : new Error(String(error));
+    console.error("Chat API error:", err);
     return NextResponse.json(
       { error: "Failed to process chat message" },
       { status: 500 }
@@ -138,14 +191,18 @@ export async function POST(request: NextRequest) {
   }
 }
 
+/* ===========================
+   Helpers
+   =========================== */
+
 function createSystemPrompt(
-  scenario: any,
-  profile: any,
+  scenario: ScenarioRow,
+  profile: UserProfileRow | null,
   userLevel: string,
   userDialect?: string
-) {
-  const level = profile?.english_level || userLevel || "A1";
-  const dialect = profile?.dialect || userDialect || "gulf";
+): string {
+  const level = profile?.english_level || (userLevel as Level) || "A1";
+  const dialect = profile?.dialect || (userDialect as Dialect) || "gulf";
   const strengths = profile?.strengths || [];
   const name = profile?.full_name || "Student";
 
@@ -189,11 +246,11 @@ RESPONSE STYLE:
 }
 
 async function saveConversationMessages(
-  supabase: any,
+  supabase: SupabaseClient,
   conversationId: string,
-  userId: string,
+  _userId: string, // not used here, kept for signature parity
   messages: ChatMessage[]
-) {
+): Promise<void> {
   try {
     // Save individual messages
     const messageInserts = messages.map((msg) => ({
@@ -210,38 +267,40 @@ async function saveConversationMessages(
       .from("chat_conversations")
       .select("conversation_data, total_messages")
       .eq("id", conversationId)
-      .single();
+      .single<ChatConversationRow>();
 
     if (existingConv) {
       const updatedData = [
-        ...(existingConv.conversation_data || []),
+        ...((existingConv.conversation_data as ChatMessage[] | null) ?? []),
         ...messages,
       ];
+
       await supabase
         .from("chat_conversations")
         .update({
           conversation_data: updatedData,
-          total_messages: (existingConv.total_messages || 0) + messages.length,
+          total_messages: (existingConv.total_messages ?? 0) + messages.length,
           last_message_at: new Date().toISOString(),
         })
         .eq("id", conversationId);
     }
-  } catch (error) {
-    console.error("Error saving conversation:", error);
+  } catch (error: unknown) {
+    const err = error instanceof Error ? error : new Error(String(error));
+    console.error("Error saving conversation:", err);
   }
 }
 
 async function analyzeUserMessage(
-  supabase: any,
+  supabase: SupabaseClient,
   conversationId: string,
   userId: string,
   scenarioId: string,
   userMessage: string,
-  scenario: any,
-  profile: any
-) {
+  scenario: ScenarioRow,
+  profile: UserProfileRow | null
+): Promise<void> {
   try {
-    // Create analysis prompt
+    // Build analysis prompt
     const analysisPrompt = `Analyze this English message from an Arabic speaker (${
       profile?.english_level || "A1"
     } level):
@@ -268,33 +327,34 @@ Provide analysis in JSON format:
     });
 
     const result = analysis.choices[0]?.message?.content;
-    if (result) {
-      const parsedAnalysis = JSON.parse(result);
+    if (!result) return;
 
-      // Save assessment to database
-      await supabase.from("chat_assessments").insert({
-        conversation_id: conversationId,
-        user_id: userId,
-        scenario_id: scenarioId,
-        grammar_score: parsedAnalysis.grammar_score,
-        vocabulary_score: parsedAnalysis.vocabulary_score,
-        fluency_score: parsedAnalysis.fluency_score,
-        cultural_appropriateness_score:
-          parsedAnalysis.cultural_appropriateness_score,
-        overall_score: Math.round(
-          (parsedAnalysis.grammar_score +
-            parsedAnalysis.vocabulary_score +
-            parsedAnalysis.fluency_score +
-            parsedAnalysis.cultural_appropriateness_score) /
-            4
-        ),
-        strengths: parsedAnalysis.strengths,
-        areas_for_improvement: parsedAnalysis.areas_for_improvement,
-        detailed_feedback: parsedAnalysis.specific_feedback,
-        ai_assessment: parsedAnalysis,
-      });
-    }
-  } catch (error) {
-    console.error("Error analyzing message:", error);
+    // Parse JSON (best-effort)
+    const parsed = JSON.parse(result) as ParsedAnalysis;
+
+    // Save assessment
+    await supabase.from("chat_assessments").insert({
+      conversation_id: conversationId,
+      user_id: userId,
+      scenario_id: scenarioId,
+      grammar_score: parsed.grammar_score,
+      vocabulary_score: parsed.vocabulary_score,
+      fluency_score: parsed.fluency_score,
+      cultural_appropriateness_score: parsed.cultural_appropriateness_score,
+      overall_score: Math.round(
+        (parsed.grammar_score +
+          parsed.vocabulary_score +
+          parsed.fluency_score +
+          parsed.cultural_appropriateness_score) /
+          4
+      ),
+      strengths: parsed.strengths,
+      areas_for_improvement: parsed.areas_for_improvement,
+      detailed_feedback: parsed.specific_feedback,
+      ai_assessment: parsed,
+    });
+  } catch (error: unknown) {
+    const err = error instanceof Error ? error : new Error(String(error));
+    console.error("Error analyzing message:", err);
   }
 }

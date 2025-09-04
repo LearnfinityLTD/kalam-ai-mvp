@@ -16,8 +16,8 @@ export const Pricing = () => {
       price: "$15",
       period: "/month per guard",
       originalPrice: "$25",
-      description: "Perfect for smaller mosques with 2-10 guards",
-      minUsers: "2 guards minimum",
+      description: "Perfect for smaller mosques with 2-10 hosts",
+      minUsers: "2 mosque hosts minimum",
       features: [
         "Tourist interaction scenarios",
         "Prayer-respectful scheduling",

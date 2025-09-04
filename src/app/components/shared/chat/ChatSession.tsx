@@ -154,7 +154,7 @@ export default function ChatSession({ segment }: ChatSessionProps) {
         const sc: Scenario = scRows[0];
 
         // Check if conversation already exists or create new one
-        let { data: existingConv } = await supabase
+        const { data: existingConv } = await supabase
           .from("chat_conversations")
           .select("id, conversation_data")
           .eq("learning_session_id", sessionId)

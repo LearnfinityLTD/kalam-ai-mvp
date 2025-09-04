@@ -6,7 +6,9 @@ import NavBar from "@/app/components/landing/shared/NavBar";
 import { CommunityStats } from "./components/landing/shared/CommunityStats";
 import { FAQ } from "./components/landing/shared/FAQ";
 import { SEOHead } from "@/components/landing/shared/SEOHead";
-import { Pricing } from "./components/landing/shared/Pricing";
+import { Pricing } from "@/components/landing/shared/Pricing";
+import { CulturalContext } from "@/components/landing/shared/CulturalContext";
+import { ContactSection } from "@/components/landing/shared/contact/ContactSection";
 
 export default function HomePage() {
   return (
@@ -17,8 +19,14 @@ export default function HomePage() {
         <Hero />
         <CommunityStats />
         <UserTypeSelection />
+        <CulturalContext />
         <Features />
         <FAQ />
+        <ContactSection
+          userType="general"
+          title="Ready to Transform Your English Communication?"
+          subtitle="Connect with our team to get started or answer any questions"
+        />
         <Pricing />
       </main>
       <Footer />

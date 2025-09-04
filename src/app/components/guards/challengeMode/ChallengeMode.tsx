@@ -660,7 +660,7 @@ const ChallengeMode: React.FC<ChallengeModeProps> = ({
                   Daily Challenge
                 </h3>
                 <p className="text-purple-700">
-                  Complete today's special challenge for bonus points!
+                  Complete today&apos;s special challenge for bonus points!
                 </p>
               </div>
               <div className="text-right">

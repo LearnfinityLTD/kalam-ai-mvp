@@ -365,8 +365,8 @@ export default function ChatSession({ segment }: ChatSessionProps) {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              We couldn't load this session. Please return to your dashboard and
-              try again.
+              We couldn&apos;t load this session. Please return to your
+              dashboard and try again.
             </p>
             <div className="mt-4">
               <Button

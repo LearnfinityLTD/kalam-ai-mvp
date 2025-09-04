@@ -25,12 +25,14 @@ import {
   Eye,
   EyeOff,
   Sparkles,
+  X,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase";
 
 import PrayerTimeIndicator from "@/components/shared/PrayerTimeIndicator";
 import AssessmentDashboardCard from "./AssessmentDashboardCard";
 import PracticeConversationButton from "../shared/PracticeConversationButton";
+import ChallengeMode from "./challengeMode/ChallengeMode";
 
 interface UserData {
   // Assessment results
@@ -52,6 +54,10 @@ interface UserData {
   next_milestone?: string;
   weekly_goal: number;
   confidence_level: number;
+
+  // User profile data
+  dialect?: string;
+  full_name?: string;
 }
 
 interface UserPreferences {
@@ -88,9 +94,9 @@ export default function EnhancedGuardDashboard({
 }) {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [userPreferences, setUserPreferences] = useState<UserPreferences>({
-    show_prayer_times: true, // Default to showing prayer times
-    prayer_calculation_method: 5, // Default method
-    prayer_school: 1, // Default school
+    show_prayer_times: true,
+    prayer_calculation_method: 5,
+    prayer_school: 1,
   });
   const [personalizedScenarios, setPersonalizedScenarios] = useState<
     PersonalizedScenario[]
@@ -98,6 +104,7 @@ export default function EnhancedGuardDashboard({
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [loading, setLoading] = useState(true);
   const [motivationalMessage, setMotivationalMessage] = useState("");
+  const [showChallengeMode, setShowChallengeMode] = useState(false);
   const supabase = createClient();
 
   useEffect(() => {
@@ -107,7 +114,6 @@ export default function EnhancedGuardDashboard({
 
   const fetchUserPreferences = async () => {
     try {
-      // Try to get user preferences from database
       const { data, error } = await supabase
         .from("user_preferences")
         .select("*")
@@ -115,7 +121,6 @@ export default function EnhancedGuardDashboard({
         .single();
 
       if (error && error.code !== "PGRST116") {
-        // PGRST116 = no rows returned, which is fine for new users
         console.error("Error fetching user preferences:", error);
         return;
       }
@@ -127,7 +132,6 @@ export default function EnhancedGuardDashboard({
           prayer_school: data.prayer_school ?? 1,
         });
       } else {
-        // No preferences found, create default ones
         await createDefaultPreferences();
       }
     } catch (error) {
@@ -148,7 +152,7 @@ export default function EnhancedGuardDashboard({
         .from("user_preferences")
         .insert(defaultPrefs);
 
-      if (error) {
+      if (error && error.code !== "PGRST116") {
         console.error("Error creating default preferences:", error);
       }
     } catch (error) {
@@ -160,7 +164,6 @@ export default function EnhancedGuardDashboard({
     const newShowPrayerTimes = !userPreferences.show_prayer_times;
 
     try {
-      // Update in database with proper upsert syntax
       const { error } = await supabase.from("user_preferences").upsert(
         {
           user_id: userId,
@@ -169,7 +172,7 @@ export default function EnhancedGuardDashboard({
           prayer_school: userPreferences.prayer_school,
         },
         {
-          onConflict: "user_id", // This is the key fix
+          onConflict: "user_id",
         }
       );
 
@@ -178,7 +181,6 @@ export default function EnhancedGuardDashboard({
         return;
       }
 
-      // Update local state only if database update succeeded
       setUserPreferences((prev) => ({
         ...prev,
         show_prayer_times: newShowPrayerTimes,
@@ -190,7 +192,7 @@ export default function EnhancedGuardDashboard({
 
   const fetchPersonalizedData = async () => {
     try {
-      // Fetch user profile with assessment data
+      // Fetch user profile with assessment data INCLUDING dialect and full_name
       const { data: profile, error: profileError } = await supabase
         .from("user_profiles")
         .select("*")
@@ -239,15 +241,17 @@ export default function EnhancedGuardDashboard({
         total_scenarios: totalScenarios || 24,
         current_streak: streak?.current_streak || 0,
         average_score: Math.round(averageScore),
-        hours_learned: Math.round(completedCount * 0.5 * 10) / 10, // Estimate
+        hours_learned: Math.round(completedCount * 0.5 * 10) / 10,
         last_activity: new Date().toISOString(),
         weekly_goal: 5,
         confidence_level: profile.assessment_score || 50,
+        // Include dialect and full_name from profile
+        dialect: profile.dialect || "gulf",
+        full_name: profile.full_name,
       };
 
       setUserData(personalizedUserData);
 
-      // Generate personalized content
       await generatePersonalizedScenarios(profile);
       await generateAchievements(personalizedUserData);
       generateMotivationalMessage(personalizedUserData);
@@ -262,7 +266,6 @@ export default function EnhancedGuardDashboard({
     english_level?: string;
     recommendations?: string[];
   }) => {
-    // Get scenarios based on user's level and recommendations
     const { data: scenarios, error } = await supabase
       .from("scenarios")
       .select("*")
@@ -278,13 +281,11 @@ export default function EnhancedGuardDashboard({
       let relevanceScore = 50;
       let whyRecommended = "Perfect for building your skills";
 
-      // Boost relevance based on user's level
       if (scenario.difficulty.toLowerCase() === level.toLowerCase()) {
         relevanceScore += 30;
         whyRecommended = `Matches your ${level} level perfectly`;
       }
 
-      // Boost relevance based on recommendations
       if (
         recommendations.includes("Practice listening comprehension") &&
         scenario.id.includes("audio")
@@ -311,7 +312,6 @@ export default function EnhancedGuardDashboard({
       };
     });
 
-    // Sort by relevance and take top 4
     setPersonalizedScenarios(
       personalized
         .sort((a, b) => b.relevance_score - a.relevance_score)
@@ -351,7 +351,7 @@ export default function EnhancedGuardDashboard({
         icon: "🎓",
         unlocked: false,
         progress: data.completed_scenarios,
-        total: Math.floor(data.total_scenarios / 5), // Rough estimate
+        total: Math.floor(data.total_scenarios / 5),
       },
       {
         id: "pronunciation_pro",
@@ -369,7 +369,7 @@ export default function EnhancedGuardDashboard({
         description: "Complete your weekly goal 4 weeks in a row",
         icon: "⭐",
         unlocked: false,
-        progress: 2, // Placeholder
+        progress: 2,
         total: 4,
       },
     ];
@@ -380,7 +380,6 @@ export default function EnhancedGuardDashboard({
   const generateMotivationalMessage = (data: UserData) => {
     const level = data.english_level;
     const streak = data.current_streak;
-    const completed = data.completed_scenarios;
     const strengths = data.strengths || [];
 
     let message = "";
@@ -488,7 +487,6 @@ export default function EnhancedGuardDashboard({
             <div className="text-4xl font-bold">{userData.current_streak}</div>
             <div className="text-white/90">day streak</div>
 
-            {/* Prayer Times Toggle Button */}
             <Button
               onClick={togglePrayerTimes}
               variant="ghost"
@@ -699,7 +697,7 @@ export default function EnhancedGuardDashboard({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <BookOpen className="h-7 w-7" /> {/* also slightly larger */}
+            <BookOpen className="h-7 w-7" />
             Continue Learning
           </CardTitle>
         </CardHeader>
@@ -707,7 +705,7 @@ export default function EnhancedGuardDashboard({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* 1) Continue Journey */}
             <Button className="h-28 flex flex-col items-center justify-center gap-3 bg-gradient-to-r from-emerald-600 to-blue-600">
-              <Play className="w-12 h-12" /> {/* ⬅️ 48px */}
+              <Play className="w-12 h-12" />
               <span className="font-medium text-base">Continue Journey</span>
               <span className="text-sm opacity-90">
                 Pick up where you left off
@@ -729,14 +727,38 @@ export default function EnhancedGuardDashboard({
             <Button
               variant="outline"
               className="h-28 flex flex-col items-center justify-center gap-3 border-orange-300 hover:bg-orange-50"
+              onClick={() => setShowChallengeMode(true)}
             >
-              <Trophy className="w-12 h-12 text-orange-600" /> {/* ⬅️ 48px */}
+              <Trophy className="w-12 h-12 text-orange-600" />
               <span className="font-medium text-base">Challenge Mode</span>
               <span className="text-sm text-gray-600">Test your skills</span>
             </Button>
           </div>
         </CardContent>
       </Card>
+
+      {/* Challenge Mode Modal */}
+      {showChallengeMode && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg w-full h-full overflow-auto">
+            <div className="sticky top-0 bg-white border-b p-4 flex justify-between items-center">
+              <h2 className="text-xl font-semibold">Challenge Mode</h2>
+              <Button
+                variant="ghost"
+                onClick={() => setShowChallengeMode(false)}
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+            <ChallengeMode
+              userLevel={userData?.english_level || "A1"}
+              userDialect={userData?.dialect || "gulf"}
+              initialLoading
+              bootDelayMs={1000}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

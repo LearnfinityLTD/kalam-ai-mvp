@@ -20,10 +20,19 @@ import {
   BookOpen,
   Loader2,
 } from "lucide-react";
+import {
+  saveChallengeResult,
+  ChallengeResultData,
+  getChallengeTemplates,
+  getQuestionsWithFallback,
+  Question as DatabaseQuestion,
+  ChallengeTemplate,
+} from "@/utils/challengeApi";
 
 /* ---------- Types ---------- */
 
 type Question = {
+  id: string;
   question: string;
   context?: string;
   audio?: boolean;
@@ -39,9 +48,9 @@ type Challenge = {
   title: string;
   subtitle: string;
   icon: React.ReactNode;
-  color: string; // tailwind gradient classes
+  color: string;
   difficulty: Difficulty;
-  time: string; // e.g. "5 min"
+  time: string;
   description: string;
   questions: Question[];
 };
@@ -54,24 +63,24 @@ type Answer = {
   explanation: string;
 };
 
-type GameState = "menu" | "playing" | "results";
+type GameState = "menu" | "playing" | "results" | "saving" | "loading";
 
-// Allowed values (single source of truth)
 export const LEVELS = ["A1", "A2", "B1", "B2", "C1"] as const;
 export type Level = (typeof LEVELS)[number];
 
 export const DIALECTS = ["gulf", "egyptian", "levantine", "standard"] as const;
 export type Dialect = (typeof DIALECTS)[number];
 
-// Accept raw strings from DB/props, normalize to unions internally
 interface ChallengeModeProps {
   userLevel?: Level | string | null;
   userDialect?: Dialect | string | null;
+  userId: string;
   initialLoading?: boolean;
   bootDelayMs?: number;
+  onComplete?: () => void;
 }
 
-// Safe normalizers (case-insensitive)
+// Safe normalizers
 const toLevel = (v?: string | null): Level => {
   const s = (v ?? "").toUpperCase();
   return (LEVELS as readonly string[]).includes(s) ? (s as Level) : "A2";
@@ -82,389 +91,212 @@ const toDialect = (v?: string | null): Dialect => {
   return (DIALECTS as readonly string[]).includes(s) ? (s as Dialect) : "gulf";
 };
 
+// Icon mapping for database-driven challenges
+const iconMap: Record<string, React.ReactNode> = {
+  Users: <Users className="w-6 h-6" />,
+  Mic: <Mic className="w-6 h-6" />,
+  Zap: <Zap className="w-6 h-6" />,
+  MessageSquare: <MessageSquare className="w-6 h-6" />,
+  BookOpen: <BookOpen className="w-6 h-6" />,
+  Star: <Star className="w-6 h-6" />,
+};
+
 /* ---------- Component ---------- */
 
 const ChallengeMode: React.FC<ChallengeModeProps> = ({
   userLevel: userLevelProp = "A2",
   userDialect: userDialectProp = "gulf",
-
+  userId,
   initialLoading = true,
   bootDelayMs = 400,
+  onComplete,
 }) => {
   const userLevel = toLevel(userLevelProp);
   const userDialect = toDialect(userDialectProp);
+  const [challengeTypes, setChallengeTypes] = useState<Challenge[]>([]);
   const [selectedChallenge, setSelectedChallenge] = useState<Challenge | null>(
     null
   );
   const [currentQuestion, setCurrentQuestion] = useState<number>(0);
   const [score, setScore] = useState<number>(0);
   const [timeLeft, setTimeLeft] = useState<number>(0);
-  const [gameState, setGameState] = useState<GameState>("menu");
+  const [gameState, setGameState] = useState<GameState>("loading");
   const [streak, setStreak] = useState<number>(0);
+  const [maxStreak, setMaxStreak] = useState<number>(0);
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [booting, setBooting] = useState<boolean>(Boolean(initialLoading));
+  const [challengeStartTime, setChallengeStartTime] = useState<number>(0);
 
-  /* ---------- Generators ---------- */
+  /* ---------- Database Integration Functions ---------- */
 
-  const generateCulturalQuestions = useCallback(
-    (_level: Level): Question[] => [
-      {
-        question:
-          "A visitor asks you where the bathroom is. What's the most appropriate response?",
-        context: "You're working as a security guard in a Dubai mall.",
-        options: [
-          "It's over there, go straight and turn left",
-          "I'll show you the way to the restroom, please follow me",
-          "Bathroom is there",
-          "Ask someone else, I don't know",
-        ],
-        correct: "I'll show you the way to the restroom, please follow me",
-        explanation:
-          "In UAE service culture, offering to personally help shows excellent customer service. Using 'restroom' is more professional than 'bathroom' in this context.",
-      },
-      {
-        question:
-          "During Ramadan, how should you respond to a colleague who's fasting when they offer you tea?",
-        context: "You're in an office in Abu Dhabi during afternoon break.",
-        options: [
-          "No thanks, you shouldn't be offering tea while fasting",
-          "Thank you so much for thinking of me, that's very kind even though you're fasting",
-          "I don't want tea now",
-          "Are you sure you should be making tea?",
-        ],
-        correct:
-          "Thank you so much for thinking of me, that's very kind even though you're fasting",
-        explanation:
-          "This response shows cultural sensitivity and appreciation. It acknowledges their kindness while being respectful of their fasting.",
-      },
-      {
-        question:
-          "An elderly Emirati man approaches you speaking Arabic. You don't understand. What do you say?",
-        context: "You're working at a government office in Sharjah.",
-        options: [
-          "I don't speak Arabic",
-          "Sorry, no Arabic",
-          "I apologize, sir, but I don't speak Arabic. Let me find someone who can help you",
-          "Sorry, English only",
-        ],
-        correct:
-          "I apologize, sir, but I don't speak Arabic. Let me find someone who can help you",
-        explanation:
-          "This response shows respect (using 'sir'), apologizes politely, and offers a solution. Very important in UAE's respect-based culture.",
-      },
-    ],
-    []
-  );
+  const loadChallengeTemplates = useCallback(async () => {
+    try {
+      const templates = await getChallengeTemplates();
 
-  const generatePronunciationQuestions = useCallback(
-    (_dialect: Dialect): Question[] => [
-      {
-        question: "Which word has the correct pronunciation of the 'P' sound?",
-        context:
-          "Arabic speakers often replace 'P' with 'B'. Listen carefully.",
-        audio: true,
-        options: [
-          "Beople (BEE-bul)",
-          "People (PEE-pul)",
-          "Beobel (BEE-bul)",
-          "Peopel (PEE-bul)",
-        ],
-        correct: "People (PEE-pul)",
-        explanation:
-          "The 'P' sound is made by pressing lips together and releasing air. Arabic speakers often substitute 'B' which uses the same lip position but with voice.",
-      },
-      {
-        question: "How do you pronounce 'three'?",
-        context:
-          "The 'th' sound doesn't exist in Arabic, making it challenging.",
-        options: ["Free (TREE)", "Sree (SREE)", "Three (θriː)", "Tree (TREE)"],
-        correct: "Three (θriː)",
-        explanation:
-          "Put your tongue between your teeth and blow air. Don't substitute with 'F', 'S', or 'T' sounds.",
-      },
-      {
-        question: "Which pronunciation of 'working' is correct?",
-        context: "Focus on the final 'ng' sound.",
-        options: [
-          "Working (WOR-king)",
-          "Workink (WOR-kink)",
-          "Working (WOR-keen)",
-          "Workeng (WOR-keng)",
-        ],
-        correct: "Working (WOR-king)",
-        explanation:
-          "The 'ng' sound is one sound, not 'n' + 'g'. Don't add extra sounds at the end.",
-      },
-    ],
-    []
-  );
+      const formattedChallenges: Challenge[] = templates.map(
+        (template: ChallengeTemplate) => ({
+          id: template.type,
+          title: template.title,
+          subtitle: template.subtitle,
+          icon: iconMap[template.icon_name] || <BookOpen className="w-6 h-6" />,
+          color: template.color_scheme,
+          difficulty: template.difficulty,
+          time: `${template.time_limit_minutes} min`,
+          description: template.description,
+          questions: [], // Will be loaded when challenge starts
+        })
+      );
 
-  const generateRapidQuestions = useCallback(
-    (_level: Level): Question[] => [
-      {
-        question: "Complete: 'I _____ been working here for five years.'",
-        options: ["have", "has", "am", "will"],
-        correct: "have",
-        explanation:
-          "Present perfect with 'I' uses 'have'. This shows an action that started in the past and continues to now.",
-      },
-      {
-        question: "Which is correct?",
-        options: [
-          "I am very much hungry",
-          "I am very hungry",
-          "I am too much hungry",
-          "I have very hunger",
-        ],
-        correct: "I am very hungry",
-        explanation:
-          "'Very hungry' is correct. Avoid 'very much hungry' (Arabic structure influence) or 'too much hungry'.",
-      },
-      {
-        question:
-          "Choose the right preposition: 'I will call you _____ the morning.'",
-        options: ["in", "at", "on", "by"],
-        correct: "in",
-        explanation:
-          "Use 'in' with parts of the day: in the morning, in the afternoon, in the evening. Exception: at night.",
-      },
-    ],
-    []
-  );
-
-  const generateDialectQuestions = useCallback(
-    (dialect: Dialect): Question[] => {
-      const gulfQuestions: Question[] = [
-        {
-          question: "How do you say 'صح كذا؟' (sah chidha?) in formal English?",
-          context: "Expressing confirmation politely in a business setting.",
-          options: [
-            "Right like this?",
-            "Is this correct?",
-            "True like this?",
-            "Correct this way?",
-          ],
-          correct: "Is this correct?",
-          explanation:
-            "While Gulf speakers might directly translate, 'Is this correct?' is the most natural and professional way to seek confirmation.",
-        },
-        {
-          question:
-            "Instead of 'خلاص' (khalas) meaning 'finished', what should you say in English?",
-          options: [
-            "Khalas, finished",
-            "That's it, we're done",
-            "Finish, khalas",
-            "Done, finished",
-          ],
-          correct: "That's it, we're done",
-          explanation:
-            "This captures both the finality and completion sense of 'khalas' in natural English without direct translation.",
-        },
-      ];
-
-      const egyptianQuestions: Question[] = [
-        {
-          question:
-            "How do you express 'معلش' (ma'alesh) in professional English?",
-          context: "Showing understanding when someone makes a minor mistake.",
-          options: [
-            "No problem",
-            "It's okay, don't worry about it",
-            "Never mind",
-            "Doesn't matter",
-          ],
-          correct: "It's okay, don't worry about it",
-          explanation:
-            "This captures the reassuring, forgiving tone of 'ma'alesh' better than direct translations.",
-        },
-      ];
-
-      return dialect === "gulf"
-        ? gulfQuestions
-        : dialect === "egyptian"
-        ? egyptianQuestions
-        : gulfQuestions;
-    },
-    []
-  );
-
-  const generateGrammarQuestions = useCallback(
-    (_level: Level): Question[] => [
-      {
-        question: "Which sentence is correct?",
-        context: "Arabic speakers often struggle with article usage.",
-        options: [
-          "I went to the hospital to visit my friend",
-          "I went to hospital to visit my friend",
-          "I went to a hospital to visit my friend",
-          "I went hospital to visit my friend",
-        ],
-        correct: "I went to the hospital to visit my friend",
-        explanation:
-          "Use 'the hospital' when referring to a specific hospital or the local hospital everyone knows about.",
-      },
-      {
-        question: "Fix this sentence: 'My friend, he is very smart.'",
-        context: "Arabic structure influence - avoid double subjects.",
-        options: [
-          "My friend, he is very smart",
-          "My friend he is very smart",
-          "My friend is very smart",
-          "My friend, is very smart",
-        ],
-        correct: "My friend is very smart",
-        explanation:
-          "Don't repeat the subject with a pronoun. Arabic allows this structure, but English doesn't.",
-      },
-      {
-        question: "Which is grammatically correct?",
-        options: [
-          "I have 25 years old",
-          "I am 25 years old",
-          "My age is 25 years",
-          "I have 25 years",
-        ],
-        correct: "I am 25 years old",
-        explanation:
-          "Use 'am/is/are' with age, not 'have'. This is a common mistake from Arabic structure influence.",
-      },
-    ],
-    []
-  );
-
-  const generateConfidenceQuestions = useCallback(
-    (_level: Level): Question[] => [
-      {
-        question: "What's a good way to start a conversation with a colleague?",
-        context: "Building confidence in social interactions.",
-        options: [
-          "How are you doing today?",
-          "What's up?",
-          "How's everything going?",
-          "All of the above are fine",
-        ],
-        correct: "All of the above are fine",
-        explanation:
-          "All these options work well. The key is choosing what feels natural to you and fits the situation.",
-      },
-      {
-        question: "If you don't understand something, what should you say?",
-        options: [
-          "I'm sorry, could you please repeat that?",
-          "Could you explain that again, please?",
-          "I didn't quite catch that",
-          "All of these are perfectly acceptable",
-        ],
-        correct: "All of these are perfectly acceptable",
-        explanation:
-          "Asking for clarification shows you're engaged and want to understand. Never be embarrassed about this.",
-      },
-    ],
-    []
-  );
-
-  /* ---------- Challenges ---------- */
-
-  const challengeTypes: Challenge[] = [
-    {
-      id: "cultural_scenarios",
-      title: "Cultural Scenarios",
-      subtitle: "Navigate UAE workplace situations",
-      icon: <Users className="w-6 h-6" />,
-      color: "from-blue-500 to-cyan-500",
-      difficulty: "Medium",
-      time: "5 min",
-      description: "Real workplace situations in Gulf context",
-      questions: generateCulturalQuestions(userLevel),
-    },
-    {
-      id: "pronunciation_drill",
-      title: "Pronunciation Challenge",
-      subtitle: "Master difficult English sounds",
-      icon: <Mic className="w-6 h-6" />,
-      color: "from-green-500 to-emerald-500",
-      difficulty: "Hard",
-      time: "3 min",
-      description: "Focus on sounds challenging for Arabic speakers",
-      questions: generatePronunciationQuestions(userDialect),
-    },
-    {
-      id: "rapid_response",
-      title: "Rapid Response",
-      subtitle: "Quick thinking in English",
-      icon: <Zap className="w-6 h-6" />,
-      color: "from-purple-500 to-pink-500",
-      difficulty: "Easy",
-      time: "2 min",
-      description: "Fast-paced vocabulary and grammar",
-      questions: generateRapidQuestions(userLevel),
-    },
-    {
-      id: "dialect_bridge",
-      title: "Dialect Bridge",
-      subtitle: "From Arabic expressions to English",
-      icon: <MessageSquare className="w-6 h-6" />,
-      color: "from-orange-500 to-red-500",
-      difficulty: "Medium",
-      time: "4 min",
-      description: "Translate concepts, not just words",
-      questions: generateDialectQuestions(userDialect),
-    },
-    {
-      id: "grammar_sprint",
-      title: "Grammar Sprint",
-      subtitle: "Common Arabic speaker mistakes",
-      icon: <BookOpen className="w-6 h-6" />,
-      color: "from-indigo-500 to-blue-500",
-      difficulty: "Medium",
-      time: "3 min",
-      description: "Target typical Arabic-English interference",
-      questions: generateGrammarQuestions(userLevel),
-    },
-    {
-      id: "confidence_builder",
-      title: "Confidence Builder",
-      subtitle: "Low-pressure practice",
-      icon: <Star className="w-6 h-6" />,
-      color: "from-yellow-500 to-orange-500",
-      difficulty: "Easy",
-      time: "6 min",
-      description: "Build confidence with supportive feedback",
-      questions: generateConfidenceQuestions(userLevel),
-    },
-  ];
-
-  /* ---------- Handlers ---------- */
-
-  const startChallenge = useCallback((challenge: Challenge) => {
-    if (
-      !challenge ||
-      !challenge.questions ||
-      challenge.questions.length === 0
-    ) {
-      console.error("Invalid challenge or no questions available");
-      return;
+      setChallengeTypes(formattedChallenges);
+      setGameState("menu");
+    } catch (error) {
+      console.error("Error loading challenge templates:", error);
+      // Fallback to hardcoded challenges if database fails
+      loadFallbackChallenges();
     }
-
-    setSelectedChallenge(challenge);
-    setCurrentQuestion(0);
-    setScore(0);
-    setStreak(0);
-    setAnswers([]);
-    // extract leading minutes number from "5 min"
-    const minutes = parseInt(challenge.time, 10) || 0;
-    setTimeLeft(minutes * 60);
-    setGameState("playing");
   }, []);
+
+  const loadFallbackChallenges = useCallback(() => {
+    const fallbackChallenges: Challenge[] = [
+      {
+        id: "cultural_scenarios",
+        title: "Cultural Scenarios",
+        subtitle: "Navigate UAE workplace situations",
+        icon: <Users className="w-6 h-6" />,
+        color: "from-blue-500 to-cyan-500",
+        difficulty: "Medium",
+        time: "5 min",
+        description: "Real workplace situations in Gulf context",
+        questions: [],
+      },
+      {
+        id: "pronunciation_drill",
+        title: "Pronunciation Challenge",
+        subtitle: "Master difficult English sounds",
+        icon: <Mic className="w-6 h-6" />,
+        color: "from-green-500 to-emerald-500",
+        difficulty: "Hard",
+        time: "3 min",
+        description: "Focus on sounds challenging for Arabic speakers",
+        questions: [],
+      },
+      {
+        id: "rapid_response",
+        title: "Rapid Response",
+        subtitle: "Quick thinking in English",
+        icon: <Zap className="w-6 h-6" />,
+        color: "from-purple-500 to-pink-500",
+        difficulty: "Easy",
+        time: "2 min",
+        description: "Fast-paced vocabulary and grammar",
+        questions: [],
+      },
+      {
+        id: "dialect_bridge",
+        title: "Dialect Bridge",
+        subtitle: "From Arabic expressions to English",
+        icon: <MessageSquare className="w-6 h-6" />,
+        color: "from-orange-500 to-red-500",
+        difficulty: "Medium",
+        time: "4 min",
+        description: "Translate concepts, not just words",
+        questions: [],
+      },
+      {
+        id: "grammar_sprint",
+        title: "Grammar Sprint",
+        subtitle: "Common Arabic speaker mistakes",
+        icon: <BookOpen className="w-6 h-6" />,
+        color: "from-indigo-500 to-blue-500",
+        difficulty: "Medium",
+        time: "3 min",
+        description: "Target typical Arabic-English interference",
+        questions: [],
+      },
+      {
+        id: "confidence_builder",
+        title: "Confidence Builder",
+        subtitle: "Low-pressure practice",
+        icon: <Star className="w-6 h-6" />,
+        color: "from-yellow-500 to-orange-500",
+        difficulty: "Easy",
+        time: "6 min",
+        description: "Build confidence with supportive feedback",
+        questions: [],
+      },
+    ];
+
+    setChallengeTypes(fallbackChallenges);
+    setGameState("menu");
+  }, []);
+
+  const loadChallengeQuestions = useCallback(
+    async (challengeType: string): Promise<Question[]> => {
+      try {
+        const dbQuestions = await getQuestionsWithFallback(
+          challengeType,
+          userLevel,
+          userDialect,
+          5
+        );
+
+        // Transform database questions to component format
+        return dbQuestions.map((q: DatabaseQuestion) => ({
+          id: q.id,
+          question: q.question_text,
+          context: q.context,
+          audio: q.has_audio,
+          options: q.options,
+          correct: q.correct_answer,
+          explanation: q.explanation,
+        }));
+      } catch (error) {
+        console.error(`Error loading questions for ${challengeType}:`, error);
+        return [];
+      }
+    },
+    [userLevel, userDialect]
+  );
+
+  /* ---------- Game Logic ---------- */
+
+  const startChallenge = useCallback(
+    async (challenge: Challenge) => {
+      setGameState("loading");
+
+      try {
+        // Load questions from database
+        const questions = await loadChallengeQuestions(challenge.id);
+
+        if (questions.length === 0) {
+          console.error("No questions available for challenge");
+          setGameState("menu");
+          return;
+        }
+
+        const challengeWithQuestions = { ...challenge, questions };
+        setSelectedChallenge(challengeWithQuestions);
+        setCurrentQuestion(0);
+        setScore(0);
+        setStreak(0);
+        setMaxStreak(0);
+        setAnswers([]);
+
+        const minutes = parseInt(challenge.time, 10) || 0;
+        setTimeLeft(minutes * 60);
+        setChallengeStartTime(Date.now());
+        setGameState("playing");
+      } catch (error) {
+        console.error("Error starting challenge:", error);
+        setGameState("menu");
+      }
+    },
+    [loadChallengeQuestions]
+  );
 
   const answerQuestion = useCallback(
     (answer: string) => {
-      if (
-        !selectedChallenge ||
-        !selectedChallenge.questions ||
-        !selectedChallenge.questions[currentQuestion]
-      ) {
+      if (!selectedChallenge?.questions?.[currentQuestion]) {
         console.error("Invalid challenge state");
         return;
       }
@@ -484,7 +316,9 @@ const ChallengeMode: React.FC<ChallengeModeProps> = ({
 
       if (isCorrect) {
         setScore((prev) => prev + (10 + streak * 2));
-        setStreak((prev) => prev + 1);
+        const newStreak = streak + 1;
+        setStreak(newStreak);
+        setMaxStreak((prev) => Math.max(prev, newStreak));
       } else {
         setStreak(0);
       }
@@ -498,20 +332,63 @@ const ChallengeMode: React.FC<ChallengeModeProps> = ({
     [selectedChallenge, currentQuestion, streak]
   );
 
-  const endChallenge = useCallback(() => {
-    setGameState("results");
-  }, []);
+  const endChallenge = useCallback(async () => {
+    setGameState("saving");
 
-  /* ---------- Timer ---------- */
-
-  useEffect(() => {
-    if (gameState === "playing" && timeLeft > 0) {
-      const timer = setTimeout(() => setTimeLeft((prev) => prev - 1), 1000);
-      return () => clearTimeout(timer);
-    } else if (timeLeft === 0 && gameState === "playing") {
-      endChallenge();
+    if (!selectedChallenge || !userId) {
+      setGameState("results");
+      return;
     }
-  }, [timeLeft, gameState, endChallenge]);
+
+    // Calculate final statistics
+    const timeTakenSeconds = Math.floor(
+      (Date.now() - challengeStartTime) / 1000
+    );
+    const correctAnswers = answers.filter((a) => a.isCorrect).length;
+    const accuracy = Math.round(
+      (correctAnswers / selectedChallenge.questions.length) * 100
+    );
+
+    const resultData: ChallengeResultData = {
+      user_id: userId,
+      challenge_type: selectedChallenge.id,
+      challenge_title: selectedChallenge.title,
+      difficulty: selectedChallenge.difficulty,
+      total_questions: selectedChallenge.questions.length,
+      correct_answers: correctAnswers,
+      score: score,
+      accuracy_percentage: accuracy,
+      time_taken_seconds: timeTakenSeconds,
+      max_streak: maxStreak,
+      answers_data: answers,
+    };
+
+    // Save to database
+    try {
+      const result = await saveChallengeResult(resultData);
+
+      if (!result.success) {
+        console.error("Failed to save challenge result:", result.error);
+      }
+
+      // Call onComplete callback if provided
+      if (onComplete) {
+        onComplete();
+      }
+    } catch (error) {
+      console.error("Error saving challenge result:", error);
+    }
+
+    setGameState("results");
+  }, [
+    selectedChallenge,
+    userId,
+    challengeStartTime,
+    answers,
+    score,
+    maxStreak,
+    onComplete,
+  ]);
 
   const resetChallenge = useCallback(() => {
     setGameState("menu");
@@ -520,7 +397,9 @@ const ChallengeMode: React.FC<ChallengeModeProps> = ({
     setScore(0);
     setTimeLeft(0);
     setStreak(0);
+    setMaxStreak(0);
     setAnswers([]);
+    setChallengeStartTime(0);
   }, []);
 
   const formatTime = useCallback((seconds: number) => {
@@ -528,12 +407,6 @@ const ChallengeMode: React.FC<ChallengeModeProps> = ({
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   }, []);
-
-  useEffect(() => {
-    if (!booting) return;
-    const id = setTimeout(() => setBooting(false), bootDelayMs);
-    return () => clearTimeout(id);
-  }, [booting, bootDelayMs]);
 
   const getScoreLevel = useCallback((scoreValue: number, maxScore: number) => {
     const percentage = (scoreValue / maxScore) * 100;
@@ -565,8 +438,30 @@ const ChallengeMode: React.FC<ChallengeModeProps> = ({
     } as const;
   }, []);
 
+  /* ---------- Effects ---------- */
+
+  useEffect(() => {
+    if (booting) {
+      const id = setTimeout(() => {
+        setBooting(false);
+        loadChallengeTemplates();
+      }, bootDelayMs);
+      return () => clearTimeout(id);
+    }
+  }, [booting, bootDelayMs, loadChallengeTemplates]);
+
+  useEffect(() => {
+    if (gameState === "playing" && timeLeft > 0) {
+      const timer = setTimeout(() => setTimeLeft((prev) => prev - 1), 1000);
+      return () => clearTimeout(timer);
+    } else if (timeLeft === 0 && gameState === "playing") {
+      endChallenge();
+    }
+  }, [timeLeft, gameState, endChallenge]);
+
   /* ---------- Views ---------- */
-  if (booting) {
+
+  if (booting || gameState === "loading") {
     return (
       <div className="max-w-6xl mx-auto p-6">
         <Card>
@@ -578,13 +473,37 @@ const ChallengeMode: React.FC<ChallengeModeProps> = ({
             >
               <Loader2 className="w-6 h-6 animate-spin text-purple-600" />
               <span className="font-medium">Challenge Mode</span>
-              <span className="text-xs text-gray-600">Starting…</span>
+              <span className="text-xs text-gray-600">
+                {gameState === "loading" ? "Loading questions..." : "Starting…"}
+              </span>
             </Button>
           </CardContent>
         </Card>
       </div>
     );
   }
+
+  // Saving state
+  if (gameState === "saving") {
+    return (
+      <div className="max-w-4xl mx-auto p-6">
+        <Card>
+          <CardContent className="py-12 flex items-center justify-center">
+            <div className="text-center">
+              <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                Saving Your Results...
+              </h3>
+              <p className="text-gray-600">
+                Recording your progress and updating your achievements
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   // Menu View
   if (gameState === "menu") {
     return (
@@ -826,9 +745,9 @@ const ChallengeMode: React.FC<ChallengeModeProps> = ({
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {answers.map((answer) => (
+              {answers.map((answer, index) => (
                 <div
-                  key={`${answer.question}-${answer.userAnswer}`}
+                  key={index}
                   className={`p-4 rounded-lg border ${
                     answer.isCorrect
                       ? "bg-green-50 border-green-200"

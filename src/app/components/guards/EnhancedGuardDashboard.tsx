@@ -1,7 +1,7 @@
 // components/guards/EnhancedGuardDashboard.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -28,11 +28,12 @@ import {
   X,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase";
-
+import { getUserChallengeStats, ChallengeStats } from "@/utils/challengeApi";
 import PrayerTimeIndicator from "@/components/shared/PrayerTimeIndicator";
 import AssessmentDashboardCard from "./AssessmentDashboardCard";
 import PracticeConversationButton from "../shared/PracticeConversationButton";
 import ChallengeMode from "./challengeMode/ChallengeMode";
+import { ChallengeStatsCard } from "./challengeMode/ChallendeStats";
 
 interface UserData {
   // Assessment results
@@ -58,6 +59,8 @@ interface UserData {
   // User profile data
   dialect?: string;
   full_name?: string;
+  // Challenge data
+  challenge_stats?: ChallengeStats | null;
 }
 
 interface UserPreferences {
@@ -107,12 +110,7 @@ export default function EnhancedGuardDashboard({
   const [showChallengeMode, setShowChallengeMode] = useState(false);
   const supabase = createClient();
 
-  useEffect(() => {
-    fetchPersonalizedData();
-    fetchUserPreferences();
-  }, [userId]);
-
-  const fetchUserPreferences = async () => {
+  const fetchUserPreferences = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from("user_preferences")
@@ -137,9 +135,9 @@ export default function EnhancedGuardDashboard({
     } catch (error) {
       console.error("Error fetching preferences:", error);
     }
-  };
+  }, [userId, supabase]);
 
-  const createDefaultPreferences = async () => {
+  const createDefaultPreferences = useCallback(async () => {
     try {
       const defaultPrefs = {
         user_id: userId,
@@ -158,9 +156,9 @@ export default function EnhancedGuardDashboard({
     } catch (error) {
       console.error("Error creating default preferences:", error);
     }
-  };
+  }, [userId, supabase]);
 
-  const togglePrayerTimes = async () => {
+  const togglePrayerTimes = useCallback(async () => {
     const newShowPrayerTimes = !userPreferences.show_prayer_times;
 
     try {
@@ -188,138 +186,68 @@ export default function EnhancedGuardDashboard({
     } catch (error) {
       console.error("Error toggling prayer times:", error);
     }
-  };
+  }, [userId, userPreferences, supabase]);
 
-  const fetchPersonalizedData = async () => {
-    try {
-      // Fetch user profile with assessment data INCLUDING dialect and full_name
-      const { data: profile, error: profileError } = await supabase
-        .from("user_profiles")
-        .select("*")
-        .eq("id", userId)
-        .single();
-
-      if (profileError) throw profileError;
-
-      // Fetch learning progress
-      const { data: progress, error: progressError } = await supabase
-        .from("user_progress")
-        .select("*")
-        .eq("user_id", userId);
-
-      if (progressError) throw progressError;
-
-      // Fetch streak data
-      const { data: streak, error: streakError } = await supabase
-        .from("user_streaks")
-        .select("current_streak")
-        .eq("user_id", userId)
-        .maybeSingle();
-
-      // Calculate personalized metrics
-      const completedCount =
-        progress?.filter((p) => p.completion_status === "completed").length ||
-        0;
-      const averageScore =
-        progress?.length > 0
-          ? progress.reduce((sum, p) => sum + (p.score || 0), 0) /
-            progress.length
-          : 0;
-
-      // Get total scenarios
-      const { count: totalScenarios } = await supabase
+  const generatePersonalizedScenarios = useCallback(
+    async (profile: { english_level?: string; recommendations?: string[] }) => {
+      const { data: scenarios, error } = await supabase
         .from("scenarios")
-        .select("id", { count: "exact", head: true })
-        .eq("segment", "guard");
+        .select("*")
+        .eq("segment", "guard")
+        .limit(6);
 
-      const personalizedUserData: UserData = {
-        english_level: profile.english_level,
-        assessment_score: profile.assessment_score,
-        strengths: profile.strengths || [],
-        recommendations: profile.recommendations || [],
-        completed_scenarios: completedCount,
-        total_scenarios: totalScenarios || 24,
-        current_streak: streak?.current_streak || 0,
-        average_score: Math.round(averageScore),
-        hours_learned: Math.round(completedCount * 0.5 * 10) / 10,
-        last_activity: new Date().toISOString(),
-        weekly_goal: 5,
-        confidence_level: profile.assessment_score || 50,
-        // Include dialect and full_name from profile
-        dialect: profile.dialect || "gulf",
-        full_name: profile.full_name,
-      };
+      if (error || !scenarios) return;
 
-      setUserData(personalizedUserData);
+      const level = profile.english_level || "A1";
+      const recommendations = profile.recommendations || [];
 
-      await generatePersonalizedScenarios(profile);
-      await generateAchievements(personalizedUserData);
-      generateMotivationalMessage(personalizedUserData);
-    } catch (error) {
-      console.error("Error fetching personalized data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+      const personalized = scenarios.map((scenario) => {
+        let relevanceScore = 50;
+        let whyRecommended = "Perfect for building your skills";
 
-  const generatePersonalizedScenarios = async (profile: {
-    english_level?: string;
-    recommendations?: string[];
-  }) => {
-    const { data: scenarios, error } = await supabase
-      .from("scenarios")
-      .select("*")
-      .eq("segment", "guard")
-      .limit(6);
+        if (scenario.difficulty.toLowerCase() === level.toLowerCase()) {
+          relevanceScore += 30;
+          whyRecommended = `Matches your ${level} level perfectly`;
+        }
 
-    if (error || !scenarios) return;
+        if (
+          recommendations.includes("Practice listening comprehension") &&
+          scenario.id.includes("audio")
+        ) {
+          relevanceScore += 20;
+          whyRecommended = "Recommended to improve your listening skills";
+        }
 
-    const level = profile.english_level || "A1";
-    const recommendations = profile.recommendations || [];
+        if (
+          recommendations.includes("Focus on complex cultural scenarios") &&
+          scenario.difficulty === "advanced"
+        ) {
+          relevanceScore += 25;
+          whyRecommended = "Builds on your cultural communication strengths";
+        }
 
-    const personalized = scenarios.map((scenario) => {
-      let relevanceScore = 50;
-      let whyRecommended = "Perfect for building your skills";
+        return {
+          id: scenario.id,
+          title: scenario.title,
+          difficulty: scenario.difficulty,
+          duration: "8-12 min",
+          relevance_score: Math.min(relevanceScore, 100),
+          why_recommended: whyRecommended,
+        };
+      });
 
-      if (scenario.difficulty.toLowerCase() === level.toLowerCase()) {
-        relevanceScore += 30;
-        whyRecommended = `Matches your ${level} level perfectly`;
-      }
+      setPersonalizedScenarios(
+        personalized
+          .sort((a, b) => b.relevance_score - a.relevance_score)
+          .slice(0, 4)
+      );
+    },
+    [supabase]
+  );
 
-      if (
-        recommendations.includes("Practice listening comprehension") &&
-        scenario.id.includes("audio")
-      ) {
-        relevanceScore += 20;
-        whyRecommended = "Recommended to improve your listening skills";
-      }
+  const generateAchievements = useCallback(async (data: UserData) => {
+    const challengeStats = data.challenge_stats;
 
-      if (
-        recommendations.includes("Focus on complex cultural scenarios") &&
-        scenario.difficulty === "advanced"
-      ) {
-        relevanceScore += 25;
-        whyRecommended = "Builds on your cultural communication strengths";
-      }
-
-      return {
-        id: scenario.id,
-        title: scenario.title,
-        difficulty: scenario.difficulty,
-        duration: "8-12 min",
-        relevance_score: Math.min(relevanceScore, 100),
-        why_recommended: whyRecommended,
-      };
-    });
-
-    setPersonalizedScenarios(
-      personalized
-        .sort((a, b) => b.relevance_score - a.relevance_score)
-        .slice(0, 4)
-    );
-  };
-
-  const generateAchievements = async (data: UserData) => {
     const achievements: Achievement[] = [
       {
         id: "first_steps",
@@ -372,12 +300,44 @@ export default function EnhancedGuardDashboard({
         progress: 2,
         total: 4,
       },
+      {
+        id: "challenge_newbie",
+        title: "Challenge Explorer",
+        description: "Complete your first challenge",
+        icon: "🚀",
+        unlocked: (challengeStats?.total_challenges_completed || 0) >= 1,
+      },
+      {
+        id: "challenge_master",
+        title: "Challenge Master",
+        description: "Complete 10 challenges",
+        icon: "🏆",
+        unlocked: (challengeStats?.total_challenges_completed || 0) >= 10,
+        progress: Math.min(challengeStats?.total_challenges_completed || 0, 10),
+        total: 10,
+      },
+      {
+        id: "high_scorer",
+        title: "High Scorer",
+        description: "Achieve 90+ average score",
+        icon: "⭐",
+        unlocked: (challengeStats?.average_challenge_score || 0) >= 90,
+      },
+      {
+        id: "streak_champion",
+        title: "Streak Champion",
+        description: "Get a 10+ answer streak in challenges",
+        icon: "🔥",
+        unlocked: (challengeStats?.best_challenge_streak || 0) >= 10,
+        progress: Math.min(challengeStats?.best_challenge_streak || 0, 10),
+        total: 10,
+      },
     ];
 
     setAchievements(achievements);
-  };
+  }, []);
 
-  const generateMotivationalMessage = (data: UserData) => {
+  const generateMotivationalMessage = useCallback((data: UserData) => {
     const level = data.english_level;
     const streak = data.current_streak;
     const strengths = data.strengths || [];
@@ -407,7 +367,97 @@ export default function EnhancedGuardDashboard({
     }
 
     setMotivationalMessage(message);
-  };
+  }, []);
+
+  const fetchPersonalizedData = useCallback(async () => {
+    try {
+      // Fetch user profile with assessment data INCLUDING dialect and full_name
+      const { data: profile, error: profileError } = await supabase
+        .from("user_profiles")
+        .select("*")
+        .eq("id", userId)
+        .single();
+
+      if (profileError) throw profileError;
+
+      // Fetch learning progress
+      const { data: progress, error: progressError } = await supabase
+        .from("user_progress")
+        .select("*")
+        .eq("user_id", userId);
+
+      if (progressError) throw progressError;
+
+      // Fetch streak data
+      const { data: streak, error: streakError } = await supabase
+        .from("user_streaks")
+        .select("current_streak")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      // Calculate personalized metrics
+      const completedCount =
+        progress?.filter((p) => p.completion_status === "completed").length ||
+        0;
+      const averageScore =
+        progress?.length > 0
+          ? progress.reduce((sum, p) => sum + (p.score || 0), 0) /
+            progress.length
+          : 0;
+
+      // Get total scenarios
+      const { count: totalScenarios } = await supabase
+        .from("scenarios")
+        .select("id", { count: "exact", head: true })
+        .eq("segment", "guard");
+
+      const challengeStats = await getUserChallengeStats(userId);
+
+      const personalizedUserData: UserData = {
+        english_level: profile.english_level,
+        assessment_score: profile.assessment_score,
+        strengths: profile.strengths || [],
+        recommendations: profile.recommendations || [],
+        completed_scenarios: completedCount,
+        total_scenarios: totalScenarios || 24,
+        current_streak: streak?.current_streak || 0,
+        average_score: Math.round(averageScore),
+        hours_learned: Math.round(completedCount * 0.5 * 10) / 10,
+        last_activity: new Date().toISOString(),
+        weekly_goal: 5,
+        confidence_level: profile.assessment_score || 50,
+        // Include dialect and full_name from profile
+        dialect: profile.dialect || "gulf",
+        full_name: profile.full_name,
+        challenge_stats: challengeStats,
+      };
+
+      setUserData(personalizedUserData);
+
+      await generatePersonalizedScenarios(profile);
+      await generateAchievements(personalizedUserData);
+      generateMotivationalMessage(personalizedUserData);
+    } catch (error) {
+      console.error("Error fetching personalized data:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [
+    userId,
+    supabase,
+    generatePersonalizedScenarios,
+    generateAchievements,
+    generateMotivationalMessage,
+  ]);
+
+  const refreshDashboardData = useCallback(async () => {
+    await fetchPersonalizedData();
+  }, [fetchPersonalizedData]);
+
+  useEffect(() => {
+    fetchPersonalizedData();
+    fetchUserPreferences();
+  }, [fetchPersonalizedData, fetchUserPreferences]);
 
   if (loading) {
     return (
@@ -521,10 +571,17 @@ export default function EnhancedGuardDashboard({
         />
       )}
 
-      {/* Assessment + Quick Stats */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Assessment + Challenge Stats + Quick Stats */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-1">
           <AssessmentDashboardCard userId={userId} />
+        </div>
+
+        <div className="lg:col-span-1">
+          <ChallengeStatsCard
+            challengeStats={userData?.challenge_stats || null}
+            loading={loading}
+          />
         </div>
 
         <div className="lg:col-span-2">
@@ -743,7 +800,6 @@ export default function EnhancedGuardDashboard({
           <div className="bg-white rounded-lg w-full h-full overflow-auto">
             <div className="sticky top-0 bg-white border-b p-4 flex justify-between items-center">
               {/* Header */}
-
               <div className="flex justify-center mb-6">
                 <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center text-white font-bold text-xl shadow-lg">
                   كلام
@@ -755,7 +811,11 @@ export default function EnhancedGuardDashboard({
 
               <Button
                 variant="ghost"
-                onClick={() => setShowChallengeMode(false)}
+                onClick={() => {
+                  setShowChallengeMode(false);
+                  // Refresh dashboard data when closing challenge mode
+                  refreshDashboardData();
+                }}
               >
                 <X className="w-8 h-8" />
               </Button>
@@ -763,8 +823,13 @@ export default function EnhancedGuardDashboard({
             <ChallengeMode
               userLevel={userData?.english_level || "A1"}
               userDialect={userData?.dialect || "gulf"}
+              userId={userId}
               initialLoading
               bootDelayMs={1000}
+              onComplete={() => {
+                // This callback will be called when a challenge is completed
+                refreshDashboardData();
+              }}
             />
           </div>
         </div>

@@ -26,6 +26,7 @@ import {
   EyeOff,
   Sparkles,
   X,
+  Info,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase";
 import { getUserChallengeStats, ChallengeStats } from "@/utils/challengeApi";
@@ -35,31 +36,28 @@ import PracticeConversationButton from "../shared/PracticeConversationButton";
 import ChallengeMode from "./challengeMode/ChallengeMode";
 import { ChallengeStatsCard } from "./challengeMode/ChallendeStats";
 
+// Fixed imports
+import { useI18n } from "@/lib/i18n/context";
+import { LanguageSwitch } from "@/app/components/shared/language/LanguageSwitch";
+import { LocalizedTooltip } from "@/app/components/shared/language/LocalizedTooltip";
+
 interface UserData {
-  // Assessment results
   english_level?: string;
   assessment_score?: number;
   strengths?: string[];
   recommendations?: string[];
-
-  // Progress data
   completed_scenarios: number;
   total_scenarios: number;
   current_streak: number;
   average_score: number;
   hours_learned: number;
   last_activity: string;
-
-  // Personalization
   learning_path?: string[];
   next_milestone?: string;
   weekly_goal: number;
   confidence_level: number;
-
-  // User profile data
   dialect?: string;
   full_name?: string;
-  // Challenge data
   challenge_stats?: ChallengeStats | null;
 }
 
@@ -95,6 +93,8 @@ export default function EnhancedGuardDashboard({
   userId: string;
   email?: string;
 }) {
+  const { t, locale } = useI18n();
+
   const [userData, setUserData] = useState<UserData | null>(null);
   const [userPreferences, setUserPreferences] = useState<UserPreferences>({
     show_prayer_times: true,
@@ -124,11 +124,12 @@ export default function EnhancedGuardDashboard({
       }
 
       if (data) {
-        setUserPreferences({
+        const prefs = {
           show_prayer_times: data.show_prayer_times ?? true,
           prayer_calculation_method: data.prayer_calculation_method ?? 5,
           prayer_school: data.prayer_school ?? 1,
-        });
+        };
+        setUserPreferences(prefs);
       } else {
         await createDefaultPreferences();
       }
@@ -144,6 +145,7 @@ export default function EnhancedGuardDashboard({
         show_prayer_times: true,
         prayer_calculation_method: 5,
         prayer_school: 1,
+        language_preference: locale,
       };
 
       const { error } = await supabase
@@ -156,7 +158,7 @@ export default function EnhancedGuardDashboard({
     } catch (error) {
       console.error("Error creating default preferences:", error);
     }
-  }, [userId, supabase]);
+  }, [userId, supabase, locale]);
 
   const togglePrayerTimes = useCallback(async () => {
     const newShowPrayerTimes = !userPreferences.show_prayer_times;
@@ -168,6 +170,7 @@ export default function EnhancedGuardDashboard({
           show_prayer_times: newShowPrayerTimes,
           prayer_calculation_method: userPreferences.prayer_calculation_method,
           prayer_school: userPreferences.prayer_school,
+          language_preference: locale,
         },
         {
           onConflict: "user_id",
@@ -186,7 +189,7 @@ export default function EnhancedGuardDashboard({
     } catch (error) {
       console.error("Error toggling prayer times:", error);
     }
-  }, [userId, userPreferences, supabase]);
+  }, [userId, userPreferences, supabase, locale]);
 
   const generatePersonalizedScenarios = useCallback(
     async (profile: { english_level?: string; recommendations?: string[] }) => {
@@ -371,7 +374,6 @@ export default function EnhancedGuardDashboard({
 
   const fetchPersonalizedData = useCallback(async () => {
     try {
-      // Fetch user profile with assessment data INCLUDING dialect and full_name
       const { data: profile, error: profileError } = await supabase
         .from("user_profiles")
         .select("*")
@@ -380,7 +382,6 @@ export default function EnhancedGuardDashboard({
 
       if (profileError) throw profileError;
 
-      // Fetch learning progress
       const { data: progress, error: progressError } = await supabase
         .from("user_progress")
         .select("*")
@@ -388,14 +389,12 @@ export default function EnhancedGuardDashboard({
 
       if (progressError) throw progressError;
 
-      // Fetch streak data
       const { data: streak, error: streakError } = await supabase
         .from("user_streaks")
         .select("current_streak")
         .eq("user_id", userId)
         .maybeSingle();
 
-      // Calculate personalized metrics
       const completedCount =
         progress?.filter((p) => p.completion_status === "completed").length ||
         0;
@@ -405,7 +404,6 @@ export default function EnhancedGuardDashboard({
             progress.length
           : 0;
 
-      // Get total scenarios
       const { count: totalScenarios } = await supabase
         .from("scenarios")
         .select("id", { count: "exact", head: true })
@@ -426,7 +424,6 @@ export default function EnhancedGuardDashboard({
         last_activity: new Date().toISOString(),
         weekly_goal: 5,
         confidence_level: profile.assessment_score || 50,
-        // Include dialect and full_name from profile
         dialect: profile.dialect || "gulf",
         full_name: profile.full_name,
         challenge_stats: challengeStats,
@@ -513,6 +510,14 @@ export default function EnhancedGuardDashboard({
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
+      {/* Header with Language Switch */}
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold text-gray-900">
+          {t("common.dashboard")}
+        </h1>
+        <LanguageSwitch />
+      </div>
+
       {/* Personalized Welcome */}
       <div
         className={`bg-gradient-to-r ${levelInfo.color} rounded-xl p-6 text-white relative`}
@@ -522,41 +527,51 @@ export default function EnhancedGuardDashboard({
             <div className="flex items-center gap-3 mb-2">
               <span className="text-3xl">{levelInfo.emoji}</span>
               <div>
-                <h2 className="text-2xl font-bold">{levelInfo.title}</h2>
-                <p className="text-white/90">
-                  {userData.english_level} Level •{" "}
-                  {userData.completed_scenarios} scenarios completed
-                </p>
+                <LocalizedTooltip translationKey="tooltips.heroBanner">
+                  <h2 className="text-2xl font-bold cursor-help">
+                    {levelInfo.title}{" "}
+                    <Info className="inline-block w-4 h-4 ml-1 opacity-80" />
+                  </h2>
+                </LocalizedTooltip>
+                <LocalizedTooltip translationKey="tooltips.heroLevel">
+                  <p className="text-white/90 cursor-help">
+                    {userData.english_level} {t("common.level")} •{" "}
+                    {userData.completed_scenarios} {t("common.scenarios")}{" "}
+                    {t("common.completed")}
+                  </p>
+                </LocalizedTooltip>
               </div>
             </div>
             <p className="text-white/95 text-lg max-w-2xl">
               {motivationalMessage}
             </p>
           </div>
-          <div className="text-right flex flex-col items-end">
-            <div className="text-4xl font-bold">{userData.current_streak}</div>
-            <div className="text-white/90">day streak</div>
 
-            <Button
-              onClick={togglePrayerTimes}
-              variant="ghost"
-              size="sm"
-              className="mt-4 text-white/80 hover:text-white hover:bg-white/20"
-              title={
-                userPreferences.show_prayer_times
-                  ? "Hide prayer times"
-                  : "Show prayer times"
-              }
-            >
-              {userPreferences.show_prayer_times ? (
-                <EyeOff className="w-4 h-4 mr-2" />
-              ) : (
-                <Eye className="w-4 h-4 mr-2" />
-              )}
-              {userPreferences.show_prayer_times
-                ? "Hide Prayers"
-                : "Show Prayers"}
-            </Button>
+          <div className="text-right flex flex-col items-end">
+            <LocalizedTooltip translationKey="tooltips.heroStreak">
+              <div className="text-4xl font-bold cursor-help">
+                {userData.current_streak}
+              </div>
+            </LocalizedTooltip>
+            <div className="text-white/90">{t("common.dayStreak")}</div>
+
+            <LocalizedTooltip translationKey="tooltips.prayersToggle">
+              <Button
+                onClick={togglePrayerTimes}
+                variant="ghost"
+                size="sm"
+                className="mt-4 text-white/80 hover:text-white hover:bg-white/20 cursor-help"
+              >
+                {userPreferences.show_prayer_times ? (
+                  <EyeOff className="w-4 h-4 mr-2" />
+                ) : (
+                  <Eye className="w-4 h-4 mr-2" />
+                )}
+                {userPreferences.show_prayer_times
+                  ? t("common.hidePrayers")
+                  : t("common.showPrayers")}
+              </Button>
+            </LocalizedTooltip>
           </div>
         </div>
       </div>
@@ -574,14 +589,22 @@ export default function EnhancedGuardDashboard({
       {/* Assessment + Challenge Stats + Quick Stats */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-1">
-          <AssessmentDashboardCard userId={userId} />
+          <LocalizedTooltip translationKey="tooltips.levelCard">
+            <div className="cursor-help">
+              <AssessmentDashboardCard userId={userId} />
+            </div>
+          </LocalizedTooltip>
         </div>
 
         <div className="lg:col-span-1">
-          <ChallengeStatsCard
-            challengeStats={userData?.challenge_stats || null}
-            loading={loading}
-          />
+          <LocalizedTooltip translationKey="tooltips.perfCard">
+            <div className="cursor-help">
+              <ChallengeStatsCard
+                challengeStats={userData?.challenge_stats || null}
+                loading={loading}
+              />
+            </div>
+          </LocalizedTooltip>
         </div>
 
         <div className="lg:col-span-2">
@@ -589,7 +612,11 @@ export default function EnhancedGuardDashboard({
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <TrendingUp className="h-5 w-5" />
-                Your Progress Journey
+                <LocalizedTooltip translationKey="tooltips.journeyCard">
+                  <span className="cursor-help">
+                    {t("dashboard.journeyTitle")}
+                  </span>
+                </LocalizedTooltip>
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -598,39 +625,65 @@ export default function EnhancedGuardDashboard({
                   <div className="text-2xl font-bold text-emerald-600">
                     {userData.completed_scenarios}
                   </div>
-                  <div className="text-xs text-gray-500">Completed</div>
+                  <LocalizedTooltip translationKey="tooltips.statsCompleted">
+                    <div className="text-xs text-gray-500 cursor-help">
+                      {t("common.completed")}
+                    </div>
+                  </LocalizedTooltip>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-blue-600">
                     {userData.average_score}%
                   </div>
-                  <div className="text-xs text-gray-500">Avg Score</div>
+                  <LocalizedTooltip translationKey="tooltips.statsAvgScore">
+                    <div className="text-xs text-gray-500 cursor-help">
+                      {t("common.avgScore")}
+                    </div>
+                  </LocalizedTooltip>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-purple-600">
                     {userData.hours_learned}h
                   </div>
-                  <div className="text-xs text-gray-500">Time Spent</div>
+                  <LocalizedTooltip translationKey="tooltips.statsTimeSpent">
+                    <div className="text-xs text-gray-500 cursor-help">
+                      {t("common.timeSpent")}
+                    </div>
+                  </LocalizedTooltip>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-orange-600">
                     {userData.confidence_level}%
                   </div>
-                  <div className="text-xs text-gray-500">Confidence</div>
+                  <LocalizedTooltip translationKey="tooltips.statsConfidence">
+                    <div className="text-xs text-gray-500 cursor-help">
+                      {t("common.confidence")}
+                    </div>
+                  </LocalizedTooltip>
                 </div>
               </div>
 
               <div>
                 <div className="flex justify-between text-sm mb-2">
-                  <span>Overall Progress</span>
-                  <span>
-                    {userData.completed_scenarios}/{userData.total_scenarios}{" "}
-                    scenarios
-                  </span>
+                  <LocalizedTooltip translationKey="tooltips.statsOverall">
+                    <span className="cursor-help">
+                      {t("common.overallProgress")}
+                    </span>
+                  </LocalizedTooltip>
+                  <LocalizedTooltip translationKey="tooltips.statsScenarioCount">
+                    <span className="cursor-help">
+                      {userData.completed_scenarios}/{userData.total_scenarios}{" "}
+                      {t("common.scenarios")}
+                    </span>
+                  </LocalizedTooltip>
                 </div>
-                <Progress value={completionPct} className="h-3" />
+                <LocalizedTooltip translationKey="tooltips.statsPercentComplete">
+                  <div className="cursor-help">
+                    <Progress value={completionPct} className="h-3" />
+                  </div>
+                </LocalizedTooltip>
                 <p className="text-xs text-gray-500 mt-1">
-                  {Math.round(completionPct)}% complete
+                  {Math.round(completionPct)}% {t("common.complete")}
                 </p>
               </div>
             </CardContent>
@@ -643,11 +696,19 @@ export default function EnhancedGuardDashboard({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Zap className="h-5 w-5 text-yellow-500" />
-            Recommended Just For You
+            <LocalizedTooltip translationKey="tooltips.recsCard">
+              <span className="cursor-help">
+                {t("dashboard.recommendedForYou")}
+              </span>
+            </LocalizedTooltip>
           </CardTitle>
-          <p className="text-sm text-gray-600">
-            Based on your {userData.english_level} level and learning goals
-          </p>
+          <LocalizedTooltip translationKey="tooltips.recsCard">
+            <p className="text-sm text-gray-600 cursor-help">
+              {t("dashboard.basedOnLevel", {
+                level: userData.english_level ?? "A1",
+              })}
+            </p>
+          </LocalizedTooltip>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -666,13 +727,18 @@ export default function EnhancedGuardDashboard({
                     </p>
                   </div>
                   <div className="text-right">
-                    <Badge
-                      variant={
-                        scenario.relevance_score >= 80 ? "default" : "secondary"
-                      }
-                    >
-                      {scenario.relevance_score}% match
-                    </Badge>
+                    <LocalizedTooltip translationKey="tooltips.recsMatch">
+                      <Badge
+                        variant={
+                          scenario.relevance_score >= 80
+                            ? "default"
+                            : "secondary"
+                        }
+                        className="cursor-help"
+                      >
+                        {scenario.relevance_score}% {t("common.match")}
+                      </Badge>
+                    </LocalizedTooltip>
                   </div>
                 </div>
 
@@ -682,13 +748,15 @@ export default function EnhancedGuardDashboard({
                     <span>•</span>
                     <span>{scenario.duration}</span>
                   </div>
-                  <Button
-                    size="sm"
-                    className="bg-gradient-to-r from-emerald-600 to-blue-600"
-                  >
-                    Start
-                    <ArrowRight className="w-4 h-4 ml-1" />
-                  </Button>
+                  <LocalizedTooltip translationKey="tooltips.recsStart">
+                    <Button
+                      size="sm"
+                      className="bg-gradient-to-r from-emerald-600 to-blue-600 cursor-help"
+                    >
+                      {t("common.start")}
+                      <ArrowRight className="w-4 h-4 ml-1" />
+                    </Button>
+                  </LocalizedTooltip>
                 </div>
               </div>
             ))}
@@ -701,50 +769,61 @@ export default function EnhancedGuardDashboard({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Award className="h-5 w-5 text-yellow-500" />
-            Your Achievements
+            <LocalizedTooltip translationKey="tooltips.achCard">
+              <span className="cursor-help">{t("dashboard.achievements")}</span>
+            </LocalizedTooltip>
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {achievements.map((achievement) => (
-              <div
+              <LocalizedTooltip
                 key={achievement.id}
-                className={`p-4 rounded-lg border-2 transition-all ${
-                  achievement.unlocked
-                    ? "border-yellow-200 bg-yellow-50"
-                    : "border-gray-200 bg-gray-50"
-                }`}
+                translationKey="tooltips.achItem"
               >
-                <div className="text-center">
-                  <div className="text-3xl mb-2">{achievement.icon}</div>
-                  <h4
-                    className={`font-semibold mb-1 ${
-                      achievement.unlocked ? "text-yellow-800" : "text-gray-600"
-                    }`}
-                  >
-                    {achievement.title}
-                  </h4>
-                  <p className="text-sm text-gray-600 mb-3">
-                    {achievement.description}
-                  </p>
+                <div
+                  className={`p-4 rounded-lg border-2 transition-all cursor-help ${
+                    achievement.unlocked
+                      ? "border-yellow-200 bg-yellow-50"
+                      : "border-gray-200 bg-gray-50"
+                  }`}
+                >
+                  <div className="text-center">
+                    <div className="text-3xl mb-2">{achievement.icon}</div>
+                    <h4
+                      className={`font-semibold mb-1 ${
+                        achievement.unlocked
+                          ? "text-yellow-800"
+                          : "text-gray-600"
+                      }`}
+                    >
+                      {achievement.title}
+                    </h4>
+                    <p className="text-sm text-gray-600 mb-3">
+                      {achievement.description}
+                    </p>
 
-                  {achievement.progress !== undefined && achievement.total && (
-                    <div>
-                      <Progress
-                        value={(achievement.progress / achievement.total) * 100}
-                        className="h-2 mb-1"
-                      />
-                      <p className="text-xs text-gray-500">
-                        {achievement.progress}/{achievement.total}
-                      </p>
-                    </div>
-                  )}
+                    {achievement.progress !== undefined &&
+                      achievement.total && (
+                        <div>
+                          <Progress
+                            value={
+                              (achievement.progress / achievement.total) * 100
+                            }
+                            className="h-2 mb-1"
+                          />
+                          <p className="text-xs text-gray-500">
+                            {achievement.progress}/{achievement.total}
+                          </p>
+                        </div>
+                      )}
 
-                  {achievement.unlocked && (
-                    <CheckCircle className="w-5 h-5 text-yellow-600 mx-auto mt-2" />
-                  )}
+                    {achievement.unlocked && (
+                      <CheckCircle className="w-5 h-5 text-yellow-600 mx-auto mt-2" />
+                    )}
+                  </div>
                 </div>
-              </div>
+              </LocalizedTooltip>
             ))}
           </div>
         </CardContent>
@@ -755,41 +834,59 @@ export default function EnhancedGuardDashboard({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <BookOpen className="h-7 w-7" />
-            Continue Learning
+            <LocalizedTooltip translationKey="tooltips.actionsCard">
+              <span className="cursor-help">
+                {t("dashboard.continueLearning")}
+              </span>
+            </LocalizedTooltip>
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* 1) Continue Journey */}
-            <Button className="h-28 flex flex-col items-center justify-center gap-3 bg-gradient-to-r from-emerald-600 to-blue-600">
-              <Play className="w-12 h-12" />
-              <span className="font-medium text-base">Continue Journey</span>
-              <span className="text-sm opacity-90">
-                Pick up where you left off
-              </span>
-            </Button>
+            <LocalizedTooltip translationKey="tooltips.actionsContinue">
+              <Button className="h-28 flex flex-col items-center justify-center gap-3 bg-gradient-to-r from-emerald-600 to-blue-600 cursor-help">
+                <Play className="w-12 h-12" />
+                <span className="font-medium text-base">
+                  {t("dashboard.continueJourney")}
+                </span>
+                <span className="text-sm opacity-90">
+                  {t("dashboard.pickUpWhere")}
+                </span>
+              </Button>
+            </LocalizedTooltip>
 
             {/* 2) Practice Conversation */}
-            <PracticeConversationButton
-              userId={userId}
-              segment={"guard"}
-              icon={Sparkles}
-              title="Practice Conversation"
-              subtitle="AI-powered chat"
-              className="h-28 flex flex-col items-center justify-center gap-3 border-purple-300 hover:bg-purple-50 rounded-md [&_svg]:w-12 [&_svg]:h-12"
-              onCreated={(sid) => console.log("Session:", sid)}
-            />
+            <LocalizedTooltip translationKey="tooltips.actionsPractice">
+              <div className="cursor-help">
+                <PracticeConversationButton
+                  userId={userId}
+                  segment={"guard"}
+                  icon={Sparkles}
+                  title={t("dashboard.practiceConversation")}
+                  subtitle={t("dashboard.aiPoweredChat")}
+                  className="h-28 flex flex-col items-center justify-center gap-3 border-purple-300 hover:bg-purple-50 rounded-md [&_svg]:w-12 [&_svg]:h-12"
+                  onCreated={(sid) => console.log("Session:", sid)}
+                />
+              </div>
+            </LocalizedTooltip>
 
             {/* 3) Challenge Mode */}
-            <Button
-              variant="outline"
-              className="h-28 flex flex-col items-center justify-center gap-3 border-orange-300 hover:bg-orange-50"
-              onClick={() => setShowChallengeMode(true)}
-            >
-              <Trophy className="w-12 h-12 text-orange-600" />
-              <span className="font-medium text-base">Challenge Mode</span>
-              <span className="text-sm text-gray-600">Test your skills</span>
-            </Button>
+            <LocalizedTooltip translationKey="tooltips.actionsChallenge">
+              <Button
+                variant="outline"
+                className="h-28 flex flex-col items-center justify-center gap-3 border-orange-300 hover:bg-orange-50 cursor-help"
+                onClick={() => setShowChallengeMode(true)}
+              >
+                <Trophy className="w-12 h-12 text-orange-600" />
+                <span className="font-medium text-base">
+                  {t("dashboard.challengeMode")}
+                </span>
+                <span className="text-sm text-gray-600">
+                  {t("dashboard.testSkills")}
+                </span>
+              </Button>
+            </LocalizedTooltip>
           </div>
         </CardContent>
       </Card>
@@ -809,16 +906,18 @@ export default function EnhancedGuardDashboard({
                 </span>
               </div>
 
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  setShowChallengeMode(false);
-                  // Refresh dashboard data when closing challenge mode
-                  refreshDashboardData();
-                }}
-              >
-                <X className="w-8 h-8" />
-              </Button>
+              <LocalizedTooltip translationKey="tooltips.modalClose">
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    setShowChallengeMode(false);
+                    refreshDashboardData();
+                  }}
+                  className="cursor-help"
+                >
+                  <X className="w-8 h-8" />
+                </Button>
+              </LocalizedTooltip>
             </div>
             <ChallengeMode
               userLevel={userData?.english_level || "A1"}
@@ -827,7 +926,6 @@ export default function EnhancedGuardDashboard({
               initialLoading
               bootDelayMs={1000}
               onComplete={() => {
-                // This callback will be called when a challenge is completed
                 refreshDashboardData();
               }}
             />

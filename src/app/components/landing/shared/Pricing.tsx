@@ -29,7 +29,7 @@ export const Pricing = () => {
         "Team dashboard (basic)",
       ],
       savings: "Save $120/year vs competitors",
-      cta: "Start 30-Day Free Trial",
+      cta: "Start 14-Day Free Trial",
       popular: false,
       highlight: "Most Popular for Small Mosques",
     },
@@ -54,7 +54,7 @@ export const Pricing = () => {
         "Integration with HR systems",
       ],
       savings: "Save $180/year per user",
-      cta: "Start 30-Day Free Trial",
+      cta: "Start 14-Day Free Trial",
       popular: true,
       highlight: "Best Value",
       badge: "87% of customers choose this",
@@ -131,7 +131,7 @@ export const Pricing = () => {
             <div className="flex flex-col md:flex-row items-center justify-between">
               <div className="text-center md:text-left mb-4 md:mb-0">
                 <h3 className="text-2xl font-bold text-gray-900">
-                  30-Day Free Trial
+                  14-Day Free Trial
                 </h3>
                 <p className="text-gray-600">
                   No credit card required • Full access • Cancel anytime

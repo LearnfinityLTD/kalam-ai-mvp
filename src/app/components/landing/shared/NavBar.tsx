@@ -34,7 +34,7 @@ export default function NavBar() {
   const userTypes = [
     {
       type: "guard",
-      label: "Mosque Guard",
+      label: "Mosque Guard Host",
       icon: Shield,
       color: "green",
       description: "Welcome tourists & manage visits",

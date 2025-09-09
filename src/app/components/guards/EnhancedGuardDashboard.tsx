@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -34,12 +35,13 @@ import PrayerTimeIndicator from "@/components/shared/PrayerTimeIndicator";
 import AssessmentDashboardCard from "./AssessmentDashboardCard";
 import PracticeConversationButton from "../shared/PracticeConversationButton";
 import ChallengeMode from "./challengeMode/ChallengeMode";
-import { ChallengeStatsCard } from "./challengeMode/ChallendeStats";
+import { ChallengeStatsCard } from "./challengeMode/ChallengeStats";
 
 // Fixed imports
 import { useI18n } from "@/lib/i18n/context";
 import { LanguageSwitch } from "@/app/components/shared/language/LanguageSwitch";
 import { LocalizedTooltip } from "@/app/components/shared/language/LocalizedTooltip";
+import { JourneyButton } from "../journey/JourneyButton";
 
 interface UserData {
   english_level?: string;
@@ -108,6 +110,7 @@ export default function EnhancedGuardDashboard({
   const [loading, setLoading] = useState(true);
   const [motivationalMessage, setMotivationalMessage] = useState("");
   const [showChallengeMode, setShowChallengeMode] = useState(false);
+  const router = useRouter();
   const supabase = createClient();
 
   const fetchUserPreferences = useCallback(async () => {
@@ -449,7 +452,8 @@ export default function EnhancedGuardDashboard({
 
   const refreshDashboardData = useCallback(async () => {
     await fetchPersonalizedData();
-  }, [fetchPersonalizedData]);
+    await fetchUserPreferences();
+  }, [fetchPersonalizedData, fetchUserPreferences]);
 
   useEffect(() => {
     fetchPersonalizedData();
@@ -843,17 +847,20 @@ export default function EnhancedGuardDashboard({
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* 1) Continue Journey */}
+            {/* 1) Continue Journey - FIXED VERSION */}
             <LocalizedTooltip translationKey="tooltips.actionsContinue">
-              <Button className="h-28 flex flex-col items-center justify-center gap-3 bg-gradient-to-r from-emerald-600 to-blue-600 cursor-help">
-                <Play className="w-12 h-12" />
-                <span className="font-medium text-base">
-                  {t("dashboard.continueJourney")}
-                </span>
-                <span className="text-sm opacity-90">
-                  {t("dashboard.pickUpWhere")}
-                </span>
-              </Button>
+              <JourneyButton
+                userId={userId}
+                userLevel={userData.english_level || "A1"}
+                className="h-28 flex flex-col items-center justify-center gap-3 bg-gradient-to-r from-emerald-600 to-blue-600 cursor-help"
+                onScenarioStart={(scenarioId) => {
+                  // Navigate to the dedicated scenario page for focused learning
+                  console.log("Starting scenario:", scenarioId);
+                  router.push(
+                    `/guards/scenarios/${scenarioId}?userId=${userId}`
+                  );
+                }}
+              />
             </LocalizedTooltip>
 
             {/* 2) Practice Conversation */}

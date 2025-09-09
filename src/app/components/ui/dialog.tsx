@@ -7,6 +7,18 @@ interface DialogProps {
   children: React.ReactNode;
 }
 
+export function DialogDescription({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <p className={`text-sm text-gray-600 mt-2 ${className}`}>{children}</p>
+  );
+}
+
 export function Dialog({ open, onOpenChange, children }: DialogProps) {
   if (!open) return null;
 

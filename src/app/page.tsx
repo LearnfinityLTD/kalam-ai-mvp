@@ -9,6 +9,8 @@ import { SEOHead } from "@/components/landing/shared/SEOHead";
 import { Pricing } from "@/components/landing/shared/Pricing";
 import { CulturalContext } from "@/components/landing/shared/CulturalContext";
 import { ContactSection } from "@/components/landing/shared/contact/ContactSection";
+import CompetitorComparison from "./components/landing/shared/CompetitorComparison";
+import OnboardingFlow from "./components/landing/shared/OnboardingFlow";
 
 export default function HomePage() {
   return (
@@ -19,8 +21,10 @@ export default function HomePage() {
         <Hero />
         <CommunityStats />
         <UserTypeSelection />
+        <OnboardingFlow />
         <CulturalContext />
         <Features />
+        <CompetitorComparison />
         <FAQ />
         <ContactSection
           userType="general"

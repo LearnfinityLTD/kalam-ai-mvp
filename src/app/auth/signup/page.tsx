@@ -70,7 +70,7 @@ function SignUpForm() {
     switch (type) {
       case "guard":
         return {
-          title: "Join as Mosque Guard Host",
+          title: "Join as Mosque Host",
           subtitle: "Master tourist interactions with cultural confidence",
           icon: Shield,
           color: "green",

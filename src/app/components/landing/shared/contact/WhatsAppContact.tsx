@@ -31,7 +31,7 @@ export const WhatsAppContact: React.FC<BaseProps> = ({
 
   const getWhatsAppMessage = (type: UserType) => {
     const messages: Record<UserType, string> = {
-      guard: `السلام عليكم! I'm interested in KalamAI for mosque guards. Can you help me get started with English training for welcoming tourists?`,
+      guard: `السلام عليكم! I'm interested in KalamAI for mosque hosts. Can you help me get started with English training for welcoming tourists?`,
       professional: `Hello! I'd like to learn more about KalamAI's business English program for Arabic speakers. Can we discuss pricing and features?`,
       guide: `Hi! I'm a tour guide interested in KalamAI. When will the tour guide program be available?`,
       enterprise: `Hello! I'm exploring KalamAI for our organization. Could we discuss enterprise options and deployment?`,

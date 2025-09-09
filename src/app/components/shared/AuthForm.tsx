@@ -146,6 +146,23 @@ export default function AuthForm({ userType, displayType, redirectTo }: Props) {
 
       await ensureProfile(userId);
 
+      // Check if user is admin and redirect to admin signin page
+      const { data: profile, error: profileError } = await supabase
+        .from("user_profiles")
+        .select("user_type, is_admin")
+        .eq("id", userId)
+        .maybeSingle();
+
+      if (profileError) throw profileError;
+
+      // If user is admin, sign them out and redirect to admin signin
+      if (profile?.is_admin) {
+        await supabase.auth.signOut();
+        toast.error("Admin users must use the dedicated admin login page");
+        router.push("/admin/signin");
+        return;
+      }
+
       // read profile to decide admin vs normal destination
       const { data: me, error: meErr } = await supabase
         .from("user_profiles")

@@ -30,7 +30,7 @@ export const UserTypeSelection = () => {
           desc: "Track progress across your mosque team",
         },
       ],
-      cta: "Start as Mosque Guard Host",
+      cta: "Start as Mosque Host",
       href: "/guards",
     },
     {

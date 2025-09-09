@@ -1,4 +1,4 @@
-// app/auth/page.tsx
+// app/auth/page.tsx - Fixed to not auto-redirect admins
 "use client";
 
 import { Suspense, useEffect, useMemo, useState } from "react";
@@ -38,7 +38,6 @@ function Inner() {
     };
   }, [sp]);
 
-  // Session + profile (for banner only; NO auto-redirect)
   const [checking, setChecking] = useState(true);
   const [signedInEmail, setSignedInEmail] = useState<string | null>(null);
   const [signedInDest, setSignedInDest] = useState<string | null>(null);
@@ -53,7 +52,6 @@ function Inner() {
         if (!cancel) setChecking(false);
         return;
       }
-      setSignedInEmail(user.email ?? null);
 
       const { data: me } = await supabase
         .from("user_profiles")
@@ -63,14 +61,18 @@ function Inner() {
 
       if (cancel) return;
 
-      // Handle routing for all user types including guides
+      setSignedInEmail(user.email ?? null);
+
+      // Role-based routing logic - REMOVED ADMIN AUTO-REDIRECT
       let dest: string;
-      if (me?.user_type === "guard") {
-        dest = me?.is_admin ? "/guards/admin" : "/guards/dashboard";
-      } else if (type === "guide") {
-        // Guides use guard routes but we differentiate in UI
+
+      // Only route based on user_type, ignore is_admin flag
+      // Admins should use the dedicated admin login page instead
+      if (me?.user_type === "guard" || type === "guide") {
+        // Guards and guides go to guard dashboard
         dest = "/guards/dashboard";
       } else {
+        // Professionals go to professional dashboard
         dest = "/professionals/dashboard";
       }
 
@@ -80,7 +82,7 @@ function Inner() {
     return () => {
       cancel = true;
     };
-  }, [supabase, next, type]);
+  }, [supabase, next, type, router]);
 
   if (checking) {
     return (
@@ -90,13 +92,11 @@ function Inner() {
     );
   }
 
-  // Map 'guide' → 'guard' for the DB constraint, but preserve original type for display
   const mappedType: DatabaseUserType = type === "guide" ? "guard" : type;
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* If already signed in, show banner instead of auto-redirect */}
         {signedInDest && (
           <div className="mb-6 rounded-xl border bg-white p-6 shadow-xl border-gray-100">
             <div className="text-center mb-4">
@@ -145,12 +145,20 @@ function Inner() {
           </div>
         )}
 
-        {/* Pass both the mapped type for DB and original type for display */}
         <AuthForm
           userType={mappedType}
           displayType={type}
           redirectTo={next || undefined}
         />
+
+        <div className="text-center mt-6">
+          <button
+            onClick={() => router.push("/admin/signin")}
+            className="text-gray-500 hover:text-gray-700 text-sm font-medium transition-colors"
+          >
+            Admin Access →
+          </button>
+        </div>
       </div>
     </main>
   );

@@ -1,18 +1,20 @@
-// components/assessment/AssessmentWrapper.tsx (Updated for Enhanced Flow)
+// components/assessment/AssessmentWrapper.tsx - With your i18n system
 "use client";
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase";
-import EnhancedAssessmentFlow from "./EnhancedAssessmentFlow";
+import SimplifiedAssessmentFlow from "./SimplifiedAssessmentFlow";
 import NewUserWelcome from "../../auth/NewUserWelcome";
+import { useI18n } from "@/lib/i18n/context";
 
 interface AssessmentResult {
+  userType: "guard" | "professional" | "tourist_guide";
   level: "A1" | "A2" | "B1" | "B2" | "C1";
   percentage: number;
   strengths: string[];
   recommendations: string[];
   timeSpent: number;
-  confidenceScore: number;
+  sessionId: string;
 }
 
 export default function AssessmentWrapper({
@@ -27,9 +29,9 @@ export default function AssessmentWrapper({
   const [loading, setLoading] = useState(true);
   const [isNewUser, setIsNewUser] = useState(false);
   const [needsAssessment, setNeedsAssessment] = useState(false);
-  const [assessmentComplete, setAssessmentComplete] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { t, locale } = useI18n();
   const supabase = createClient();
 
   useEffect(() => {
@@ -49,79 +51,36 @@ export default function AssessmentWrapper({
       console.log("📊 Profile query result:", { profile, error });
 
       if (error && error.code === "PGRST116") {
-        console.log("✨ New user detected, creating profile");
-        const createResult = await createUserProfile();
-        if (createResult.success) {
-          setIsNewUser(true);
-          setShowWelcome(true);
-        } else {
-          setError("Failed to create user profile");
-        }
+        console.log("✨ New user detected, showing welcome flow");
+        setIsNewUser(true);
+        setShowWelcome(true);
       } else if (error) {
         console.error("❌ Error checking user status:", error);
-        setError(`Database error: ${error.message}`);
+        setError(t("assessment.databaseError", { message: error.message }));
       } else if (!profile) {
         console.log("⚠️ No profile returned but no error");
-        setError("Profile not found");
+        setError(t("assessment.profileNotFound"));
       } else if (!profile.assessment_completed) {
         console.log("📝 Existing user needs assessment");
         setNeedsAssessment(true);
       } else {
         console.log("✅ User assessment complete, proceeding to dashboard");
-        setAssessmentComplete(true);
         onAssessmentComplete();
       }
     } catch (error) {
       console.error("💥 Exception in checkUserStatus:", error);
       setError(
-        `System error: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`
+        t("assessment.systemError", {
+          message: error instanceof Error ? error.message : "Unknown error",
+        })
       );
     } finally {
       setLoading(false);
     }
   };
 
-  const createUserProfile = async (): Promise<{
-    success: boolean;
-    error?: string;
-  }> => {
-    try {
-      console.log("🏗️ Creating user profile for:", userId);
-
-      const { data, error } = await supabase
-        .from("user_profiles")
-        .insert([
-          {
-            id: userId,
-            user_type: "guard",
-            assessment_completed: false,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          },
-        ])
-        .select()
-        .single();
-
-      if (error) {
-        console.error("❌ Error creating user profile:", error);
-        return { success: false, error: error.message };
-      }
-
-      console.log("✅ User profile created successfully:", data);
-      return { success: true };
-    } catch (error) {
-      console.error("💥 Exception in createUserProfile:", error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
-      };
-    }
-  };
-
   const handleStartAssessment = () => {
-    console.log("🎯 Starting assessment");
+    console.log("🎯 Starting assessment from welcome");
     setShowWelcome(false);
     setNeedsAssessment(true);
   };
@@ -130,63 +89,90 @@ export default function AssessmentWrapper({
     console.log("🎉 Assessment completed with result:", result);
 
     try {
-      // Save enhanced assessment results
-      const { data, error } = await supabase
-        .from("user_profiles")
-        .update({
-          english_level: result.level,
-          assessment_completed: true,
-          assessment_score: result.percentage,
-          strengths: result.strengths,
-          recommendations: result.recommendations,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", userId)
-        .select()
-        .single();
+      // For new users, create profile with selected user type
+      if (isNewUser) {
+        const { data: newProfile, error: createError } = await supabase
+          .from("user_profiles")
+          .insert([
+            {
+              id: userId,
+              user_type: result.userType,
+              english_level: result.level,
+              assessment_completed: true,
+              assessment_score: result.percentage,
+              strengths: result.strengths,
+              recommendations: result.recommendations,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            },
+          ])
+          .select()
+          .single();
 
-      if (error) {
-        console.error("❌ Error saving assessment results:", error);
-        setError(`Failed to save assessment: ${error.message}`);
-        return;
+        if (createError) {
+          console.error("❌ Error creating user profile:", createError);
+          setError(
+            t("assessment.failedToSave", { message: createError.message })
+          );
+          return;
+        }
+
+        console.log("✅ New user profile created:", newProfile);
+      } else {
+        // For existing users, update their profile
+        const { data: updatedProfile, error: updateError } = await supabase
+          .from("user_profiles")
+          .update({
+            user_type: result.userType,
+            english_level: result.level,
+            assessment_completed: true,
+            assessment_score: result.percentage,
+            strengths: result.strengths,
+            recommendations: result.recommendations,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", userId)
+          .select()
+          .single();
+
+        if (updateError) {
+          console.error("❌ Error updating user profile:", updateError);
+          setError(
+            t("assessment.failedToSave", { message: updateError.message })
+          );
+          return;
+        }
+
+        console.log("✅ User profile updated:", updatedProfile);
       }
 
-      console.log("✅ Assessment results saved:", data);
-
-      // Create enhanced learning path
-      const learningPathResult = await createLearningPath(result);
+      // Create personalized learning path
+      const learningPathResult = await createPersonalizedLearningPath(result);
       if (!learningPathResult.success) {
         console.warn("⚠️ Learning path creation failed, but continuing");
       }
 
-      // Save assessment analytics for improvement
-      await saveAssessmentAnalytics(result);
+      // Mark assessment session as completed
+      await completeAssessmentSession(result.sessionId, result);
 
       console.log("🏠 Proceeding to dashboard");
       onAssessmentComplete();
     } catch (error) {
       console.error("💥 Exception in handleAssessmentComplete:", error);
       setError(
-        `System error saving assessment: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`
+        t("assessment.systemError", {
+          message: error instanceof Error ? error.message : "Unknown error",
+        })
       );
     }
   };
 
-  const createLearningPath = async (
+  const createPersonalizedLearningPath = async (
     result: AssessmentResult
   ): Promise<{ success: boolean; error?: string }> => {
     try {
-      const scenarios = getRecommendedScenarios(
-        result.level,
-        result.strengths,
-        result.recommendations
-      );
-      console.log(
-        "📚 Creating enhanced learning path with scenarios:",
-        scenarios
-      );
+      const scenarios = getPersonalizedScenarios(result.userType, result.level);
+      console.log("📚 Creating personalized learning path:", scenarios);
 
       const { data, error } = await supabase
         .from("user_learning_paths")
@@ -209,10 +195,10 @@ export default function AssessmentWrapper({
         return { success: false, error: error.message };
       }
 
-      console.log("✅ Learning path created:", data);
+      console.log("✅ Personalized learning path created:", data);
       return { success: true };
     } catch (error) {
-      console.error("💥 Exception in createLearningPath:", error);
+      console.error("💥 Exception in createPersonalizedLearningPath:", error);
       return {
         success: false,
         error: error instanceof Error ? error.message : "Unknown error",
@@ -220,101 +206,106 @@ export default function AssessmentWrapper({
     }
   };
 
-  const getRecommendedScenarios = (
-    level: string,
-    strengths: string[],
-    recommendations: string[]
+  const getPersonalizedScenarios = (
+    userType: string,
+    level: string
   ): { recommended: string[]; startWith: string } => {
-    // Enhanced scenario mapping based on assessment results
-    const baseScenarios: Record<string, string[]> = {
-      A1: [
-        "basic-greetings",
-        "simple-directions",
-        "prayer-times-basic",
-        "emergency-help",
-      ],
-      A2: [
-        "visitor-welcome",
-        "facility-tour",
-        "prayer-explanation",
-        "basic-questions",
-      ],
-      B1: [
-        "cultural-sensitivity",
-        "visitor-registration",
-        "prayer-guidance",
-        "facility-information",
-      ],
-      B2: [
-        "complex-inquiries",
-        "interfaith-dialogue",
-        "event-coordination",
-        "conflict-resolution-basic",
-      ],
-      C1: [
-        "advanced-cultural-topics",
-        "emergency-management",
-        "theological-questions",
-        "leadership-scenarios",
-      ],
+    // Personalized scenarios based on user type AND level
+    const scenarioMappings: Record<string, Record<string, string[]>> = {
+      guard: {
+        A1: [
+          "basic-mosque-greetings",
+          "simple-directions",
+          "prayer-times-basic",
+        ],
+        A2: ["visitor-welcome", "dress-code-explanation", "facility-tour"],
+        B1: [
+          "cultural-sensitivity",
+          "emergency-procedures",
+          "interfaith-dialogue-basic",
+        ],
+        B2: [
+          "complex-visitor-needs",
+          "hajj-crowd-management",
+          "security-protocols",
+        ],
+        C1: [
+          "advanced-cultural-ambassador",
+          "crisis-leadership",
+          "theological-discussions",
+        ],
+      },
+      professional: {
+        A1: ["business-introductions", "meeting-basics", "email-fundamentals"],
+        A2: ["presentation-skills", "client-communication", "phone-etiquette"],
+        B1: [
+          "negotiation-basics",
+          "cross-cultural-business",
+          "vision-2030-intro",
+        ],
+        B2: [
+          "advanced-negotiations",
+          "international-partnerships",
+          "complex-presentations",
+        ],
+        C1: [
+          "executive-leadership",
+          "strategic-communication",
+          "diplomatic-relations",
+        ],
+      },
+      tourist_guide: {
+        A1: ["tourist-welcome", "basic-information", "simple-explanations"],
+        A2: ["cultural-site-tours", "group-management", "question-handling"],
+        B1: ["historical-narratives", "cultural-sensitivity", "VIP-service"],
+        B2: ["luxury-tourism", "crisis-management", "interfaith-tours"],
+        C1: [
+          "expert-cultural-guide",
+          "diplomatic-tours",
+          "educational-excellence",
+        ],
+      },
     };
 
-    const scenarios = [...(baseScenarios[level] || baseScenarios["A1"])];
-
-    // Customize based on strengths and weaknesses
-    if (strengths.includes("Listening Comprehension")) {
-      scenarios.push("advanced-audio-scenarios");
-    }
-
-    if (
-      recommendations.includes(
-        "Practice listening to different English accents"
-      )
-    ) {
-      scenarios.unshift("accent-training");
-    }
-
-    if (recommendations.includes("Focus on complex cultural scenarios")) {
-      scenarios.push("advanced-cultural-navigation");
-    }
-
-    // Determine starting scenario based on level and confidence
-    const startWith =
-      level === "A1"
-        ? scenarios[0]
-        : level === "A2"
-        ? scenarios[1]
-        : scenarios[Math.floor(scenarios.length / 2)];
+    const typeScenarios = scenarioMappings[userType] || scenarioMappings.guard;
+    const levelScenarios = typeScenarios[level] || typeScenarios.A1;
 
     return {
-      recommended: scenarios.slice(0, 8), // Limit to 8 scenarios for focus
-      startWith,
+      recommended: levelScenarios,
+      startWith: levelScenarios[0],
     };
   };
 
-  const saveAssessmentAnalytics = async (result: AssessmentResult) => {
+  const completeAssessmentSession = async (
+    sessionId: string,
+    result: AssessmentResult
+  ) => {
     try {
-      // Save assessment data for product improvement
-      const analyticsData = {
-        user_id: userId,
-        assessment_version: "2.0_enhanced",
-        level_assigned: result.level,
-        score: result.percentage,
-        time_spent_seconds: result.timeSpent,
-        confidence_score: result.confidenceScore,
-        strengths_identified: result.strengths,
-        recommendations_given: result.recommendations,
-        completed_at: new Date().toISOString(),
-      };
+      const { error } = await supabase
+        .from("assessment_sessions")
+        .update({
+          final_level: result.level,
+          final_score: result.percentage,
+          strengths_identified: result.strengths,
+          recommendations_given: result.recommendations,
+          completed_at: new Date().toISOString(),
+        })
+        .eq("id", sessionId);
 
-      // This would go to an analytics table (optional for MVP)
-      console.log("📊 Assessment analytics:", analyticsData);
+      if (error) {
+        console.error("❌ Error completing assessment session:", error);
+      } else {
+        console.log("✅ Assessment session completed");
+      }
     } catch (error) {
-      console.log("⚠️ Analytics logging failed (non-critical):", error);
+      console.log(
+        "⚠️ Assessment session completion failed (non-critical):",
+        error
+      );
     }
   };
 
-  // Error state with enhanced design
+  // Error state
   if (error) {
     return (
       <div className="min-h-screen grid place-items-center bg-gradient-to-br from-red-50 to-orange-50">
@@ -335,7 +326,7 @@ export default function AssessmentWrapper({
             </svg>
           </div>
           <h2 className="text-lg font-semibold text-red-800 mb-2">
-            Setup Error
+            {t("assessment.setupError")}
           </h2>
           <p className="text-sm text-red-600 mb-4">{error}</p>
 
@@ -347,26 +338,24 @@ export default function AssessmentWrapper({
             }}
             className="bg-gradient-to-r from-red-600 to-orange-600 text-white px-6 py-2 rounded-lg hover:from-red-700 hover:to-orange-700 transition-all"
           >
-            Try Again
+            {t("assessment.tryAgain")}
           </button>
         </div>
       </div>
     );
   }
 
-  // Enhanced loading state
-  if (loading && !assessmentComplete) {
+  // Loading state
+  if (loading) {
     return (
       <div className="min-h-screen grid place-items-center bg-gradient-to-br from-emerald-50 to-blue-50">
         <div className="text-center">
-          <div className="relative">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto"></div>
-          </div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto"></div>
           <p className="text-lg text-gray-700 mt-6 font-medium">
-            Preparing your personalized assessment...
+            {t("assessment.settingUpAssessment")}
           </p>
           <p className="text-sm text-gray-500 mt-2">
-            This will only take a moment
+            {t("assessment.onlyTakesMoment")}
           </p>
         </div>
       </div>
@@ -380,12 +369,13 @@ export default function AssessmentWrapper({
     );
   }
 
-  // Show enhanced assessment
+  // Show simplified assessment
   if (needsAssessment) {
     return (
-      <EnhancedAssessmentFlow
+      <SimplifiedAssessmentFlow
         userId={userId}
         email={email}
+        isNewUser={isNewUser}
         onComplete={handleAssessmentComplete}
       />
     );

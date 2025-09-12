@@ -1,3 +1,4 @@
+// lib/i18n/context.tsx
 "use client";
 
 import {
@@ -11,7 +12,7 @@ import { Locale, defaultLocale } from "./config";
 import { translations } from "./translations";
 
 type Primitive = string | number | boolean;
-type ValuesMap = Record<string, Primitive>;
+type ValuesMap = Record<string, Primitive | undefined>; // Allow undefined values
 type UnknownRecord = Record<string, unknown>;
 type TranslationsObject = Record<Locale, UnknownRecord>;
 
@@ -75,11 +76,11 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     const template = primary ?? fallback ?? key;
 
     if (values) {
-      return Object.entries(values).reduce(
-        (str, [placeholder, value]) =>
-          str.replace(new RegExp(`{{${placeholder}}}`, "g"), String(value)),
-        template
-      );
+      return Object.entries(values).reduce((str, [placeholder, value]) => {
+        // Handle undefined values by converting to empty string
+        const safeValue = value !== undefined ? String(value) : "";
+        return str.replace(new RegExp(`{{${placeholder}}}`, "g"), safeValue);
+      }, template);
     }
     return template;
   };

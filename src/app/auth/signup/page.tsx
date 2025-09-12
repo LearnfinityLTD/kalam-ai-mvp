@@ -145,6 +145,19 @@ function SignUpForm() {
     return true;
   };
 
+  // Helper function to get the correct dashboard route
+  const getDashboardRoute = (type: UserType) => {
+    switch (type) {
+      case "professional":
+        return "/professionals/dashboard";
+      case "guide":
+        return "/guides/dashboard";
+      case "guard":
+      default:
+        return "/guards/dashboard";
+    }
+  };
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -175,11 +188,8 @@ function SignUpForm() {
 
       // If your project auto-confirms users, data.user exists now; the trigger already wrote user_profiles.
       if (data.user?.id) {
-        router.replace(
-          dbUserType === "professional"
-            ? "/professionals/dashboard"
-            : "/guards/dashboard"
-        );
+        // Use original userType for routing, not dbUserType
+        router.replace(getDashboardRoute(userType));
         return;
       }
 
@@ -350,7 +360,7 @@ function SignUpForm() {
                   </div>
                 </div>
 
-                {dbUserType === "guard" && (
+                {(userType === "guard" || userType === "guide") && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Arabic Dialect
@@ -410,7 +420,7 @@ function SignUpForm() {
                       Creating Account...
                     </div>
                   ) : (
-                    "Start Free Trial"
+                    "Sign Up"
                   )}
                 </Button>
               </form>

@@ -91,6 +91,110 @@ export const translations = {
       needHelp: "Need Help?",
       completeScenario: "Complete Scenario",
     },
+    assessment: {
+      // User Type Selection
+      userTypeTitle: "What describes you best?",
+      userTypeSubtitle: "Choose your role to get personalized questions",
+
+      // User Types
+      guard: {
+        title: "Mosque Guard/Security",
+        subtitle: "I help visitors and keep the mosque safe",
+        description:
+          "Perfect for mosque security guards and visitor assistants",
+      },
+      professional: {
+        title: "Business Professional",
+        subtitle: "I work in business or corporate environment",
+        description:
+          "Ideal for Saudi business professionals working internationally",
+      },
+      touristGuide: {
+        title: "Tourist Guide",
+        subtitle: "I guide visitors and tourists",
+        description: "Great for tourism and hospitality professionals",
+      },
+
+      // Navigation & Buttons
+      startAssessment: "Start Assessment",
+      loadingQuestions: "Loading Questions...",
+      previous: "Previous",
+      next: "Next",
+      completeAssessment: "Complete Assessment",
+
+      // Questions
+      questionOf: "Question {{current}} of {{total}}",
+      selfAssessmentTitle: "How much English do you know?",
+
+      // Results
+      assessmentComplete: "Assessment Complete",
+      yourLevel: "Your Level",
+      score: "Score",
+      time: "Time",
+      perfectFor: "Perfect for {{userType}}",
+
+      // Strengths & Recommendations
+      yourStrengths: "Your Strengths",
+      yourLearningPlan: "Your Learning Plan",
+      whatsNext: "What's Next?",
+
+      // Action Buttons
+      startPersonalizedJourney: "Start Your Personalized Journey",
+      retakeAssessment: "Retake Assessment",
+
+      // Status Messages
+      setupError: "Setup Error",
+      tryAgain: "Try Again",
+      settingUpAssessment: "Setting up your personalized assessment...",
+      onlyTakesMoment: "This will only take a moment",
+
+      // Time Display
+      completedIn: "Completed in {{minutes}} minutes {{seconds}} seconds",
+      personalizedFor: "Personalized for {{userType}}",
+
+      // Features
+      features: {
+        personalizedScenarios: "Personalized Scenarios",
+        prayerTimeLearning: "Prayer-Time Learning",
+        achievementSystem: "Achievement System",
+        culturalMastery: "Cultural Mastery",
+
+        scenariosDesc: "Practice real {{userType}} situations at your level",
+        prayerDesc: "5-minute sessions between prayers",
+        achievementDesc: "Earn badges and track your progress",
+        culturalDesc: "Become a confident cultural ambassador",
+      },
+
+      // Level Descriptions
+      levels: {
+        A1: {
+          title: "Beginner",
+          description: "Building essential communication skills",
+        },
+        A2: {
+          title: "Elementary",
+          description: "Can handle basic interactions confidently",
+        },
+        B1: {
+          title: "Intermediate",
+          description: "Comfortable with most everyday situations",
+        },
+        B2: {
+          title: "Upper-Intermediate",
+          description: "Handle complex situations professionally",
+        },
+        C1: {
+          title: "Advanced",
+          description: "Sophisticated communication and cultural expertise",
+        },
+      },
+
+      // Error States
+      databaseError: "Database error: {{message}}",
+      systemError: "System error: {{message}}",
+      profileNotFound: "Profile not found",
+      failedToSave: "Failed to save assessment: {{message}}",
+    },
   },
   ar: {
     common: {
@@ -182,6 +286,99 @@ export const translations = {
       pause: "إيقاف مؤقت",
       needHelp: "هل تحتاج مساعدة؟",
       completeScenario: "إكمال السيناريو",
+    },
+    assessment: {
+      // User Type Selection
+      userTypeTitle: "ما الذي يصفك بشكل أفضل؟",
+      userTypeSubtitle: "اختر دورك للحصول على أسئلة شخصية",
+
+      // User Types
+      guard: {
+        title: "حارس/أمن المسجد",
+        subtitle: "أساعد الزوار وأحافظ على أمان المسجد",
+        description: "مثالي لحراس أمن المسجد ومساعدي الزوار",
+      },
+      professional: {
+        title: "مهني في الأعمال",
+        subtitle: "أعمل في بيئة تجارية أو مؤسسية",
+        description: "مثالي للمهنيين السعوديين العاملين دولياً",
+      },
+      touristGuide: {
+        title: "مرشد سياحي",
+        subtitle: "أرشد الزوار والسياح",
+        description: "رائع لمحترفي السياحة والضيافة",
+      },
+
+      // Navigation & Buttons
+      startAssessment: "ابدأ التقييم",
+      loadingQuestions: "جاري تحميل الأسئلة...",
+      previous: "السابق",
+      next: "التالي",
+      completeAssessment: "إكمال التقييم",
+
+      // Questions
+      questionOf: "السؤال {{current}} من {{total}}",
+      selfAssessmentTitle: "كم تعرف من اللغة الإنجليزية؟",
+
+      // Results
+      assessmentComplete: "تم إكمال التقييم",
+      yourLevel: "مستواك",
+      score: "النتيجة",
+      time: "الوقت",
+      perfectFor: "مثالي لـ {{userType}}",
+
+      // Strengths & Recommendations
+      yourStrengths: "نقاط قوتك",
+      yourLearningPlan: "خطة التعلم الخاصة بك",
+      whatsNext: "ما التالي؟",
+
+      // Action Buttons
+      startPersonalizedJourney: "ابدأ رحلتك الشخصية",
+      retakeAssessment: "إعادة التقييم",
+
+      // Status Messages
+      setupError: "خطأ في الإعداد",
+      tryAgain: "حاول مرة أخرى",
+      settingUpAssessment: "جاري إعداد تقييمك الشخصي...",
+      onlyTakesMoment: "هذا سيستغرق لحظة فقط",
+
+      // Time Display
+      completedIn: "مكتمل في {{minutes}} دقيقة {{seconds}} ثانية",
+      personalizedFor: "مخصص لـ {{userType}}",
+
+      // Features
+      features: {
+        personalizedScenarios: "سيناريوهات شخصية",
+        prayerTimeLearning: "التعلم وقت الصلاة",
+        achievementSystem: "نظام الإنجازات",
+        culturalMastery: "إتقان ثقافي",
+
+        scenariosDesc: "مارس مواقف {{userType}} الحقيقية في مستواك",
+        prayerDesc: "جلسات 5 دقائق بين الصلوات",
+        achievementDesc: "احصل على شارات وتتبع تقدمك",
+        culturalDesc: "كن سفيراً ثقافياً واثقاً",
+      },
+
+      // Level Descriptions
+      levels: {
+        A1: { title: "مبتدئ", description: "بناء مهارات التواصل الأساسية" },
+        A2: {
+          title: "ابتدائي",
+          description: "يمكن التعامل مع التفاعلات الأساسية بثقة",
+        },
+        B1: { title: "متوسط", description: "مرتاح مع معظم المواقف اليومية" },
+        B2: {
+          title: "متوسط متقدم",
+          description: "التعامل مع المواقف المعقدة مهنياً",
+        },
+        C1: { title: "متقدم", description: "تواصل متطور وخبرة ثقافية" },
+      },
+
+      // Error States
+      databaseError: "خطأ في قاعدة البيانات: {{message}}",
+      systemError: "خطأ في النظام: {{message}}",
+      profileNotFound: "الملف الشخصي غير موجود",
+      failedToSave: "فشل في حفظ التقييم: {{message}}",
     },
   },
 } as const;

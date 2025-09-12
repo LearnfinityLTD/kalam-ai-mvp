@@ -103,7 +103,7 @@ export async function getChallengeQuestions(
       .limit(limit);
 
     if (error) {
-      console.error("Error fetching challenge questions:", error);
+      // console.error("Error fetching challenge questions:", error);
       return [];
     }
 

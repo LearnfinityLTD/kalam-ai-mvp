@@ -1,4 +1,4 @@
-// app/admin/signin/page.tsx
+// app/admin/signin/page.tsx - FIXED VERSION
 "use client";
 
 import React, { useState, useEffect, Suspense } from "react";
@@ -41,8 +41,6 @@ function AdminSignInContent() {
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
 
-  const redirectTo = searchParams.get("redirect") || "/guards/admin";
-
   useEffect(() => {
     checkExistingSession();
   }, []);
@@ -55,16 +53,20 @@ function AdminSignInContent() {
       } = await supabase.auth.getUser();
 
       if (user) {
-        // Check if user is admin
+        // Check if user is admin - FIXED: Added is_super_admin to select
         const { data: profile, error: profileError } = await supabase
           .from("user_profiles")
-          .select("is_admin, user_type")
+          .select("is_admin, user_type, is_super_admin, full_name")
           .eq("id", user.id)
           .single();
 
         if (!profileError && profile?.is_admin) {
-          // User is already signed in as admin, redirect
-          router.replace(redirectTo);
+          // User is already signed in as admin, redirect to appropriate dashboard
+          if (profile?.is_super_admin) {
+            router.replace("/super-admin");
+          } else {
+            router.replace("/guards/admin");
+          }
           return;
         }
       }
@@ -117,25 +119,37 @@ function AdminSignInContent() {
         throw new Error("Authentication failed");
       }
 
-      // Check admin privileges
+      // Check admin privileges - FIXED: Added is_super_admin to select
+
       const { data: profile, error: profileError } = await supabase
         .from("user_profiles")
-        .select("is_admin, user_type, full_name")
+        .select(
+          "is_admin, user_type, full_name, is_super_admin, needs_password_reset"
+        )
         .eq("id", data.user.id)
         .single();
 
+      if (profile?.needs_password_reset) {
+        // Redirect to password reset page instead of dashboard
+        router.replace("/admin/reset-password");
+        return;
+      }
       if (profileError) {
         throw new Error("Failed to verify admin access");
       }
 
-      if (!profile?.is_admin) {
+      // FIXED: Check super admin first, then regular admin
+      if (profile?.is_super_admin) {
+        toast.success(`Welcome back, Super Admin!`);
+        router.replace("/super-admin");
+      } else if (profile?.is_admin) {
+        toast.success(`Welcome back, ${profile.full_name || "Admin"}!`);
+        router.replace("/guards/admin");
+      } else {
         // Sign out the user since they don't have admin access
         await supabase.auth.signOut();
         throw new Error("Access denied: Admin privileges required");
       }
-
-      toast.success(`Welcome back, ${profile.full_name || "Admin"}!`);
-      router.replace(redirectTo);
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Sign in failed";

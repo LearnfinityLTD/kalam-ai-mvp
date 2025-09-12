@@ -588,7 +588,7 @@ export default function AdminDashboard() {
         {items.map((item) => {
           const active = activeSection === item.key;
           return (
-            <button
+            <Button
               key={item.key}
               onClick={() => {
                 setActiveSection(item.key);
@@ -624,7 +624,7 @@ export default function AdminDashboard() {
                   )}
                 </>
               )}
-            </button>
+            </Button>
           );
         })}
       </nav>

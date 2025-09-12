@@ -73,7 +73,7 @@ export default function AdminPasswordReset(): JSX.Element {
       // If password reset is not required, redirect to appropriate dashboard
       if (!profile?.needs_password_reset) {
         if (profile?.is_super_admin) {
-          router.replace("/superadmin");
+          router.replace("/super-admin");
         } else {
           router.replace("/guards/admin");
         }
@@ -174,7 +174,7 @@ export default function AdminPasswordReset(): JSX.Element {
 
       // Redirect to appropriate dashboard
       if (userProfile?.is_super_admin) {
-        router.replace("/superadmin");
+        router.replace("/super-admin");
       } else {
         router.replace("/guards/admin");
       }

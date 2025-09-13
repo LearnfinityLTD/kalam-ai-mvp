@@ -7,11 +7,11 @@ import AuthForm from "@/components/shared/AuthForm";
 import { Button } from "@/ui/button";
 import { createClient } from "@/lib/supabase";
 
-type UserTypeParam = "guard" | "professional" | "guide";
-type DatabaseUserType = "guard" | "professional";
+type UserTypeParam = "guard" | "professional" | "tourist_guide";
+type DatabaseUserType = "guard" | "professional" | "tourist_guide";
 
 const isUserType = (v: string | null): v is UserTypeParam =>
-  v === "guard" || v === "professional" || v === "guide";
+  v === "guard" || v === "professional" || v === "tourist_guide";
 
 export default function AuthPage() {
   return (
@@ -68,7 +68,7 @@ function Inner() {
 
       // Only route based on user_type, ignore is_admin flag
       // Admins should use the dedicated admin login page instead
-      if (me?.user_type === "guard" || type === "guide") {
+      if (me?.user_type === "guard" || type === "tourist_guide") {
         // Guards and guides go to guard dashboard
         dest = "/guards/dashboard";
       } else {
@@ -92,8 +92,8 @@ function Inner() {
     );
   }
 
-  const mappedType: DatabaseUserType = type === "guide" ? "guard" : type;
-
+  const mappedType: DatabaseUserType =
+    type === "tourist_guide" ? "tourist_guide" : type;
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md">

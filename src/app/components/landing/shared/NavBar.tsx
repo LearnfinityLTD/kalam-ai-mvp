@@ -40,7 +40,7 @@ export default function NavBar() {
       description: "Welcome tourists & manage visits",
     },
     {
-      type: "guide",
+      type: "tourist_guide",
       label: "Tour Guide",
       icon: MapPin,
       color: "amber",

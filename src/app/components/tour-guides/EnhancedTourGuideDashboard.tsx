@@ -1,6 +1,5 @@
-// components/guards/EnhancedGuardDashboard.tsx - Final Production Ready Version
+// components/guards/EnhancedTourGuideDashboard.tsx - Final Production Ready Version
 "use client";
-
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,15 +29,14 @@ import { createClient } from "@/lib/supabase";
 import { getUserChallengeStats, ChallengeStats } from "@/utils/challengeApi";
 import PrayerTimeIndicator from "@/components/shared/PrayerTimeIndicator";
 import AssessmentDashboardCard from "@/app/components/shared/AssessmentDashboardCard";
+import PersonalizedDashboard from "@/app/components/shared/PersonalizedDashboard";
 import PracticeConversationButton from "../shared/PracticeConversationButton";
-import ChallengeMode from "./challengeMode/ChallengeMode";
-import { ChallengeStatsCard } from "./challengeMode/ChallengeStats";
 import { useI18n } from "@/lib/i18n/context";
 import { LanguageSwitch } from "@/app/components/shared/language/LanguageSwitch";
-import { LocalizedTooltip } from "@/app/components/shared/language/LocalizedTooltip";
 import { JourneyButton } from "../journey/JourneyButton";
 
 interface UserData {
+  user_type?: string;
   english_level?: string;
   assessment_score?: number;
   strengths?: string[];
@@ -84,7 +82,7 @@ interface Achievement {
   total?: number;
 }
 
-export default function EnhancedGuardDashboard({
+export default function EnhancedTourGuideDashboard({
   userId,
   email,
   onLogout,
@@ -113,6 +111,7 @@ export default function EnhancedGuardDashboard({
   const [showChallengeMode, setShowChallengeMode] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showPersonalizedPath, setShowPersonalizedPath] = useState(false);
   const [activeSettingsSection, setActiveSettingsSection] =
     useState("preferences");
   const [settingsPreferences, setSettingsPreferences] = useState({
@@ -158,6 +157,13 @@ export default function EnhancedGuardDashboard({
   // Sidebar navigation items
   const sidebarItems = [
     { id: "dashboard", label: t("nav.dashboard"), icon: Home, active: true },
+    {
+      id: "learning-path",
+      label: "AI Learning Path",
+      icon: Sparkles,
+      active: false,
+      isNew: true, // Add badge indicator
+    },
     {
       id: "progress",
       label: t("nav.progress"),
@@ -300,6 +306,10 @@ export default function EnhancedGuardDashboard({
         setShowSettings(false);
         window.scrollTo({ top: 0, behavior: "smooth" });
         break;
+      case "learning-path":
+        setShowSettings(false);
+        setShowPersonalizedPath(true);
+        break;
       case "settings":
         setShowSettings(true);
         break;
@@ -401,7 +411,8 @@ export default function EnhancedGuardDashboard({
 
   const isActiveRoute = (itemId: string) => {
     if (itemId === "settings") return showSettings;
-    if (itemId === "dashboard") return !showSettings;
+    if (itemId === "learning-path") return showPersonalizedPath;
+    if (itemId === "dashboard") return !showSettings && !showPersonalizedPath;
     return false;
   };
   const generateMotivationalMessage = useCallback((data: UserData) => {
@@ -486,6 +497,7 @@ export default function EnhancedGuardDashboard({
       const challengeStats = await getUserChallengeStats(userId);
 
       const personalizedUserData: UserData = {
+        user_type: profile.user_type,
         english_level: profile.english_level,
         assessment_score: profile.assessment_score,
         strengths: profile.strengths || [],
@@ -550,7 +562,6 @@ export default function EnhancedGuardDashboard({
     userData.total_scenarios > 0
       ? (userData.completed_scenarios / userData.total_scenarios) * 100
       : 0;
-
   const levelInfo = {
     A1: {
       color: "from-red-400 to-red-600",
@@ -726,7 +737,7 @@ export default function EnhancedGuardDashboard({
                     sidebarCollapsed
                       ? "w-12 h-12 flex items-center justify-center"
                       : "w-full flex items-center gap-3 px-3 py-2"
-                  } rounded-lg transition-all duration-200 ${
+                  } rounded-lg transition-all duration-200 relative ${
                     isActive
                       ? "bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300 border-r-2 border-emerald-500 shadow-sm"
                       : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white hover:shadow-sm"
@@ -735,7 +746,21 @@ export default function EnhancedGuardDashboard({
                 >
                   <IconComponent className="w-6 h-6" />
                   {!sidebarCollapsed && (
-                    <span className="font-medium">{item.label}</span>
+                    <>
+                      <span className="font-medium">{item.label}</span>
+                      {item.isNew && (
+                        <Badge
+                          variant="secondary"
+                          className="ml-auto bg-yellow-100 text-yellow-800 text-xs px-1.5 py-0.5"
+                        >
+                          NEW
+                        </Badge>
+                      )}
+                    </>
+                  )}
+                  {/* New indicator dot for collapsed sidebar */}
+                  {sidebarCollapsed && item.isNew && (
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full border-2 border-white"></div>
                   )}
                 </button>
               );
@@ -1062,290 +1087,347 @@ export default function EnhancedGuardDashboard({
               </div>
               <LanguageSwitch />
             </div>
-
-            {/* Hero Section */}
-            <Card
-              className={`bg-gradient-to-r ${levelInfo.color} text-white border-0`}
-            >
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
+            {showPersonalizedPath ? (
+              <>
+                {/* Personalized Dashboard Component */}
+                <PersonalizedDashboard
+                  userData={userData}
+                  userId={userId}
+                  userType={userData.user_type || "guard"}
+                />
+              </>
+            ) : (
+              <>
+                {/* Your existing dashboard content - Header */}
+                <div className="flex justify-between items-center">
                   <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center text-3xl">
-                      <div
-                        className={`${levelInfo.badgeColor} text-white font-bold text-lg px-3 py-1 rounded-lg`}
-                      >
-                        {levelInfo.badge}
-                      </div>
-                    </div>
-                    <div>
-                      <h2 className="text-2xl font-bold">{levelInfo.title}</h2>
-                      <p className="text-white/90">
-                        {userData.english_level} Level •{" "}
-                        {userData.completed_scenarios} scenarios completed
-                      </p>
-                      <p className="text-white/95 mt-2 max-w-lg">
-                        {motivationalMessage}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="text-right">
-                    <div className="text-4xl font-bold">
-                      {userData.current_streak}
-                    </div>
-                    <div className="text-white/90">day streak</div>
-
-                    {/* Prayer Times Toggle */}
+                    {/* Add AI Path Quick Access */}
                     <Button
-                      onClick={togglePrayerTimes}
-                      variant="ghost"
+                      onClick={() => setShowPersonalizedPath(true)}
+                      variant="outline"
                       size="sm"
-                      className="mt-4 text-white/80 hover:text-white hover:bg-white/20"
+                      className="border-yellow-300 text-yellow-700 hover:bg-yellow-50 dark:border-yellow-600 dark:text-yellow-400"
                     >
-                      {userPreferences.show_prayer_times ? (
-                        <EyeOff className="w-4 h-4 mr-2" />
-                      ) : (
-                        <Eye className="w-4 h-4 mr-2" />
-                      )}
-                      {userPreferences.show_prayer_times
-                        ? "Hide Prayers"
-                        : "Show Prayers"}
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      AI Learning Path
+                      <Badge
+                        variant="secondary"
+                        className="ml-2 bg-yellow-100 text-yellow-800 text-xs"
+                      >
+                        NEW
+                      </Badge>
                     </Button>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
 
-            {/* Prayer Times - Collapsible */}
-            {userPreferences.show_prayer_times && (
-              <PrayerTimeIndicator
-                calculationMethod={userPreferences.prayer_calculation_method}
-                school={userPreferences.prayer_school}
-                onToggleVisibility={togglePrayerTimes}
-                userId={userId}
-              />
-            )}
-
-            {/* Primary Actions */}
-            <Card className="dark:bg-gray-800 dark:border-gray-700">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 dark:text-white">
-                  <Play className="h-5 w-5" />
-                  Continue Learning
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {/* Continue Journey */}
-                  <JourneyButton
-                    userId={userId}
-                    userLevel={userData.english_level || "A1"}
-                    className="h-32 flex flex-col items-center justify-center gap-3 bg-gradient-to-r from-emerald-600 to-blue-600 text-white rounded-lg hover:from-emerald-700 hover:to-blue-700"
-                    onScenarioStart={(scenarioId) => {
-                      router.push(
-                        `/guards/scenarios/${scenarioId}?userId=${userId}`
-                      );
-                    }}
-                  />
-
-                  {/* Practice Conversation */}
-                  <PracticeConversationButton
-                    userId={userId}
-                    segment="guard"
-                    icon={Sparkles}
-                    title="Practice Conversation"
-                    subtitle="AI-powered chat"
-                    className="h-32 flex flex-col items-center justify-center gap-3 border-2 border-purple-300 hover:bg-purple-50 rounded-lg"
-                    onCreated={(sid) => console.log("Session:", sid)}
-                  />
-
-                  {/* Challenge Mode */}
-                  <Button
-                    variant="outline"
-                    className="h-32 flex flex-col items-center justify-center gap-3 border-2 border-orange-300 hover:bg-orange-50 rounded-lg"
-                    onClick={() => setShowChallengeMode(true)}
-                  >
-                    <Trophy className="w-10 h-10 text-orange-600" />
-                    <span className="font-medium text-base dark:text-white">
-                      Challenge Mode
-                    </span>
-                    <span className="text-sm text-gray-600 dark:text-white">
-                      Test your skills
-                    </span>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Stats Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <AssessmentDashboardCard userId={userId} />
-              <ChallengeStatsCard
-                challengeStats={userData?.challenge_stats || null}
-                loading={loading}
-              />
-
-              {/* Progress Overview */}
-              <Card className="dark:bg-gray-800 dark:border-gray-700">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 dark:text-white">
-                    <TrendingUp className="h-5 w-5" />
-                    Your Progress
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4 text-center">
-                      <div>
-                        <div className="text-2xl font-bold text-emerald-600">
-                          {userData.completed_scenarios}
+                {/* Hero Section */}
+                <Card
+                  className={`bg-gradient-to-r ${levelInfo.color} text-white border-0`}
+                >
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center text-3xl">
+                          <div
+                            className={`${levelInfo.badgeColor} text-white font-bold text-lg px-3 py-1 rounded-lg`}
+                          >
+                            {levelInfo.badge}
+                          </div>
                         </div>
-                        <div className="text-xs text-gray-500">Completed</div>
-                      </div>
-                      <div>
-                        <div className="text-2xl font-bold text-blue-600">
-                          {userData.average_score}%
-                        </div>
-                        <div className="text-xs text-gray-500">Avg Score</div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <div className="flex justify-between text-sm mb-2">
-                        <span>Overall Progress</span>
-                        <span>
-                          {userData.completed_scenarios}/
-                          {userData.total_scenarios}
-                        </span>
-                      </div>
-                      <Progress value={completionPct} className="h-3" />
-                      <p className="text-xs text-gray-500 mt-1">
-                        {Math.round(completionPct)}% complete
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Recommended Scenarios */}
-            <Card className="dark:bg-gray-800 dark:border-gray-700">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 dark:text-white">
-                  <Zap className="h-5 w-5 text-yellow-500" />
-                  Recommended Just For You
-                </CardTitle>
-                <p className="text-sm text-gray-600">
-                  Based on your {userData.english_level} level and learning
-                  goals
-                </p>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {personalizedScenarios.map((scenario) => (
-                    <div
-                      key={scenario.id}
-                      className="border rounded-lg p-4 hover:shadow-md transition-shadow"
-                    >
-                      <div className="flex items-start justify-between mb-3">
                         <div>
-                          <h4 className="font-semibold text-gray-900">
-                            {scenario.title}
-                          </h4>
-                          <p className="text-sm text-blue-600 mb-1">
-                            {scenario.why_recommended}
+                          <h2 className="text-2xl font-bold">
+                            {levelInfo.title}
+                          </h2>
+                          <p className="text-white/90">
+                            {userData.english_level} Level •{" "}
+                            {userData.completed_scenarios} scenarios completed
+                          </p>
+                          <p className="text-white/95 mt-2 max-w-lg">
+                            {motivationalMessage}
                           </p>
                         </div>
-                        <Badge
-                          variant={
-                            scenario.relevance_score >= 80
-                              ? "default"
-                              : "secondary"
-                          }
-                        >
-                          {scenario.relevance_score}% match
-                        </Badge>
                       </div>
 
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3 text-sm text-gray-500">
-                          <span>{scenario.difficulty}</span>
-                          <span>•</span>
-                          <span>{scenario.duration}</span>
+                      <div className="text-right">
+                        <div className="text-4xl font-bold">
+                          {userData.current_streak}
                         </div>
+                        <div className="text-white/90">day streak</div>
+
+                        {/* Prayer Times Toggle */}
                         <Button
+                          onClick={togglePrayerTimes}
+                          variant="ghost"
                           size="sm"
-                          className="bg-gradient-to-r from-emerald-600 to-blue-600"
+                          className="mt-4 text-white/80 hover:text-white hover:bg-white/20"
                         >
-                          Start
-                          <ArrowRight className="w-4 h-4 ml-1" />
+                          {userPreferences.show_prayer_times ? (
+                            <EyeOff className="w-4 h-4 mr-2" />
+                          ) : (
+                            <Eye className="w-4 h-4 mr-2" />
+                          )}
+                          {userPreferences.show_prayer_times
+                            ? "Hide Prayers"
+                            : "Show Prayers"}
                         </Button>
                       </div>
                     </div>
-                  ))}
+                  </CardContent>
+                </Card>
+
+                {/* Prayer Times - Collapsible */}
+                {userPreferences.show_prayer_times && (
+                  <PrayerTimeIndicator
+                    calculationMethod={
+                      userPreferences.prayer_calculation_method
+                    }
+                    school={userPreferences.prayer_school}
+                    onToggleVisibility={togglePrayerTimes}
+                    userId={userId}
+                  />
+                )}
+
+                {/* Primary Actions */}
+                <Card className="dark:bg-gray-800 dark:border-gray-700">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 dark:text-white">
+                      <Play className="h-5 w-5" />
+                      Continue Learning
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {/* AI Learning Path Teaser */}
+                      <Button
+                        onClick={() => setShowPersonalizedPath(true)}
+                        className="h-32 flex flex-col items-center justify-center gap-3 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-lg hover:from-yellow-600 hover:to-orange-600 relative"
+                      >
+                        <Sparkles className="w-10 h-10" />
+                        <span className="font-medium text-base">
+                          AI Learning Path
+                        </span>
+                        <span className="text-sm opacity-90">
+                          Personalized for you
+                        </span>
+                        <Badge className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 py-1">
+                          NEW
+                        </Badge>
+                      </Button>
+                      {/* Continue Journey */}
+                      <JourneyButton
+                        userId={userId}
+                        userLevel={userData.english_level || "A1"}
+                        className="h-32 flex flex-col items-center justify-center gap-3 bg-gradient-to-r from-emerald-600 to-blue-600 text-white rounded-lg hover:from-emerald-700 hover:to-blue-700"
+                        onScenarioStart={(scenarioId) => {
+                          router.push(
+                            `/guards/scenarios/${scenarioId}?userId=${userId}`
+                          );
+                        }}
+                      />
+
+                      {/* Practice Conversation */}
+                      <PracticeConversationButton
+                        userId={userId}
+                        segment="guard"
+                        icon={Sparkles}
+                        title="Practice Conversation"
+                        subtitle="AI-powered chat"
+                        className="h-32 flex flex-col items-center justify-center gap-3 border-2 border-purple-300 hover:bg-purple-50 rounded-lg"
+                        onCreated={(sid) => console.log("Session:", sid)}
+                      />
+
+                      {/* Challenge Mode */}
+                      <Button
+                        variant="outline"
+                        className="h-32 flex flex-col items-center justify-center gap-3 border-2 border-orange-300 hover:bg-orange-50 rounded-lg"
+                        onClick={() => setShowChallengeMode(true)}
+                      >
+                        <Trophy className="w-10 h-10 text-orange-600" />
+                        <span className="font-medium text-base dark:text-white">
+                          Challenge Mode
+                        </span>
+                        <span className="text-sm text-gray-600 dark:text-white">
+                          Test your skills
+                        </span>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Stats Overview */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <AssessmentDashboardCard userId={userId} />
+
+                  {/* Progress Overview */}
+                  <Card className="dark:bg-gray-800 dark:border-gray-700">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 dark:text-white">
+                        <TrendingUp className="h-5 w-5" />
+                        Your Progress
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4 text-center">
+                          <div>
+                            <div className="text-2xl font-bold text-emerald-600">
+                              {userData.completed_scenarios}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              Completed
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-2xl font-bold text-blue-600">
+                              {userData.average_score}%
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              Avg Score
+                            </div>
+                          </div>
+                        </div>
+
+                        <div>
+                          <div className="flex justify-between text-sm mb-2">
+                            <span>Overall Progress</span>
+                            <span>
+                              {userData.completed_scenarios}/
+                              {userData.total_scenarios}
+                            </span>
+                          </div>
+                          <Progress value={completionPct} className="h-3" />
+                          <p className="text-xs text-gray-500 mt-1">
+                            {Math.round(completionPct)}% complete
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
-              </CardContent>
-            </Card>
 
-            {/* Recent Achievements */}
-            <Card className="dark:bg-gray-800 dark:border-gray-700">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 dark:text-white">
-                  <Award className="h-5 w-5 text-yellow-500" />
-                  Recent Achievements
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {achievements.slice(0, 3).map((achievement) => (
-                    <div
-                      key={achievement.id}
-                      className={`p-4 rounded-lg border-2 transition-all ${
-                        achievement.unlocked
-                          ? "border-yellow-200 bg-yellow-50"
-                          : "border-gray-200 bg-gray-50"
-                      }`}
-                    >
-                      <div className="text-center">
-                        <div className="text-3xl mb-2">{achievement.icon}</div>
-                        <h4
-                          className={`font-semibold mb-1 ${
-                            achievement.unlocked
-                              ? "text-yellow-800"
-                              : "text-gray-600"
-                          }`}
+                {/* Recommended Scenarios */}
+                <Card className="dark:bg-gray-800 dark:border-gray-700">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 dark:text-white">
+                      <Zap className="h-5 w-5 text-yellow-500" />
+                      Recommended Just For You
+                    </CardTitle>
+                    <p className="text-sm text-gray-600">
+                      Based on your {userData.english_level} level and learning
+                      goals
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {personalizedScenarios.map((scenario) => (
+                        <div
+                          key={scenario.id}
+                          className="border rounded-lg p-4 hover:shadow-md transition-shadow"
                         >
-                          {achievement.title}
-                        </h4>
-                        <p className="text-sm text-gray-600 mb-3">
-                          {achievement.description}
-                        </p>
-
-                        {achievement.progress !== undefined &&
-                          achievement.total && (
+                          <div className="flex items-start justify-between mb-3">
                             <div>
-                              <Progress
-                                value={
-                                  (achievement.progress / achievement.total) *
-                                  100
-                                }
-                                className="h-2 mb-1"
-                              />
-                              <p className="text-xs text-gray-500">
-                                {achievement.progress}/{achievement.total}
+                              <h4 className="font-semibold text-gray-900">
+                                {scenario.title}
+                              </h4>
+                              <p className="text-sm text-blue-600 mb-1">
+                                {scenario.why_recommended}
                               </p>
                             </div>
-                          )}
+                            <Badge
+                              variant={
+                                scenario.relevance_score >= 80
+                                  ? "default"
+                                  : "secondary"
+                              }
+                            >
+                              {scenario.relevance_score}% match
+                            </Badge>
+                          </div>
 
-                        {achievement.unlocked && (
-                          <CheckCircle className="w-5 h-5 text-yellow-600 mx-auto mt-2" />
-                        )}
-                      </div>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3 text-sm text-gray-500">
+                              <span>{scenario.difficulty}</span>
+                              <span>•</span>
+                              <span>{scenario.duration}</span>
+                            </div>
+                            <Button
+                              size="sm"
+                              className="bg-gradient-to-r from-emerald-600 to-blue-600"
+                            >
+                              Start
+                              <ArrowRight className="w-4 h-4 ml-1" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
+
+                {/* Recent Achievements */}
+                <Card className="dark:bg-gray-800 dark:border-gray-700">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 dark:text-white">
+                      <Award className="h-5 w-5 text-yellow-500" />
+                      Recent Achievements
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {achievements.slice(0, 3).map((achievement) => (
+                        <div
+                          key={achievement.id}
+                          className={`p-4 rounded-lg border-2 transition-all ${
+                            achievement.unlocked
+                              ? "border-yellow-200 bg-yellow-50"
+                              : "border-gray-200 bg-gray-50"
+                          }`}
+                        >
+                          <div className="text-center">
+                            <div className="text-3xl mb-2">
+                              {achievement.icon}
+                            </div>
+                            <h4
+                              className={`font-semibold mb-1 ${
+                                achievement.unlocked
+                                  ? "text-yellow-800"
+                                  : "text-gray-600"
+                              }`}
+                            >
+                              {achievement.title}
+                            </h4>
+                            <p className="text-sm text-gray-600 mb-3">
+                              {achievement.description}
+                            </p>
+
+                            {achievement.progress !== undefined &&
+                              achievement.total && (
+                                <div>
+                                  <Progress
+                                    value={
+                                      (achievement.progress /
+                                        achievement.total) *
+                                      100
+                                    }
+                                    className="h-2 mb-1"
+                                  />
+                                  <p className="text-xs text-gray-500">
+                                    {achievement.progress}/{achievement.total}
+                                  </p>
+                                </div>
+                              )}
+
+                            {achievement.unlocked && (
+                              <CheckCircle className="w-5 h-5 text-yellow-600 mx-auto mt-2" />
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </>
+            )}
           </div>
         </div>
       </main>
@@ -1374,16 +1456,6 @@ export default function EnhancedGuardDashboard({
                 <X className="w-6 h-6" />
               </Button>
             </div>
-            <ChallengeMode
-              userLevel={userData?.english_level || "A1"}
-              userDialect={userData?.dialect || "gulf"}
-              userId={userId}
-              initialLoading
-              bootDelayMs={1000}
-              onComplete={() => {
-                refreshDashboardData();
-              }}
-            />
           </div>
         </div>
       )}

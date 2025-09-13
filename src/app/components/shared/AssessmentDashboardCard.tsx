@@ -1,4 +1,4 @@
-// components/guards/AssessmentDashboardCard.tsx
+// components/shared/AssessmentDashboardCard.tsx
 "use client";
 
 import { useState, useEffect } from "react";

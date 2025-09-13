@@ -23,7 +23,7 @@ import {
   EyeOff,
 } from "lucide-react";
 
-type UserType = "guard" | "guide" | "professional";
+type UserType = "guard" | "tourist_guide" | "professional";
 type Dialect = "gulf" | "egyptian" | "levantine" | "standard";
 
 const EMAIL_RE =
@@ -49,12 +49,12 @@ function SignUpForm() {
   // Query param: guard | guide | professional
   const userType = useMemo<UserType>(() => {
     const q = sp.get("type");
-    return q === "guide" || q === "professional" ? q : "guard";
+    return q === "tourist_guide" || q === "professional" ? q : "guard";
   }, [sp]);
 
   // DB constraint only allows guard | professional
   const dbUserType: "guard" | "professional" =
-    userType === "guide" ? "guard" : userType;
+    userType === "tourist_guide" ? "guard" : userType;
 
   const [fullName, setFullName] = useState("");
   const [dialect, setDialect] = useState<Dialect>("standard");
@@ -81,7 +81,7 @@ function SignUpForm() {
             "Team progress tracking",
           ],
         };
-      case "guide":
+      case "tourist_guide":
         return {
           title: "Join as Tour Guide",
           subtitle: "Lead international visitors with confidence",
@@ -138,7 +138,7 @@ function SignUpForm() {
       setError("Password must be at least 8 characters long.");
       return false;
     }
-    if ((userType === "guard" || userType === "guide") && !dialect) {
+    if ((userType === "guard" || userType === "tourist_guide") && !dialect) {
       setError("Please select your Arabic dialect.");
       return false;
     }
@@ -150,7 +150,7 @@ function SignUpForm() {
     switch (type) {
       case "professional":
         return "/professionals/dashboard";
-      case "guide":
+      case "tourist_guide":
         return "/guides/dashboard";
       case "guard":
       default:
@@ -360,7 +360,7 @@ function SignUpForm() {
                   </div>
                 </div>
 
-                {(userType === "guard" || userType === "guide") && (
+                {(userType === "guard" || userType === "tourist_guide") && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Arabic Dialect

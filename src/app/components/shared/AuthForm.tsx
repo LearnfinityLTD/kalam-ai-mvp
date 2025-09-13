@@ -18,8 +18,8 @@ import {
 } from "lucide-react";
 
 type Props = {
-  userType: "guard" | "professional"; // For database operations
-  displayType?: "guard" | "professional" | "guide"; // For UI display
+  userType: "guard" | "professional" | "tourist_guide"; // For database operations
+  displayType?: "guard" | "professional" | "tourist_guide"; // For UI display
   redirectTo?: string;
 };
 
@@ -50,7 +50,7 @@ export default function AuthForm({ userType, displayType, redirectTo }: Props) {
             "Access your personalized mosque scenarios and tourist interaction practice",
           signupText: "Join as Mosque Host",
         };
-      case "guide":
+      case "tourist_guide":
         return {
           title: "Tour Guide Sign In",
           subtitle: "Welcome back! Lead with confidence",
@@ -112,6 +112,7 @@ export default function AuthForm({ userType, displayType, redirectTo }: Props) {
         user_type: userType,
         is_admin: false,
       });
+      console.log("useDFDG", userType);
       if (insertErr) throw insertErr;
     }
   };
@@ -170,13 +171,19 @@ export default function AuthForm({ userType, displayType, redirectTo }: Props) {
         .eq("id", userId)
         .maybeSingle();
       if (meErr) throw meErr;
-
-      const computedDest =
-        userType === "guard"
-          ? me?.is_admin
-            ? "/guards/admin"
-            : "/guards/dashboard"
-          : "/professionals/dashboard";
+      console.log("HERE", userType);
+      const computedDest = (() => {
+        switch (userType) {
+          case "guard":
+            return me?.is_admin ? "/guards/admin" : "/guards/dashboard";
+          case "tourist_guide":
+            return "/tour-guides/dashboard";
+          case "professional":
+            return "/professionals/dashboard";
+          default:
+            return "/dashboard"; // fallback
+        }
+      })();
 
       router.replace(redirectTo || computedDest);
     } catch (err: unknown) {

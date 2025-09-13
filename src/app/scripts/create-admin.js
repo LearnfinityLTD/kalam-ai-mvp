@@ -2,12 +2,8 @@
 import { createClient } from "@supabase/supabase-js";
 import crypto from "crypto";
 import dotenv from "dotenv";
-import { fileURLToPath } from "url";
-import { dirname, join } from "path";
 import sgMail from "@sendgrid/mail";
 // Load environment variables from .env.local
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 dotenv.config({ path: ".env.local" });
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -55,7 +51,7 @@ async function createAdmin(adminData) {
         console.log("Deleted existing user");
       }
     } catch (cleanupError) {
-      console.log("Cleanup completed (no existing user)");
+      console.log("Cleanup completed (no existing user)", cleanupError);
     }
 
     // 1. Create user in Supabase Auth (trigger will auto-create profile)

@@ -5,18 +5,13 @@ import { useState } from "react";
 import NavBar from "@/app/components/landing/shared/NavBar";
 import Footer from "@/app/components/shared/Footer";
 import {
-  Shield,
   MessageSquare,
-  Target,
   CheckCircle,
-  Users,
   TrendingUp,
   Clock,
   Globe,
-  Star,
   ArrowRight,
   Calendar,
-  Phone,
 } from "lucide-react";
 import { FAQ } from "../components/landing/shared/FAQ";
 
@@ -114,25 +109,6 @@ export default function DemoPage() {
       description:
         "Works with Gulf, Egyptian, Levantine, and Modern Standard Arabic speakers",
       stat: "4 Arabic dialects",
-    },
-  ];
-
-  const testimonials = [
-    {
-      quote:
-        "Our guards went from nervous to confident with international visitors in just 8 weeks. Tourist satisfaction scores increased 40%.",
-      author: "Ahmed Al-Rahman",
-      title: "Facilities Manager",
-      company: "Grand Mosque of Kuwait",
-      rating: 5,
-    },
-    {
-      quote:
-        "Training time reduced from 6 months to 2 months. Our tour booking revenue increased 60% with better English communication.",
-      author: "Fatima Hassan",
-      title: "Operations Director",
-      company: "Cairo Heritage Tours",
-      rating: 5,
     },
   ];
 

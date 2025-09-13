@@ -1,6 +1,6 @@
 // ContactSection.tsx using whatsapp / calendly
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import { Globe } from "lucide-react";
 import { UserType } from "./index";
 import { CalendlyBooking } from "./CalendlyBooking";

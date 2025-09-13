@@ -6,15 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
 import { Progress } from "@/ui/progress";
 import { Badge } from "@/ui/badge";
 import { Button } from "@/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/tabs";
-import { Input } from "@/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/ui/select";
 import {
   Users,
   Shield,
@@ -23,20 +14,13 @@ import {
   Briefcase,
   Database,
   Clock,
-  Target,
-  Search,
   Download,
   Edit,
   Eye,
   UserPlus,
-  MoreHorizontal,
   Plus,
-  Filter,
-  Menu,
-  X,
   PanelLeftClose,
   PanelLeftOpen,
-  Award,
   TrendingUp,
   BarChart3,
   Settings,
@@ -51,9 +35,6 @@ import {
   DollarSign,
   Zap,
   AlertTriangle,
-  RefreshCw,
-  CheckCircle,
-  Star,
   LineChart,
 } from "lucide-react";
 
@@ -89,7 +70,7 @@ export default function SuperAdminDashboard() {
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeSection, setActiveSection] = useState("overview");
-  const [searchTerm, setSearchTerm] = useState("");
+  //   const [searchTerm, setSearchTerm] = useState(""); TODO
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -275,7 +256,6 @@ export default function SuperAdminDashboard() {
   };
 
   const NavItem = ({
-    id,
     label,
     icon: Icon,
     badge,

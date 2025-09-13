@@ -237,7 +237,7 @@ export async function POST(request: NextRequest) {
 }
 
 // Optional: Add a GET endpoint to fetch organizations
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const supabase = await createClient();
 

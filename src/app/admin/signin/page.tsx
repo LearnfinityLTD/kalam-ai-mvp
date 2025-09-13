@@ -32,7 +32,6 @@ function LoadingFallback() {
 
 function AdminSignInContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const supabase = createClient();
 
   const [email, setEmail] = useState("");
@@ -41,15 +40,10 @@ function AdminSignInContent() {
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
 
-  useEffect(() => {
-    checkExistingSession();
-  }, []);
-
   const checkExistingSession = async () => {
     try {
       const {
         data: { user },
-        error,
       } = await supabase.auth.getUser();
 
       if (user) {
@@ -76,6 +70,10 @@ function AdminSignInContent() {
       setChecking(false);
     }
   };
+
+  useEffect(() => {
+    checkExistingSession();
+  }, [checkExistingSession]);
 
   const validateForm = () => {
     if (!EMAIL_RE.test(email.trim())) {

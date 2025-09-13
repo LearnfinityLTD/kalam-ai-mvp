@@ -9,7 +9,6 @@ import {
   MapPin,
   Briefcase,
   Mail,
-  Phone,
   Building,
   Users,
   Clock,

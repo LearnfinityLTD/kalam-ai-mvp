@@ -115,6 +115,7 @@ function ScenarioPageContent() {
         setCurrentStep(progressData?.current_step || 0);
       }
     } catch (error) {
+      console.log(error);
       // Silent catch - errors are handled by checking the data
       setScenario(null);
     } finally {
@@ -143,6 +144,7 @@ function ScenarioPageContent() {
           }
         );
       } catch (error) {
+        console.log(error);
         // Silent catch - progress update is not critical for UX
       }
     }
@@ -419,7 +421,7 @@ function ScenarioPageContent() {
 }
 
 // Scenario Type Components
-function ConversationScenario({ scenario }: { scenario: Scenario }) {
+function ConversationScenario({}: { scenario: Scenario }) {
   return (
     <div className="space-y-4">
       <div className="bg-blue-100 rounded-lg p-4">
@@ -436,7 +438,7 @@ function ConversationScenario({ scenario }: { scenario: Scenario }) {
   );
 }
 
-function ListeningScenario({ scenario }: { scenario: Scenario }) {
+function ListeningScenario({}: { scenario: Scenario }) {
   return (
     <div className="space-y-4">
       <div className="text-center">
@@ -465,7 +467,7 @@ function ListeningScenario({ scenario }: { scenario: Scenario }) {
   );
 }
 
-function VocabularyScenario({ scenario }: { scenario: Scenario }) {
+function VocabularyScenario({}: { scenario: Scenario }) {
   return (
     <div className="space-y-4">
       <div className="text-center">
@@ -489,7 +491,7 @@ function VocabularyScenario({ scenario }: { scenario: Scenario }) {
   );
 }
 
-function CulturalScenario({ scenario }: { scenario: Scenario }) {
+function CulturalScenario({}: { scenario: Scenario }) {
   return (
     <div className="space-y-4">
       <div className="bg-purple-50 rounded-lg p-4">

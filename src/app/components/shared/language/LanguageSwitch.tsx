@@ -18,7 +18,7 @@ export function LanguageSwitch() {
       variant="outline"
       size="sm"
       onClick={handleToggle}
-      className="flex items-center gap-2"
+      className="flex items-center gap-2 dark:text-white"
     >
       <Globe className="w-4 h-4" />
       {locale === "en" ? "العربية" : "English"}

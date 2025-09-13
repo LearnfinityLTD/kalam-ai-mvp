@@ -1,12 +1,8 @@
 // scripts/run-create-admin.js
 import { createAdmin } from "./create-admin.js";
 import dotenv from "dotenv";
-import { fileURLToPath } from "url";
-import { dirname, join } from "path";
 
 // Load environment variables
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 dotenv.config({ path: ".env.local" });
 
 async function runCreateAdmin() {

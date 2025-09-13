@@ -16,10 +16,7 @@ import {
   MapPin,
   Target,
   Trophy,
-  Star,
-  Clock,
   Users,
-  RotateCcw,
 } from "lucide-react";
 import { LanguageSwitch } from "../shared/language/LanguageSwitch";
 
@@ -59,7 +56,6 @@ interface DbQuestion {
 
 export default function SimplifiedAssessmentFlow({
   userId,
-  email,
   isNewUser,
   onComplete,
 }: {

@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  UserPlus,
-  Shield,
-  Play,
-  ArrowRight,
-  Clock,
-  CheckCircle,
-} from "lucide-react";
+import { UserPlus, Shield, Play, ArrowRight, Clock } from "lucide-react";
 
 export default function OnboardingFlow() {
   const steps = [

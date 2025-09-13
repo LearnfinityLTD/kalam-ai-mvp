@@ -31,12 +31,8 @@ export default function AssessmentWrapper({
   const [needsAssessment, setNeedsAssessment] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { t, locale } = useI18n();
+  const { t } = useI18n();
   const supabase = createClient();
-
-  useEffect(() => {
-    checkUserStatus();
-  }, [userId]);
 
   const checkUserStatus = async () => {
     console.log("🔍 Checking user status for userId:", userId);
@@ -78,6 +74,10 @@ export default function AssessmentWrapper({
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    checkUserStatus();
+  }, [userId, checkUserStatus]);
 
   const handleStartAssessment = () => {
     console.log("🎯 Starting assessment from welcome");

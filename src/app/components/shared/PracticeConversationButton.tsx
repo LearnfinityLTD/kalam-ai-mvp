@@ -224,7 +224,7 @@ export default function PracticeConversationButton({
       aria-label={title}
       className={[
         "h-20 w-full",
-        "flex flex-col items-center justify-center gap-2",
+        "flex flex-col items-center justify-center gap-2 dark:text-white",
         "border-purple-300 hover:bg-purple-50",
         "transition-colors",
         loading ? "opacity-80 cursor-wait" : "",
@@ -234,7 +234,7 @@ export default function PracticeConversationButton({
     >
       <Icon className="w-6 h-6 text-purple-600" />
       <span className="font-medium">{title}</span>
-      <span className="text-xs text-gray-600">
+      <span className="text-xs text-gray-600 dark:text-white">
         {loading ? "Starting…" : subtitle}
       </span>
     </Button>

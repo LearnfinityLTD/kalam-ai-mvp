@@ -18,7 +18,6 @@ import {
   Clock,
   Target,
   CheckCircle,
-  Lock,
   ArrowRight,
   BookOpen,
   MessageCircle,

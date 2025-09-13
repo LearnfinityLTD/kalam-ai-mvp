@@ -9,8 +9,6 @@ import {
   Shield,
   BookOpen,
   Clock,
-  EyeOff,
-  CheckCircle,
   Users,
   Play,
   Pause,

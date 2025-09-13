@@ -65,7 +65,6 @@ function LoadingFallback() {
 function FullLearningPathPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { t } = useI18n();
   const supabase = createClient();
 
   const userId = searchParams.get("userId") || "";

@@ -195,6 +195,14 @@ export const translations = {
       profileNotFound: "Profile not found",
       failedToSave: "Failed to save assessment: {{message}}",
     },
+    nav: {
+      dashboard: "Dashboard",
+      progress: "Progress",
+      scenarios: "Scenarios",
+      practice: "Practice",
+      achievements: "Achievements",
+      settings: "Settings",
+    },
   },
   ar: {
     common: {
@@ -379,6 +387,14 @@ export const translations = {
       systemError: "خطأ في النظام: {{message}}",
       profileNotFound: "الملف الشخصي غير موجود",
       failedToSave: "فشل في حفظ التقييم: {{message}}",
+    },
+    nav: {
+      dashboard: "لوحة المعلومات",
+      progress: "التقدم",
+      scenarios: "السيناريوهات",
+      practice: "التمرين",
+      achievements: "الإنجازات",
+      settings: "الإعدادات",
     },
   },
 } as const;

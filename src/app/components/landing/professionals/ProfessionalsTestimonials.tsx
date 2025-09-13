@@ -2,9 +2,6 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/ui/button";
 import {
-  Building2,
-  Users,
-  Calendar,
   CheckCircle,
   Globe,
   TrendingUp,

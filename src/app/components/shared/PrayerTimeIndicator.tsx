@@ -277,6 +277,7 @@ export default function PrayerTimeIndicator({
       localStorage.setItem(key, JSON.stringify(normalized));
       setTimes(normalized);
     } catch (e) {
+      console.log(e);
       toast({
         title: "خطأ",
         description:

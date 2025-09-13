@@ -54,7 +54,6 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     setCurrentLocale(newLocale);
     if (typeof document !== "undefined") {
       document.documentElement.lang = newLocale;
-      document.documentElement.dir = newLocale === "ar" ? "rtl" : "ltr";
     }
     if (typeof localStorage !== "undefined") {
       localStorage.setItem("preferred-language", newLocale);
@@ -64,7 +63,6 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (typeof document !== "undefined") {
       document.documentElement.lang = locale;
-      document.documentElement.dir = locale === "ar" ? "rtl" : "ltr";
     }
   }, [locale]);
 

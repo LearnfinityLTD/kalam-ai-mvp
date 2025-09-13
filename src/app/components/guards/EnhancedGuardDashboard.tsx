@@ -1,4 +1,4 @@
-// components/guards/EnhancedGuardDashboard.tsx
+// components/guards/EnhancedGuardDashboard.tsx - Final Production Ready Version
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -8,15 +8,9 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Calendar,
   Trophy,
-  Target,
-  Clock,
-  Star,
-  Book,
   ArrowRight,
   Play,
-  Users,
   TrendingUp,
   Zap,
   CheckCircle,
@@ -27,7 +21,10 @@ import {
   EyeOff,
   Sparkles,
   X,
-  Info,
+  Settings,
+  Menu,
+  Home,
+  BarChart3,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase";
 import { getUserChallengeStats, ChallengeStats } from "@/utils/challengeApi";
@@ -36,8 +33,6 @@ import AssessmentDashboardCard from "./AssessmentDashboardCard";
 import PracticeConversationButton from "../shared/PracticeConversationButton";
 import ChallengeMode from "./challengeMode/ChallengeMode";
 import { ChallengeStatsCard } from "./challengeMode/ChallengeStats";
-
-// Fixed imports
 import { useI18n } from "@/lib/i18n/context";
 import { LanguageSwitch } from "@/app/components/shared/language/LanguageSwitch";
 import { LocalizedTooltip } from "@/app/components/shared/language/LocalizedTooltip";
@@ -67,6 +62,7 @@ interface UserPreferences {
   show_prayer_times: boolean;
   prayer_calculation_method?: number;
   prayer_school?: number;
+  sidebar_collapsed?: boolean;
 }
 
 interface PersonalizedScenario {
@@ -91,17 +87,22 @@ interface Achievement {
 export default function EnhancedGuardDashboard({
   userId,
   email,
+  onLogout,
 }: {
   userId: string;
   email?: string;
+  onLogout?: () => Promise<void>;
 }) {
   const { t, locale } = useI18n();
+  const router = useRouter();
+  const supabase = createClient();
 
   const [userData, setUserData] = useState<UserData | null>(null);
   const [userPreferences, setUserPreferences] = useState<UserPreferences>({
     show_prayer_times: true,
     prayer_calculation_method: 5,
     prayer_school: 1,
+    sidebar_collapsed: false,
   });
   const [personalizedScenarios, setPersonalizedScenarios] = useState<
     PersonalizedScenario[]
@@ -110,8 +111,79 @@ export default function EnhancedGuardDashboard({
   const [loading, setLoading] = useState(true);
   const [motivationalMessage, setMotivationalMessage] = useState("");
   const [showChallengeMode, setShowChallengeMode] = useState(false);
-  const router = useRouter();
-  const supabase = createClient();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [activeSettingsSection, setActiveSettingsSection] =
+    useState("preferences");
+  const [settingsPreferences, setSettingsPreferences] = useState({
+    soundEffects: true,
+    animations: true,
+    motivationalMessages: true,
+    listeningExercises: true,
+    darkMode: "off" as "off" | "on" | "auto",
+  });
+
+  // Apply dark mode when settings change
+  useEffect(() => {
+    const applyDarkMode = () => {
+      const html = document.documentElement;
+
+      if (settingsPreferences.darkMode === "on") {
+        html.classList.add("dark");
+      } else if (settingsPreferences.darkMode === "off") {
+        html.classList.remove("dark");
+      } else if (settingsPreferences.darkMode === "auto") {
+        // Auto mode - check system preference
+        const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+        if (mediaQuery.matches) {
+          html.classList.add("dark");
+        } else {
+          html.classList.remove("dark");
+        }
+      }
+    };
+
+    applyDarkMode();
+
+    // Listen for system theme changes in auto mode
+    if (settingsPreferences.darkMode === "auto") {
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+      const handleChange = () => applyDarkMode();
+      mediaQuery.addEventListener("change", handleChange);
+
+      return () => mediaQuery.removeEventListener("change", handleChange);
+    }
+  }, [settingsPreferences.darkMode]);
+
+  // Sidebar navigation items
+  const sidebarItems = [
+    { id: "dashboard", label: t("nav.dashboard"), icon: Home, active: true },
+    {
+      id: "progress",
+      label: t("nav.progress"),
+      icon: BarChart3,
+      active: false,
+    },
+    {
+      id: "scenarios",
+      label: t("nav.scenarios"),
+      icon: BookOpen,
+      active: false,
+    },
+    {
+      id: "practice",
+      label: t("nav.practice"),
+      icon: MessageCircle,
+      active: false,
+    },
+    {
+      id: "achievements",
+      label: t("nav.achievements"),
+      icon: Trophy,
+      active: false,
+    },
+    { id: "settings", label: t("nav.settings"), icon: Settings, active: false },
+  ];
 
   const fetchUserPreferences = useCallback(async () => {
     try {
@@ -131,8 +203,10 @@ export default function EnhancedGuardDashboard({
           show_prayer_times: data.show_prayer_times ?? true,
           prayer_calculation_method: data.prayer_calculation_method ?? 5,
           prayer_school: data.prayer_school ?? 1,
+          sidebar_collapsed: data.sidebar_collapsed ?? false,
         };
         setUserPreferences(prefs);
+        setSidebarCollapsed(prefs.sidebar_collapsed);
       } else {
         await createDefaultPreferences();
       }
@@ -148,6 +222,7 @@ export default function EnhancedGuardDashboard({
         show_prayer_times: true,
         prayer_calculation_method: 5,
         prayer_school: 1,
+        sidebar_collapsed: false,
         language_preference: locale,
       };
 
@@ -163,6 +238,32 @@ export default function EnhancedGuardDashboard({
     }
   }, [userId, supabase, locale]);
 
+  const toggleSidebar = useCallback(async () => {
+    const newCollapsed = !sidebarCollapsed;
+    setSidebarCollapsed(newCollapsed);
+
+    try {
+      await supabase.from("user_preferences").upsert(
+        {
+          user_id: userId,
+          sidebar_collapsed: newCollapsed,
+          show_prayer_times: userPreferences.show_prayer_times,
+          prayer_calculation_method: userPreferences.prayer_calculation_method,
+          prayer_school: userPreferences.prayer_school,
+          language_preference: locale,
+        },
+        { onConflict: "user_id" }
+      );
+
+      setUserPreferences((prev) => ({
+        ...prev,
+        sidebar_collapsed: newCollapsed,
+      }));
+    } catch (error) {
+      console.error("Error updating sidebar preference:", error);
+    }
+  }, [userId, sidebarCollapsed, userPreferences, supabase, locale]);
+
   const togglePrayerTimes = useCallback(async () => {
     const newShowPrayerTimes = !userPreferences.show_prayer_times;
 
@@ -173,11 +274,10 @@ export default function EnhancedGuardDashboard({
           show_prayer_times: newShowPrayerTimes,
           prayer_calculation_method: userPreferences.prayer_calculation_method,
           prayer_school: userPreferences.prayer_school,
+          sidebar_collapsed: userPreferences.sidebar_collapsed,
           language_preference: locale,
         },
-        {
-          onConflict: "user_id",
-        }
+        { onConflict: "user_id" }
       );
 
       if (error) {
@@ -194,13 +294,37 @@ export default function EnhancedGuardDashboard({
     }
   }, [userId, userPreferences, supabase, locale]);
 
+  const handleNavigation = (itemId: string) => {
+    switch (itemId) {
+      case "dashboard":
+        setShowSettings(false);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        break;
+      case "settings":
+        setShowSettings(true);
+        break;
+      case "help-center":
+        // Navigate to help center page
+        router.push(`/guards/help-center?userId=${userId}`);
+        break;
+      case "progress":
+      case "scenarios":
+      case "practice":
+      case "achievements":
+        router.push(`/guards/${itemId}?userId=${userId}`);
+        break;
+      default:
+        console.log(`Navigation to ${itemId} not implemented yet`);
+    }
+  };
+
   const generatePersonalizedScenarios = useCallback(
     async (profile: { english_level?: string; recommendations?: string[] }) => {
       const { data: scenarios, error } = await supabase
         .from("scenarios")
         .select("*")
         .eq("segment", "guard")
-        .limit(6);
+        .limit(4);
 
       if (error || !scenarios) return;
 
@@ -224,14 +348,6 @@ export default function EnhancedGuardDashboard({
           whyRecommended = "Recommended to improve your listening skills";
         }
 
-        if (
-          recommendations.includes("Focus on complex cultural scenarios") &&
-          scenario.difficulty === "advanced"
-        ) {
-          relevanceScore += 25;
-          whyRecommended = "Builds on your cultural communication strengths";
-        }
-
         return {
           id: scenario.id,
           title: scenario.title,
@@ -243,9 +359,7 @@ export default function EnhancedGuardDashboard({
       });
 
       setPersonalizedScenarios(
-        personalized
-          .sort((a, b) => b.relevance_score - a.relevance_score)
-          .slice(0, 4)
+        personalized.sort((a, b) => b.relevance_score - a.relevance_score)
       );
     },
     [supabase]
@@ -272,32 +386,6 @@ export default function EnhancedGuardDashboard({
         total: 3,
       },
       {
-        id: "cultural_ambassador",
-        title: "Cultural Ambassador",
-        description: "Excel in cultural sensitivity scenarios",
-        icon: "🤝",
-        unlocked: data.strengths?.includes("Cultural Sensitivity") || false,
-      },
-      {
-        id: "level_master",
-        title: `${data.english_level} Master`,
-        description: `Complete all ${data.english_level} level scenarios`,
-        icon: "🎓",
-        unlocked: false,
-        progress: data.completed_scenarios,
-        total: Math.floor(data.total_scenarios / 5),
-      },
-      {
-        id: "pronunciation_pro",
-        title: "Pronunciation Pro",
-        description: "Score 90%+ on 5 pronunciation exercises",
-        icon: "🗣️",
-        unlocked: data.average_score >= 90 && data.completed_scenarios >= 5,
-        progress:
-          data.average_score >= 90 ? Math.min(data.completed_scenarios, 5) : 0,
-        total: 5,
-      },
-      {
         id: "consistent_learner",
         title: "Consistent Learner",
         description: "Complete your weekly goal 4 weeks in a row",
@@ -306,47 +394,18 @@ export default function EnhancedGuardDashboard({
         progress: 2,
         total: 4,
       },
-      {
-        id: "challenge_newbie",
-        title: "Challenge Explorer",
-        description: "Complete your first challenge",
-        icon: "🚀",
-        unlocked: (challengeStats?.total_challenges_completed || 0) >= 1,
-      },
-      {
-        id: "challenge_master",
-        title: "Challenge Master",
-        description: "Complete 10 challenges",
-        icon: "🏆",
-        unlocked: (challengeStats?.total_challenges_completed || 0) >= 10,
-        progress: Math.min(challengeStats?.total_challenges_completed || 0, 10),
-        total: 10,
-      },
-      {
-        id: "high_scorer",
-        title: "High Scorer",
-        description: "Achieve 90+ average score",
-        icon: "⭐",
-        unlocked: (challengeStats?.average_challenge_score || 0) >= 90,
-      },
-      {
-        id: "streak_champion",
-        title: "Streak Champion",
-        description: "Get a 10+ answer streak in challenges",
-        icon: "🔥",
-        unlocked: (challengeStats?.best_challenge_streak || 0) >= 10,
-        progress: Math.min(challengeStats?.best_challenge_streak || 0, 10),
-        total: 10,
-      },
     ];
 
     setAchievements(achievements);
   }, []);
 
+  const isActiveRoute = (itemId: string) => {
+    if (itemId === "settings") return showSettings;
+    if (itemId === "dashboard") return !showSettings;
+    return false;
+  };
   const generateMotivationalMessage = useCallback((data: UserData) => {
-    const level = data.english_level;
     const streak = data.current_streak;
-    const strengths = data.strengths || [];
 
     let message = "";
 
@@ -357,23 +416,35 @@ export default function EnhancedGuardDashboard({
       message = `${streak} day${
         streak === 1 ? "" : "s"
       } strong! Keep going to build momentum.`;
-    } else if (streak >= 7) {
-      message = `Amazing ${streak}-day streak! You're becoming a true English communication expert.`;
     } else {
-      message = `${streak} days in a row! You're building excellent learning habits.`;
-    }
-
-    if (strengths.includes("Cultural Sensitivity")) {
-      message += " Your cultural awareness really shines through!";
-    }
-
-    if (level === "B2" || level === "C1") {
-      message +=
-        " Your advanced English skills are impressive - you're ready for complex scenarios.";
+      message = `Amazing ${streak}-day streak! You're becoming a true English communication expert.`;
     }
 
     setMotivationalMessage(message);
   }, []);
+
+  const saveDarkModePreference = useCallback(
+    async (darkMode: "off" | "on" | "auto") => {
+      try {
+        await supabase.from("user_preferences").upsert(
+          {
+            user_id: userId,
+            dark_mode: darkMode,
+            show_prayer_times: userPreferences.show_prayer_times,
+            prayer_calculation_method:
+              userPreferences.prayer_calculation_method,
+            prayer_school: userPreferences.prayer_school,
+            sidebar_collapsed: userPreferences.sidebar_collapsed,
+            language_preference: locale,
+          },
+          { onConflict: "user_id" }
+        );
+      } catch (error) {
+        console.error("Error saving dark mode preference:", error);
+      }
+    },
+    [userId, userPreferences, supabase, locale]
+  );
 
   const fetchPersonalizedData = useCallback(async () => {
     try {
@@ -483,448 +554,825 @@ export default function EnhancedGuardDashboard({
   const levelInfo = {
     A1: {
       color: "from-red-400 to-red-600",
-      emoji: "🌱",
+      badge: "A1",
+      badgeColor: "bg-red-500",
       title: "Foundation Builder",
     },
     A2: {
       color: "from-orange-400 to-orange-600",
-      emoji: "🌿",
+      badge: "A2",
+      badgeColor: "bg-orange-500",
       title: "Confident Helper",
     },
     B1: {
       color: "from-yellow-400 to-yellow-600",
-      emoji: "🌳",
+      badge: "B1",
+      badgeColor: "bg-yellow-500",
       title: "Cultural Bridge",
     },
     B2: {
       color: "from-blue-400 to-blue-600",
-      emoji: "🦋",
+      badge: "B2",
+      badgeColor: "bg-blue-500",
       title: "Expert Communicator",
     },
     C1: {
       color: "from-green-400 to-green-600",
-      emoji: "🦅",
+      badge: "C1",
+      badgeColor: "bg-green-500",
       title: "Master Ambassador",
     },
   }[userData.english_level || "A1"] || {
     color: "from-gray-400 to-gray-600",
-    emoji: "📝",
+    badge: "?",
+    badgeColor: "bg-gray-500",
     title: "Learning",
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
-      {/* Header with Language Switch */}
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-gray-900">
-          {t("common.dashboard")}
-        </h1>
-        <LanguageSwitch />
-      </div>
-
-      {/* Personalized Welcome */}
-      <div
-        className={`bg-gradient-to-r ${levelInfo.color} rounded-xl p-6 text-white relative`}
+    <div
+      className="flex min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors"
+      dir="ltr"
+    >
+      {/* Sidebar */}
+      <aside
+        className={`${
+          sidebarCollapsed ? "w-20" : "w-64"
+        } bg-white dark:bg-gray-800 shadow-lg transition-all duration-300 flex flex-col order-first`}
+        style={{ direction: "ltr" }}
       >
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <span className="text-3xl">{levelInfo.emoji}</span>
-              <div>
-                <LocalizedTooltip translationKey="tooltips.heroBanner">
-                  <h2 className="text-2xl font-bold cursor-help">
-                    {levelInfo.title}{" "}
-                    <Info className="inline-block w-4 h-4 ml-1 opacity-80" />
-                  </h2>
-                </LocalizedTooltip>
-                <LocalizedTooltip translationKey="tooltips.heroLevel">
-                  <p className="text-white/90 cursor-help">
-                    {userData.english_level} {t("common.level")} •{" "}
-                    {userData.completed_scenarios} {t("common.scenarios")}{" "}
-                    {t("common.completed")}
-                  </p>
-                </LocalizedTooltip>
+        {/* User Profile & Controls - At Top */}
+        {sidebarCollapsed ? (
+          /* Collapsed Header */
+          <div className="p-3 border-b space-y-4">
+            {/* Logo centered */}
+            <div className="flex justify-center">
+              <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-sm">
+                كلام
               </div>
             </div>
-            <p className="text-white/95 text-lg max-w-2xl">
-              {motivationalMessage}
-            </p>
-          </div>
 
-          <div className="text-right flex flex-col items-end">
-            <LocalizedTooltip translationKey="tooltips.heroStreak">
-              <div className="text-4xl font-bold cursor-help">
-                {userData.current_streak}
-              </div>
-            </LocalizedTooltip>
-            <div className="text-white/90">{t("common.dayStreak")}</div>
-
-            <LocalizedTooltip translationKey="tooltips.prayersToggle">
+            {/* Controls stacked */}
+            <div className="flex flex-col gap-3 items-center">
               <Button
-                onClick={togglePrayerTimes}
                 variant="ghost"
                 size="sm"
-                className="mt-4 text-white/80 hover:text-white hover:bg-white/20 cursor-help"
+                onClick={toggleSidebar}
+                className="w-10 h-10 p-0 hover:bg-gray-100"
               >
-                {userPreferences.show_prayer_times ? (
-                  <EyeOff className="w-4 h-4 mr-2" />
-                ) : (
-                  <Eye className="w-4 h-4 mr-2" />
-                )}
-                {userPreferences.show_prayer_times
-                  ? t("common.hidePrayers")
-                  : t("common.showPrayers")}
+                <Menu className="w-5 h-5" />
               </Button>
-            </LocalizedTooltip>
+
+              {onLogout && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onLogout}
+                  className="w-10 h-10 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                  title="Logout"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                    />
+                  </svg>
+                </Button>
+              )}
+            </div>
+          </div>
+        ) : (
+          /* Expanded Header */
+          <div className="p-4 border-b space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-sm">
+                  كلام
+                </div>
+                <span className="text-xl font-bold text-gray-900 dark:text-white">
+                  KalamAI
+                </span>
+              </div>
+
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={toggleSidebar}
+                  className="flex-shrink-0"
+                >
+                  <Menu className="w-4 h-4" />
+                </Button>
+
+                {onLogout && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={onLogout}
+                    className="flex-shrink-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                    title="Logout"
+                  >
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                      />
+                    </svg>
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            <div className="px-2 py-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
+              <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                {userData?.full_name || email?.split("@")[0] || "Guardian"}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-300 truncate">
+                {email}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Navigation */}
+        <nav className={`flex-1 ${sidebarCollapsed ? "p-2" : "p-4"}`}>
+          <div
+            className={`space-y-2 ${
+              sidebarCollapsed ? "flex flex-col items-center" : ""
+            }`}
+          >
+            {sidebarItems.map((item) => {
+              const IconComponent = item.icon;
+              const isActive = isActiveRoute(item.id);
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => handleNavigation(item.id)}
+                  className={`${
+                    sidebarCollapsed
+                      ? "w-12 h-12 flex items-center justify-center"
+                      : "w-full flex items-center gap-3 px-3 py-2"
+                  } rounded-lg transition-all duration-200 ${
+                    isActive
+                      ? "bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300 border-r-2 border-emerald-500 shadow-sm"
+                      : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white hover:shadow-sm"
+                  }`}
+                  title={sidebarCollapsed ? item.label : undefined}
+                >
+                  <IconComponent className="w-6 h-6" />
+                  {!sidebarCollapsed && (
+                    <span className="font-medium">{item.label}</span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </nav>
+      </aside>
+      {showSettings && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg w-full max-w-4xl h-[80vh] overflow-auto shadow-xl">
+            <div className="sticky top-0 bg-white dark:bg-gray-800 border-b p-6 flex justify-between items-center">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                Settings
+              </h1>
+              <Button
+                variant="ghost"
+                onClick={() => setShowSettings(false)}
+                className="hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <X className="w-6 h-6" />
+              </Button>
+            </div>
+
+            <div className="flex">
+              {/* Settings Sidebar */}
+              <div className="w-80 border-r dark:border-gray-700 p-6">
+                <div className="space-y-6">
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                      Account
+                    </h2>
+                    <div className="space-y-2">
+                      <button
+                        onClick={() => setActiveSettingsSection("preferences")}
+                        className={`w-full text-left px-3 py-2 rounded-lg font-medium transition-colors ${
+                          activeSettingsSection === "preferences"
+                            ? "bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300 border-r-2 border-emerald-500"
+                            : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white"
+                        }`}
+                      >
+                        Preferences
+                      </button>
+                      <button
+                        onClick={() => setActiveSettingsSection("privacy")}
+                        className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
+                          activeSettingsSection === "privacy"
+                            ? "bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300 border-r-2 border-emerald-500 font-medium"
+                            : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white"
+                        }`}
+                      >
+                        Privacy settings
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                      Support
+                    </h2>
+                    <div className="space-y-2">
+                      <button
+                        onClick={() => {
+                          setShowSettings(false);
+                          handleNavigation("help-center");
+                        }}
+                        className="w-full text-left px-3 py-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white transition-colors"
+                      >
+                        Help Center
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Settings Content */}
+              <div className="flex-1 p-6">
+                <div className="max-w-2xl">
+                  {activeSettingsSection === "preferences" && (
+                    <>
+                      <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
+                        Preferences
+                      </h2>
+
+                      {/* Lesson Experience */}
+                      <div className="mb-8">
+                        <h3 className="text-lg font-medium text-gray-700 dark:text-white mb-6 pb-2 border-b dark:border-gray-600">
+                          Lesson experience
+                        </h3>
+
+                        <div className="space-y-6">
+                          <div className="flex items-center justify-between">
+                            <span className="text-gray-700 dark:text-gray-300">
+                              Sound effects
+                            </span>
+                            <button
+                              onClick={() =>
+                                setSettingsPreferences((prev) => ({
+                                  ...prev,
+                                  soundEffects: !prev.soundEffects,
+                                }))
+                              }
+                              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                                settingsPreferences.soundEffects
+                                  ? "bg-blue-500"
+                                  : "bg-gray-300 dark:bg-gray-600"
+                              }`}
+                            >
+                              <span
+                                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                                  settingsPreferences.soundEffects
+                                    ? "translate-x-6"
+                                    : "translate-x-1"
+                                }`}
+                              />
+                            </button>
+                          </div>
+
+                          <div className="flex items-center justify-between">
+                            <span className="text-gray-700 dark:text-gray-300">
+                              Animations
+                            </span>
+                            <button
+                              onClick={() =>
+                                setSettingsPreferences((prev) => ({
+                                  ...prev,
+                                  animations: !prev.animations,
+                                }))
+                              }
+                              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                                settingsPreferences.animations
+                                  ? "bg-blue-500"
+                                  : "bg-gray-300 dark:bg-gray-600"
+                              }`}
+                            >
+                              <span
+                                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                                  settingsPreferences.animations
+                                    ? "translate-x-6"
+                                    : "translate-x-1"
+                                }`}
+                              />
+                            </button>
+                          </div>
+
+                          <div className="flex items-center justify-between">
+                            <span className="text-gray-700 dark:text-gray-300">
+                              Motivational messages
+                            </span>
+                            <button
+                              onClick={() =>
+                                setSettingsPreferences((prev) => ({
+                                  ...prev,
+                                  motivationalMessages:
+                                    !prev.motivationalMessages,
+                                }))
+                              }
+                              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                                settingsPreferences.motivationalMessages
+                                  ? "bg-blue-500"
+                                  : "bg-gray-300 dark:bg-gray-600"
+                              }`}
+                            >
+                              <span
+                                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                                  settingsPreferences.motivationalMessages
+                                    ? "translate-x-6"
+                                    : "translate-x-1"
+                                }`}
+                              />
+                            </button>
+                          </div>
+
+                          <div className="flex items-center justify-between">
+                            <span className="text-gray-700 dark:text-gray-300">
+                              Listening exercises
+                            </span>
+                            <button
+                              onClick={() =>
+                                setSettingsPreferences((prev) => ({
+                                  ...prev,
+                                  listeningExercises: !prev.listeningExercises,
+                                }))
+                              }
+                              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                                settingsPreferences.listeningExercises
+                                  ? "bg-blue-500"
+                                  : "bg-gray-300 dark:bg-gray-600"
+                              }`}
+                            >
+                              <span
+                                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                                  settingsPreferences.listeningExercises
+                                    ? "translate-x-6"
+                                    : "translate-x-1"
+                                }`}
+                              />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Appearance */}
+                      <div className="mb-8">
+                        <h3 className="text-lg font-medium text-gray-700 dark:text-white mb-6 pb-2 border-b dark:border-gray-600">
+                          Appearance
+                        </h3>
+
+                        <div className="space-y-6">
+                          <div className="flex items-center justify-between">
+                            <span className="text-gray-700 dark:text-gray-300">
+                              Dark mode
+                            </span>
+                            <select
+                              value={settingsPreferences.darkMode}
+                              onChange={(e) => {
+                                const newMode = e.target.value as
+                                  | "off"
+                                  | "on"
+                                  | "auto";
+                                setSettingsPreferences((prev) => ({
+                                  ...prev,
+                                  darkMode: newMode,
+                                }));
+                                saveDarkModePreference(newMode);
+                              }}
+                              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 min-w-[120px]"
+                            >
+                              <option value="off">OFF</option>
+                              <option value="on">ON</option>
+                              <option value="auto">AUTO</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {activeSettingsSection === "privacy" && (
+                    <>
+                      <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
+                        Privacy Settings
+                      </h2>
+
+                      <div className="space-y-8">
+                        <div>
+                          <h3 className="text-lg font-medium text-gray-700 dark:text-white mb-6 pb-2 border-b dark:border-gray-600">
+                            Data & Privacy
+                          </h3>
+
+                          <div className="space-y-6">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <span className="text-gray-700 dark:text-gray-300 font-medium">
+                                  Analytics & Performance
+                                </span>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">
+                                  Help improve the app by sharing usage data
+                                </p>
+                              </div>
+                              <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-blue-500 transition-colors">
+                                <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-6 transition-transform" />
+                              </button>
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <span className="text-gray-700 dark:text-gray-300 font-medium">
+                                  Personalized Recommendations
+                                </span>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">
+                                  Use learning data to suggest relevant content
+                                </p>
+                              </div>
+                              <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-blue-500 transition-colors">
+                                <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-6 transition-transform" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div>
+                          <h3 className="text-lg font-medium text-gray-700 dark:text-white mb-6 pb-2 border-b dark:border-gray-600">
+                            Account Actions
+                          </h3>
+
+                          <div className="space-y-4">
+                            <Button
+                              variant="outline"
+                              className="w-full justify-start text-gray-700 dark:text-gray-300"
+                            >
+                              Download My Data
+                            </Button>
+                            <Button
+                              variant="outline"
+                              className="w-full justify-start text-red-600 dark:text-red-400 border-red-200 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-900"
+                            >
+                              Delete Account
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-
-      {/* Conditional Prayer Times */}
-      {userPreferences.show_prayer_times && (
-        <PrayerTimeIndicator
-          calculationMethod={userPreferences.prayer_calculation_method}
-          school={userPreferences.prayer_school}
-          onToggleVisibility={togglePrayerTimes}
-          userId={userId}
-        />
       )}
-
-      {/* Assessment + Challenge Stats + Quick Stats */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div className="lg:col-span-1">
-          <LocalizedTooltip translationKey="tooltips.levelCard">
-            <div className="cursor-help">
-              <AssessmentDashboardCard userId={userId} />
+      {/* Main Content */}
+      <main className="flex-1 overflow-auto">
+        <div style={{ direction: locale === "ar" ? "rtl" : "ltr" }}>
+          <div className="max-w-6xl mx-auto px-6 py-8 space-y-8">
+            {/* Header */}
+            <div className="flex justify-between items-center">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                  {t("common.dashboard")}
+                </h1>
+                <p className="text-gray-600 dark:text-gray-300 mt-1">
+                  Welcome back,{" "}
+                  {userData.full_name?.split(" ")[0] || "Guardian"}
+                </p>
+              </div>
+              <LanguageSwitch />
             </div>
-          </LocalizedTooltip>
-        </div>
 
-        <div className="lg:col-span-1">
-          <LocalizedTooltip translationKey="tooltips.perfCard">
-            <div className="cursor-help">
+            {/* Hero Section */}
+            <Card
+              className={`bg-gradient-to-r ${levelInfo.color} text-white border-0`}
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center text-3xl">
+                      <div
+                        className={`${levelInfo.badgeColor} text-white font-bold text-lg px-3 py-1 rounded-lg`}
+                      >
+                        {levelInfo.badge}
+                      </div>
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold">{levelInfo.title}</h2>
+                      <p className="text-white/90">
+                        {userData.english_level} Level •{" "}
+                        {userData.completed_scenarios} scenarios completed
+                      </p>
+                      <p className="text-white/95 mt-2 max-w-lg">
+                        {motivationalMessage}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="text-right">
+                    <div className="text-4xl font-bold">
+                      {userData.current_streak}
+                    </div>
+                    <div className="text-white/90">day streak</div>
+
+                    {/* Prayer Times Toggle */}
+                    <Button
+                      onClick={togglePrayerTimes}
+                      variant="ghost"
+                      size="sm"
+                      className="mt-4 text-white/80 hover:text-white hover:bg-white/20"
+                    >
+                      {userPreferences.show_prayer_times ? (
+                        <EyeOff className="w-4 h-4 mr-2" />
+                      ) : (
+                        <Eye className="w-4 h-4 mr-2" />
+                      )}
+                      {userPreferences.show_prayer_times
+                        ? "Hide Prayers"
+                        : "Show Prayers"}
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Prayer Times - Collapsible */}
+            {userPreferences.show_prayer_times && (
+              <PrayerTimeIndicator
+                calculationMethod={userPreferences.prayer_calculation_method}
+                school={userPreferences.prayer_school}
+                onToggleVisibility={togglePrayerTimes}
+                userId={userId}
+              />
+            )}
+
+            {/* Primary Actions */}
+            <Card className="dark:bg-gray-800 dark:border-gray-700">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 dark:text-white">
+                  <Play className="h-5 w-5" />
+                  Continue Learning
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Continue Journey */}
+                  <JourneyButton
+                    userId={userId}
+                    userLevel={userData.english_level || "A1"}
+                    className="h-32 flex flex-col items-center justify-center gap-3 bg-gradient-to-r from-emerald-600 to-blue-600 text-white rounded-lg hover:from-emerald-700 hover:to-blue-700"
+                    onScenarioStart={(scenarioId) => {
+                      router.push(
+                        `/guards/scenarios/${scenarioId}?userId=${userId}`
+                      );
+                    }}
+                  />
+
+                  {/* Practice Conversation */}
+                  <PracticeConversationButton
+                    userId={userId}
+                    segment="guard"
+                    icon={Sparkles}
+                    title="Practice Conversation"
+                    subtitle="AI-powered chat"
+                    className="h-32 flex flex-col items-center justify-center gap-3 border-2 border-purple-300 hover:bg-purple-50 rounded-lg"
+                    onCreated={(sid) => console.log("Session:", sid)}
+                  />
+
+                  {/* Challenge Mode */}
+                  <Button
+                    variant="outline"
+                    className="h-32 flex flex-col items-center justify-center gap-3 border-2 border-orange-300 hover:bg-orange-50 rounded-lg"
+                    onClick={() => setShowChallengeMode(true)}
+                  >
+                    <Trophy className="w-10 h-10 text-orange-600" />
+                    <span className="font-medium text-base dark:text-white">
+                      Challenge Mode
+                    </span>
+                    <span className="text-sm text-gray-600 dark:text-white">
+                      Test your skills
+                    </span>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Stats Overview */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <AssessmentDashboardCard userId={userId} />
               <ChallengeStatsCard
                 challengeStats={userData?.challenge_stats || null}
                 loading={loading}
               />
+
+              {/* Progress Overview */}
+              <Card className="dark:bg-gray-800 dark:border-gray-700">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 dark:text-white">
+                    <TrendingUp className="h-5 w-5" />
+                    Your Progress
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4 text-center">
+                      <div>
+                        <div className="text-2xl font-bold text-emerald-600">
+                          {userData.completed_scenarios}
+                        </div>
+                        <div className="text-xs text-gray-500">Completed</div>
+                      </div>
+                      <div>
+                        <div className="text-2xl font-bold text-blue-600">
+                          {userData.average_score}%
+                        </div>
+                        <div className="text-xs text-gray-500">Avg Score</div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between text-sm mb-2">
+                        <span>Overall Progress</span>
+                        <span>
+                          {userData.completed_scenarios}/
+                          {userData.total_scenarios}
+                        </span>
+                      </div>
+                      <Progress value={completionPct} className="h-3" />
+                      <p className="text-xs text-gray-500 mt-1">
+                        {Math.round(completionPct)}% complete
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-          </LocalizedTooltip>
-        </div>
 
-        <div className="lg:col-span-2">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5" />
-                <LocalizedTooltip translationKey="tooltips.journeyCard">
-                  <span className="cursor-help">
-                    {t("dashboard.journeyTitle")}
-                  </span>
-                </LocalizedTooltip>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-emerald-600">
-                    {userData.completed_scenarios}
-                  </div>
-                  <LocalizedTooltip translationKey="tooltips.statsCompleted">
-                    <div className="text-xs text-gray-500 cursor-help">
-                      {t("common.completed")}
-                    </div>
-                  </LocalizedTooltip>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600">
-                    {userData.average_score}%
-                  </div>
-                  <LocalizedTooltip translationKey="tooltips.statsAvgScore">
-                    <div className="text-xs text-gray-500 cursor-help">
-                      {t("common.avgScore")}
-                    </div>
-                  </LocalizedTooltip>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-purple-600">
-                    {userData.hours_learned}h
-                  </div>
-                  <LocalizedTooltip translationKey="tooltips.statsTimeSpent">
-                    <div className="text-xs text-gray-500 cursor-help">
-                      {t("common.timeSpent")}
-                    </div>
-                  </LocalizedTooltip>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-orange-600">
-                    {userData.confidence_level}%
-                  </div>
-                  <LocalizedTooltip translationKey="tooltips.statsConfidence">
-                    <div className="text-xs text-gray-500 cursor-help">
-                      {t("common.confidence")}
-                    </div>
-                  </LocalizedTooltip>
-                </div>
-              </div>
-
-              <div>
-                <div className="flex justify-between text-sm mb-2">
-                  <LocalizedTooltip translationKey="tooltips.statsOverall">
-                    <span className="cursor-help">
-                      {t("common.overallProgress")}
-                    </span>
-                  </LocalizedTooltip>
-                  <LocalizedTooltip translationKey="tooltips.statsScenarioCount">
-                    <span className="cursor-help">
-                      {userData.completed_scenarios}/{userData.total_scenarios}{" "}
-                      {t("common.scenarios")}
-                    </span>
-                  </LocalizedTooltip>
-                </div>
-                <LocalizedTooltip translationKey="tooltips.statsPercentComplete">
-                  <div className="cursor-help">
-                    <Progress value={completionPct} className="h-3" />
-                  </div>
-                </LocalizedTooltip>
-                <p className="text-xs text-gray-500 mt-1">
-                  {Math.round(completionPct)}% {t("common.complete")}
+            {/* Recommended Scenarios */}
+            <Card className="dark:bg-gray-800 dark:border-gray-700">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 dark:text-white">
+                  <Zap className="h-5 w-5 text-yellow-500" />
+                  Recommended Just For You
+                </CardTitle>
+                <p className="text-sm text-gray-600">
+                  Based on your {userData.english_level} level and learning
+                  goals
                 </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      {/* Personalized Recommendations */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Zap className="h-5 w-5 text-yellow-500" />
-            <LocalizedTooltip translationKey="tooltips.recsCard">
-              <span className="cursor-help">
-                {t("dashboard.recommendedForYou")}
-              </span>
-            </LocalizedTooltip>
-          </CardTitle>
-          <LocalizedTooltip translationKey="tooltips.recsCard">
-            <p className="text-sm text-gray-600 cursor-help">
-              {t("dashboard.basedOnLevel", {
-                level: userData.english_level ?? "A1",
-              })}
-            </p>
-          </LocalizedTooltip>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {personalizedScenarios.map((scenario) => (
-              <div
-                key={scenario.id}
-                className="border rounded-lg p-4 hover:shadow-md transition-shadow"
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <h4 className="font-semibold text-gray-900">
-                      {scenario.title}
-                    </h4>
-                    <p className="text-sm text-blue-600 mb-1">
-                      {scenario.why_recommended}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <LocalizedTooltip translationKey="tooltips.recsMatch">
-                      <Badge
-                        variant={
-                          scenario.relevance_score >= 80
-                            ? "default"
-                            : "secondary"
-                        }
-                        className="cursor-help"
-                      >
-                        {scenario.relevance_score}% {t("common.match")}
-                      </Badge>
-                    </LocalizedTooltip>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3 text-sm text-gray-500">
-                    <span>{scenario.difficulty}</span>
-                    <span>•</span>
-                    <span>{scenario.duration}</span>
-                  </div>
-                  <LocalizedTooltip translationKey="tooltips.recsStart">
-                    <Button
-                      size="sm"
-                      className="bg-gradient-to-r from-emerald-600 to-blue-600 cursor-help"
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {personalizedScenarios.map((scenario) => (
+                    <div
+                      key={scenario.id}
+                      className="border rounded-lg p-4 hover:shadow-md transition-shadow"
                     >
-                      {t("common.start")}
-                      <ArrowRight className="w-4 h-4 ml-1" />
-                    </Button>
-                  </LocalizedTooltip>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Achievements */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Award className="h-5 w-5 text-yellow-500" />
-            <LocalizedTooltip translationKey="tooltips.achCard">
-              <span className="cursor-help">{t("dashboard.achievements")}</span>
-            </LocalizedTooltip>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {achievements.map((achievement) => (
-              <LocalizedTooltip
-                key={achievement.id}
-                translationKey="tooltips.achItem"
-              >
-                <div
-                  className={`p-4 rounded-lg border-2 transition-all cursor-help ${
-                    achievement.unlocked
-                      ? "border-yellow-200 bg-yellow-50"
-                      : "border-gray-200 bg-gray-50"
-                  }`}
-                >
-                  <div className="text-center">
-                    <div className="text-3xl mb-2">{achievement.icon}</div>
-                    <h4
-                      className={`font-semibold mb-1 ${
-                        achievement.unlocked
-                          ? "text-yellow-800"
-                          : "text-gray-600"
-                      }`}
-                    >
-                      {achievement.title}
-                    </h4>
-                    <p className="text-sm text-gray-600 mb-3">
-                      {achievement.description}
-                    </p>
-
-                    {achievement.progress !== undefined &&
-                      achievement.total && (
+                      <div className="flex items-start justify-between mb-3">
                         <div>
-                          <Progress
-                            value={
-                              (achievement.progress / achievement.total) * 100
-                            }
-                            className="h-2 mb-1"
-                          />
-                          <p className="text-xs text-gray-500">
-                            {achievement.progress}/{achievement.total}
+                          <h4 className="font-semibold text-gray-900">
+                            {scenario.title}
+                          </h4>
+                          <p className="text-sm text-blue-600 mb-1">
+                            {scenario.why_recommended}
                           </p>
                         </div>
-                      )}
+                        <Badge
+                          variant={
+                            scenario.relevance_score >= 80
+                              ? "default"
+                              : "secondary"
+                          }
+                        >
+                          {scenario.relevance_score}% match
+                        </Badge>
+                      </div>
 
-                    {achievement.unlocked && (
-                      <CheckCircle className="w-5 h-5 text-yellow-600 mx-auto mt-2" />
-                    )}
-                  </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3 text-sm text-gray-500">
+                          <span>{scenario.difficulty}</span>
+                          <span>•</span>
+                          <span>{scenario.duration}</span>
+                        </div>
+                        <Button
+                          size="sm"
+                          className="bg-gradient-to-r from-emerald-600 to-blue-600"
+                        >
+                          Start
+                          <ArrowRight className="w-4 h-4 ml-1" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </LocalizedTooltip>
-            ))}
+              </CardContent>
+            </Card>
+
+            {/* Recent Achievements */}
+            <Card className="dark:bg-gray-800 dark:border-gray-700">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 dark:text-white">
+                  <Award className="h-5 w-5 text-yellow-500" />
+                  Recent Achievements
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {achievements.slice(0, 3).map((achievement) => (
+                    <div
+                      key={achievement.id}
+                      className={`p-4 rounded-lg border-2 transition-all ${
+                        achievement.unlocked
+                          ? "border-yellow-200 bg-yellow-50"
+                          : "border-gray-200 bg-gray-50"
+                      }`}
+                    >
+                      <div className="text-center">
+                        <div className="text-3xl mb-2">{achievement.icon}</div>
+                        <h4
+                          className={`font-semibold mb-1 ${
+                            achievement.unlocked
+                              ? "text-yellow-800"
+                              : "text-gray-600"
+                          }`}
+                        >
+                          {achievement.title}
+                        </h4>
+                        <p className="text-sm text-gray-600 mb-3">
+                          {achievement.description}
+                        </p>
+
+                        {achievement.progress !== undefined &&
+                          achievement.total && (
+                            <div>
+                              <Progress
+                                value={
+                                  (achievement.progress / achievement.total) *
+                                  100
+                                }
+                                className="h-2 mb-1"
+                              />
+                              <p className="text-xs text-gray-500">
+                                {achievement.progress}/{achievement.total}
+                              </p>
+                            </div>
+                          )}
+
+                        {achievement.unlocked && (
+                          <CheckCircle className="w-5 h-5 text-yellow-600 mx-auto mt-2" />
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Smart Learning Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BookOpen className="h-7 w-7" />
-            <LocalizedTooltip translationKey="tooltips.actionsCard">
-              <span className="cursor-help">
-                {t("dashboard.continueLearning")}
-              </span>
-            </LocalizedTooltip>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* 1) Continue Journey - FIXED VERSION */}
-            <LocalizedTooltip translationKey="tooltips.actionsContinue">
-              <JourneyButton
-                userId={userId}
-                userLevel={userData.english_level || "A1"}
-                className="h-28 flex flex-col items-center justify-center gap-3 bg-gradient-to-r from-emerald-600 to-blue-600 cursor-help"
-                onScenarioStart={(scenarioId) => {
-                  // Navigate to the dedicated scenario page for focused learning
-                  console.log("Starting scenario:", scenarioId);
-                  router.push(
-                    `/guards/scenarios/${scenarioId}?userId=${userId}`
-                  );
-                }}
-              />
-            </LocalizedTooltip>
-
-            {/* 2) Practice Conversation */}
-            <LocalizedTooltip translationKey="tooltips.actionsPractice">
-              <div className="cursor-help">
-                <PracticeConversationButton
-                  userId={userId}
-                  segment={"guard"}
-                  icon={Sparkles}
-                  title={t("dashboard.practiceConversation")}
-                  subtitle={t("dashboard.aiPoweredChat")}
-                  className="h-28 flex flex-col items-center justify-center gap-3 border-purple-300 hover:bg-purple-50 rounded-md [&_svg]:w-12 [&_svg]:h-12"
-                  onCreated={(sid) => console.log("Session:", sid)}
-                />
-              </div>
-            </LocalizedTooltip>
-
-            {/* 3) Challenge Mode */}
-            <LocalizedTooltip translationKey="tooltips.actionsChallenge">
-              <Button
-                variant="outline"
-                className="h-28 flex flex-col items-center justify-center gap-3 border-orange-300 hover:bg-orange-50 cursor-help"
-                onClick={() => setShowChallengeMode(true)}
-              >
-                <Trophy className="w-12 h-12 text-orange-600" />
-                <span className="font-medium text-base">
-                  {t("dashboard.challengeMode")}
-                </span>
-                <span className="text-sm text-gray-600">
-                  {t("dashboard.testSkills")}
-                </span>
-              </Button>
-            </LocalizedTooltip>
-          </div>
-        </CardContent>
-      </Card>
+        </div>
+      </main>
 
       {/* Challenge Mode Modal */}
       {showChallengeMode && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg w-full h-full overflow-auto">
             <div className="sticky top-0 bg-white border-b p-4 flex justify-between items-center">
-              {/* Header */}
-              <div className="flex justify-center mb-6">
-                <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center text-white font-bold text-xl shadow-lg">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-sm">
                   كلام
                 </div>
-                <span className="ml-3 text-1xl font-bold text-gray-900 self-center">
-                  AI
+                <span className="text-xl font-bold text-gray-900">
+                  Challenge Mode
                 </span>
               </div>
 
-              <LocalizedTooltip translationKey="tooltips.modalClose">
-                <Button
-                  variant="ghost"
-                  onClick={() => {
-                    setShowChallengeMode(false);
-                    refreshDashboardData();
-                  }}
-                  className="cursor-help"
-                >
-                  <X className="w-8 h-8" />
-                </Button>
-              </LocalizedTooltip>
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setShowChallengeMode(false);
+                  refreshDashboardData();
+                }}
+              >
+                <X className="w-6 h-6" />
+              </Button>
             </div>
             <ChallengeMode
               userLevel={userData?.english_level || "A1"}

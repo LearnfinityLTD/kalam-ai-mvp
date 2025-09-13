@@ -60,7 +60,6 @@ import {
   Wifi,
   Globe,
   DollarSign,
-  CreditCard as CreditCardIcon,
   Zap,
 } from "lucide-react";
 

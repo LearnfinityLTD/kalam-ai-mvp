@@ -3,7 +3,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase";
-import EnhancedGuardDashboard from "@/components/guards/EnhancedGuardDashboard";
 import AssessmentWrapper from "@/components/assessment/AssessmentWrapper";
 import { useRouter } from "next/navigation";
 import { Button } from "@/ui/button";

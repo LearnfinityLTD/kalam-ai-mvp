@@ -1,4 +1,4 @@
-// app/guards/dashboard/page.tsx (Updated to use Enhanced Dashboard)
+// app/guards/dashboard/page.tsx (Updated for new sidebar layout)
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -11,17 +11,10 @@ import { Button } from "@/ui/button";
 export default function GuardDashboardPage() {
   const supabase = useMemo(() => createClient(), []);
   const router = useRouter();
-  const [currentTime, setCurrentTime] = useState(new Date());
   const [userId, setUserId] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [showDashboard, setShowDashboard] = useState(false);
-
-  // Tick clock
-  useEffect(() => {
-    const t = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(t);
-  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -104,7 +97,7 @@ export default function GuardDashboardPage() {
             Access Required
           </h1>
           <p className="text-gray-600 mb-6">
-            Please sign in to access your personalized host dashboard.
+            Please sign in to access your personalized guard dashboard.
           </p>
           <Button
             onClick={() => router.replace("/auth/signin?type=guard")}
@@ -129,61 +122,13 @@ export default function GuardDashboardPage() {
     );
   }
 
-  // Show enhanced personalized dashboard
+  // Show the enhanced dashboard - it now handles its own layout completely
+  // Including sidebar, header, and all content areas
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50">
-      {/* Minimal Header - less prominent since dashboard is now personalized */}
-      <div className="bg-white/80 backdrop-blur-sm shadow-sm border-b border-white/20">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-blue-600 rounded flex items-center justify-center text-white text-sm font-bold">
-                كلام
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">KalamAI</h1>
-                {email && (
-                  <p className="text-xs text-gray-600">
-                    Welcome back, {email.split("@")[0]}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <div className="hidden sm:block text-right">
-                <div className="text-sm text-gray-500">
-                  {currentTime.toLocaleDateString("en-GB", {
-                    weekday: "short",
-                    month: "short",
-                    day: "numeric",
-                  })}
-                </div>
-                <div className="text-lg font-semibold text-gray-900">
-                  {currentTime.toLocaleTimeString("en-GB", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </div>
-              </div>
-
-              <Button
-                variant="outline"
-                size="sm"
-                className="border-red-300 text-red-600 hover:bg-red-50"
-                onClick={handleLogout}
-              >
-                Log out
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Enhanced Dashboard */}
-      <main>
-        <EnhancedGuardDashboard userId={userId} email={email ?? undefined} />
-      </main>
-    </div>
+    <EnhancedGuardDashboard
+      userId={userId}
+      email={email ?? undefined}
+      onLogout={handleLogout}
+    />
   );
 }

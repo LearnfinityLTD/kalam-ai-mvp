@@ -80,7 +80,7 @@ export default function ProgressTracker({ userId }: { userId: string }) {
         // trim milliseconds because Postgres may store without them
         .replace(/\.\d{3}Z$/, "Z");
 
-      const { count: weeklyCount, error: weeklyErr } = await supabase
+      const { error: weeklyErr } = await supabase
         .from("user_progress")
         .select("id", { count: "exact", head: true })
         .eq("user_id", userId)

@@ -25,8 +25,6 @@ type ToastProps = React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> &
     description?: string;
   };
 
-type ToastActionElement = React.ReactElement<typeof ToastPrimitives.Action>;
-
 // Toast provider with root-level context
 export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
   return (

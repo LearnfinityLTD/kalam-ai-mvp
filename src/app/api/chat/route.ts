@@ -27,7 +27,7 @@ interface ChatRequest {
   userDialect?: string;
 }
 
-type Segment = "guard" | "professional";
+// type Segment = "guard" | "professional"; TODO
 
 type Level = "A1" | "A2" | "B1" | "B2" | "C1";
 type Dialect = "gulf" | "egyptian" | "levantine" | "standard";

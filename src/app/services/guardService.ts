@@ -1,9 +1,8 @@
 // services/guardService.ts
 import { createClient } from "@/lib/supabase";
-import { Database } from "@/lib/database.types";
 
-type Tables = Database["public"]["Tables"];
-type UserProfile = Tables["user_profiles"]["Insert"];
+// type Tables = Database["public"]["Tables"]; TODO
+// type UserProfile = Tables["user_profiles"]["Insert"]; TODO
 type UserType = "guard" | "professional";
 type Dialect = "gulf" | "egyptian" | "levantine" | "standard";
 type EnglishLevel = "A1" | "A2" | "B1" | "B2" | "C1";

@@ -19,7 +19,7 @@ import {
   Zap,
 } from "lucide-react";
 
-interface UserProfile {
+export interface PersonalizedUserProfile {
   id: string;
   user_type: string;
   full_name: string;
@@ -29,6 +29,7 @@ interface UserProfile {
   recommendations: string[];
   total_challenges_completed: number;
   average_challenge_score: number;
+  current_streak?: number;
 }
 
 interface LearningPath {
@@ -56,31 +57,49 @@ interface AdaptiveRecommendation {
   priority: "high" | "medium" | "low";
 }
 
+interface UserProgress {
+  scenarios_completed: number;
+  total_scenarios: number;
+  last_activity: string;
+  journey_status: string;
+}
+
+interface DashboardProps {
+  userData: PersonalizedUserProfile;
+  userId: string;
+  userType?: string;
+}
+
 export default function PersonalizedDashboard({
   userData,
   userId,
   userType,
-}: {
-  userData: any;
-  userId: string;
-  userType?: string;
-}) {
+}: DashboardProps) {
   const [recommendation, setRecommendation] =
     useState<PersonalizedRecommendation | null>(null);
   const [adaptiveRecs, setAdaptiveRecs] = useState<AdaptiveRecommendation[]>(
     []
   );
-  const [progress, setProgress] = useState<any>(null);
+  const [progress, setProgress] = useState<UserProgress | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchUserData();
-  }, []);
+    if (userId) {
+      fetchUserData();
+    }
+  }, [userId]);
 
   const fetchUserData = async () => {
     try {
+      setError(null);
       const response = await fetch("/api/learning-paths/user");
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch user data: ${response.statusText}`);
+      }
+
       const data = await response.json();
 
       setProgress(data.progress);
@@ -88,23 +107,40 @@ export default function PersonalizedDashboard({
       setAdaptiveRecs(data.recommendations || []);
     } catch (error) {
       console.error("Failed to fetch user data:", error);
+      setError(
+        error instanceof Error ? error.message : "Failed to fetch user data"
+      );
     }
   };
 
   const generatePersonalizedPath = async () => {
     setIsGenerating(true);
+    setError(null);
+
     try {
       const response = await fetch("/api/learning-paths/generate", {
         method: "POST",
       });
+
+      if (!response.ok) {
+        throw new Error(`Failed to generate path: ${response.statusText}`);
+      }
+
       const data = await response.json();
 
       if (data.success) {
         setRecommendation(data.recommendation);
         await fetchUserData();
+      } else {
+        throw new Error(data.error || "Failed to generate learning path");
       }
     } catch (error) {
       console.error("Failed to generate path:", error);
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Failed to generate learning path"
+      );
     } finally {
       setIsGenerating(false);
     }
@@ -112,20 +148,34 @@ export default function PersonalizedDashboard({
 
   const regeneratePath = async () => {
     setIsRegenerating(true);
+    setError(null);
+
     try {
       const response = await fetch("/api/learning-paths/regenerate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ reason: "performance_update" }),
       });
+
+      if (!response.ok) {
+        throw new Error(`Failed to regenerate path: ${response.statusText}`);
+      }
+
       const data = await response.json();
 
       if (data.success) {
         setRecommendation(data.recommendation);
         await fetchUserData();
+      } else {
+        throw new Error(data.error || "Failed to regenerate learning path");
       }
     } catch (error) {
       console.error("Failed to regenerate path:", error);
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Failed to regenerate learning path"
+      );
     } finally {
       setIsRegenerating(false);
     }
@@ -135,7 +185,7 @@ export default function PersonalizedDashboard({
     if (!recommendation?.primaryPath) return;
 
     try {
-      await fetch("/api/learning-paths/update-progress", {
+      const response = await fetch("/api/learning-paths/update-progress", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -144,11 +194,39 @@ export default function PersonalizedDashboard({
         }),
       });
 
+      if (!response.ok) {
+        throw new Error(`Failed to start path: ${response.statusText}`);
+      }
+
       window.location.href = "/scenarios";
     } catch (error) {
       console.error("Failed to start path:", error);
+      setError("Failed to start learning path");
     }
   };
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <Card className="border-red-200 bg-red-50 dark:bg-red-900/20 dark:border-red-800">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-2 text-red-800 dark:text-red-300">
+              <AlertCircle className="w-5 h-5" />
+              <span className="font-medium">Error loading dashboard</span>
+            </div>
+            <p className="text-red-700 dark:text-red-400 mt-2">{error}</p>
+            <Button
+              onClick={fetchUserData}
+              variant="outline"
+              className="mt-4 border-red-300 text-red-800 hover:bg-red-100"
+            >
+              Try Again
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -228,17 +306,20 @@ export default function PersonalizedDashboard({
                 Your Strengths
               </div>
               <div className="flex flex-wrap gap-2">
-                {(userData.strengths || []).map(
-                  (strength: string, index: number) => (
-                    <Badge
-                      key={index}
-                      variant="default"
-                      className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                    >
-                      <CheckCircle className="w-3 h-3 mr-1" />
-                      {strength}
-                    </Badge>
-                  )
+                {userData.strengths.map((strength: string, index: number) => (
+                  <Badge
+                    key={index}
+                    variant="default"
+                    className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+                  >
+                    <CheckCircle className="w-3 h-3 mr-1" />
+                    {strength}
+                  </Badge>
+                ))}
+                {userData.strengths.length === 0 && (
+                  <span className="text-sm text-gray-500 dark:text-gray-400 italic">
+                    Complete more activities to identify strengths
+                  </span>
                 )}
               </div>
             </div>
@@ -247,17 +328,20 @@ export default function PersonalizedDashboard({
                 Focus Areas
               </div>
               <div className="flex flex-wrap gap-2">
-                {(userData.recommendations || []).map(
-                  (rec: string, index: number) => (
-                    <Badge
-                      key={index}
-                      variant="outline"
-                      className="text-orange-600 border-orange-300"
-                    >
-                      <Target className="w-3 h-3 mr-1" />
-                      {rec}
-                    </Badge>
-                  )
+                {userData.recommendations.map((rec: string, index: number) => (
+                  <Badge
+                    key={index}
+                    variant="outline"
+                    className="text-orange-600 border-orange-300"
+                  >
+                    <Target className="w-3 h-3 mr-1" />
+                    {rec}
+                  </Badge>
+                ))}
+                {userData.recommendations.length === 0 && (
+                  <span className="text-sm text-gray-500 dark:text-gray-400 italic">
+                    Focus areas will appear after assessment
+                  </span>
                 )}
               </div>
             </div>
@@ -505,7 +589,7 @@ export default function PersonalizedDashboard({
                 </div>
                 <Progress
                   value={
-                    progress.total_scenarios
+                    progress.total_scenarios && progress.total_scenarios > 0
                       ? (progress.scenarios_completed /
                           progress.total_scenarios) *
                         100

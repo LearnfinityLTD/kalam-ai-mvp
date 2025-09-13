@@ -18,7 +18,7 @@ interface UserProfile {
   id: string;
   total_challenges_completed: number;
   average_challenge_score: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // app/api/learning-paths/regenerate/route.ts
@@ -52,14 +52,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Calculate new assessment metrics based on recent performance
-    const { data: recentChallenges } = await supabase
+    const { data: rawChallenges } = await supabase
       .from("challenge_results")
       .select("score, challenge_type")
       .eq("user_id", user.id)
       .order("completed_at", { ascending: false })
       .limit(20);
 
-    const { data: recentScenarios } = await supabase
+    const { data: rawScenarios } = await supabase
       .from("scenario_results")
       .select(
         "overall_score, cultural_sensitivity_score, english_proficiency_score"
@@ -68,18 +68,22 @@ export async function POST(request: NextRequest) {
       .order("completed_at", { ascending: false })
       .limit(10);
 
+    // Type the data properly
+    const recentChallenges = rawChallenges as ChallengeResult[] | null;
+    const recentScenarios = rawScenarios as ScenarioResult[] | null;
+
     // Update user profile with new metrics
     if (recentChallenges && recentChallenges.length > 0) {
       const avgScore =
         recentChallenges.reduce(
-          (sum: number, c: ChallengeResult) => sum + (c.score ?? 0),
+          (sum: number, c: ChallengeResult) => sum + Number(c.score ?? 0),
           0
         ) / recentChallenges.length;
 
       const updateData = {
         average_challenge_score: Math.round(avgScore),
         total_challenges_completed: Math.max(
-          userProfile.total_challenges_completed,
+          userProfile.total_challenges_completed || 0,
           recentChallenges.length
         ),
         updated_at: new Date().toISOString(),
@@ -120,7 +124,7 @@ export async function POST(request: NextRequest) {
         ) / recentScenarios.length;
 
       // Update additional metrics based on scenario performance
-      const scenarioUpdateData: any = {
+      const scenarioUpdateData: Record<string, unknown> = {
         updated_at: new Date().toISOString(),
       };
 

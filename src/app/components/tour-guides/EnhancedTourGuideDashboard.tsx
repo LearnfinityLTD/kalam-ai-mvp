@@ -29,7 +29,9 @@ import { createClient } from "@/lib/supabase";
 import { getUserChallengeStats, ChallengeStats } from "@/utils/challengeApi";
 import PrayerTimeIndicator from "@/components/shared/PrayerTimeIndicator";
 import AssessmentDashboardCard from "@/app/components/shared/AssessmentDashboardCard";
-import PersonalizedDashboard from "@/app/components/shared/PersonalizedDashboard";
+import PersonalizedDashboard, {
+  PersonalizedUserProfile,
+} from "@/app/components/shared/PersonalizedDashboard";
 import PracticeConversationButton from "../shared/PracticeConversationButton";
 import { useI18n } from "@/lib/i18n/context";
 import { LanguageSwitch } from "@/app/components/shared/language/LanguageSwitch";
@@ -54,6 +56,8 @@ interface UserData {
   dialect?: string;
   full_name?: string;
   challenge_stats?: ChallengeStats | null;
+  total_challenges_completed?: number;
+  average_challenge_score?: number;
 }
 
 interface UserPreferences {
@@ -532,7 +536,50 @@ export default function EnhancedTourGuideDashboard({
     generateAchievements,
     generateMotivationalMessage,
   ]);
-
+  // In PersonalizedDashboard.tsx, update the UserProfile interface:
+  interface UserProfile {
+    id?: string; // Make optional since UserData might not have it
+    user_type?: string;
+    full_name?: string;
+    english_level?: string;
+    assessment_score?: number;
+    strengths?: string[];
+    recommendations?: string[];
+    total_challenges_completed?: number; // Make optional
+    average_challenge_score?: number; // Make optional
+    current_streak?: number;
+    // Add other UserData properties that might be used
+    completed_scenarios?: number;
+    total_scenarios?: number;
+    hours_learned?: number;
+    last_activity?: string;
+    learning_path?: string[];
+    next_milestone?: string;
+    weekly_goal?: number;
+    confidence_level?: number;
+    dialect?: string;
+    challenge_stats?: string;
+  }
+  const mapUserDataToProfile = (
+    userData: UserData
+  ): PersonalizedUserProfile => {
+    return {
+      id: userId,
+      user_type: userData.user_type || "guard",
+      full_name: userData.full_name || "",
+      english_level: userData.english_level || "A1",
+      assessment_score: userData.assessment_score || 0,
+      strengths: userData.strengths || [],
+      recommendations: userData.recommendations || [],
+      total_challenges_completed:
+        userData.total_challenges_completed ||
+        userData.completed_scenarios ||
+        0,
+      average_challenge_score:
+        userData.average_challenge_score || userData.average_score || 0,
+      current_streak: userData.current_streak || 0,
+    };
+  };
   const refreshDashboardData = useCallback(async () => {
     await fetchPersonalizedData();
     await fetchUserPreferences();
@@ -1091,7 +1138,7 @@ export default function EnhancedTourGuideDashboard({
               <>
                 {/* Personalized Dashboard Component */}
                 <PersonalizedDashboard
-                  userData={userData}
+                  userData={mapUserDataToProfile(userData)}
                   userId={userId}
                   userType={userData.user_type || "guard"}
                 />

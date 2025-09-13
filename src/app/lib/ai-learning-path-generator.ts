@@ -2,6 +2,7 @@
 // This service analyzes user assessments and generates personalized learning paths
 
 import { OpenAI } from "openai";
+import { createClient } from "@/lib/supabase";
 
 interface UserProfile {
   id: string;
@@ -33,6 +34,10 @@ interface LearningPath {
   total_modules: number;
 }
 
+interface ScoredLearningPath extends LearningPath {
+  score: number;
+}
+
 interface PersonalizedPathRecommendation {
   primaryPath: LearningPath;
   secondaryPaths: LearningPath[];
@@ -52,6 +57,33 @@ interface CustomModule {
   priority: "high" | "medium" | "low";
 }
 
+interface AIAnalysis {
+  pathRecommendations: Array<{
+    pathName: string;
+    score: number;
+    reasoning: string;
+  }>;
+  focusAreas: string[];
+  customModules: Array<{
+    title: string;
+    description: string;
+    priority: "high" | "medium" | "low";
+  }>;
+  reasoning: string;
+  timeAdjustment: number;
+}
+
+interface Module {
+  id: string;
+}
+
+interface Scenario {
+  id: string;
+  title: string;
+  difficulty: string;
+  module_id: string;
+}
+
 class AILearningPathGenerator {
   private openai: OpenAI;
 
@@ -66,11 +98,19 @@ class AILearningPathGenerator {
     // Filter paths by user type and level appropriateness
     const relevantPaths = this.filterRelevantPaths(user, availablePaths);
 
+    if (relevantPaths.length === 0) {
+      throw new Error("No suitable learning paths found for user profile");
+    }
+
     // Generate AI recommendations
     const aiAnalysis = await this.getAIRecommendations(user, relevantPaths);
 
     // Apply business logic and scoring
     const scoredPaths = this.scorePaths(user, relevantPaths, aiAnalysis);
+
+    if (scoredPaths.length === 0) {
+      throw new Error("No paths available after scoring");
+    }
 
     // Generate custom modules based on weaknesses
     const customModules = await this.generateCustomModules(user, aiAnalysis);
@@ -85,7 +125,9 @@ class AILearningPathGenerator {
         scoredPaths[0]
       ),
       confidence: this.calculateConfidence(user, aiAnalysis),
-      reasoning: aiAnalysis.reasoning,
+      reasoning:
+        aiAnalysis.reasoning ||
+        "AI recommendation based on user profile analysis",
     };
   }
 
@@ -111,7 +153,7 @@ class AILearningPathGenerator {
   private async getAIRecommendations(
     user: UserProfile,
     paths: LearningPath[]
-  ): Promise<any> {
+  ): Promise<AIAnalysis> {
     const prompt = `
     Analyze this user's English learning profile and recommend the best learning path:
 
@@ -120,8 +162,8 @@ class AILearningPathGenerator {
     - English Level: ${user.english_level} 
     - Assessment Score: ${user.assessment_score}%
     - Arabic Dialect: ${user.dialect}
-    - Strengths: ${user.strengths.join(", ")}
-    - Current Recommendations: ${user.recommendations.join(", ")}
+    - Strengths: ${user.strengths.join(", ") || "None identified"}
+    - Current Recommendations: ${user.recommendations.join(", ") || "None"}
     - Challenges Completed: ${user.total_challenges_completed}
     - Average Score: ${user.average_challenge_score}%
 
@@ -157,27 +199,64 @@ class AILearningPathGenerator {
     }
     `;
 
-    const response = await this.openai.chat.completions.create({
-      model: "gpt-4",
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.3,
-      max_tokens: 1500,
-    });
+    try {
+      const response = await this.openai.chat.completions.create({
+        model: "gpt-4",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+        max_tokens: 1500,
+      });
 
-    return JSON.parse(response.choices[0].message.content || "{}");
+      const content = response.choices[0].message.content;
+      if (!content) {
+        throw new Error("No response from OpenAI");
+      }
+
+      return JSON.parse(content) as AIAnalysis;
+    } catch (error) {
+      console.error("AI recommendation error:", error);
+      // Fallback to basic recommendations
+      return this.getFallbackRecommendations(user, paths);
+    }
+  }
+
+  private getFallbackRecommendations(
+    user: UserProfile,
+    paths: LearningPath[]
+  ): AIAnalysis {
+    // Simple fallback logic when AI fails
+    const topPaths = paths.slice(0, 3).map((path, index) => ({
+      pathName: path.name,
+      score: 80 - index * 10,
+      reasoning: `Suitable for ${user.user_type} at ${user.english_level} level`,
+    }));
+
+    return {
+      pathRecommendations: topPaths,
+      focusAreas: user.recommendations.slice(0, 3),
+      customModules: [
+        {
+          title: "Foundation Building",
+          description: "Basic skill reinforcement",
+          priority: "high" as const,
+        },
+      ],
+      reasoning: "Fallback recommendation based on user profile matching",
+      timeAdjustment: 1.0,
+    };
   }
 
   private scorePaths(
     user: UserProfile,
     paths: LearningPath[],
-    aiAnalysis: any
+    aiAnalysis: AIAnalysis
   ): LearningPath[] {
-    const scored = paths.map((path) => {
+    const scored: ScoredLearningPath[] = paths.map((path) => {
       let score = 0;
 
       // Base score from AI
       const aiRec = aiAnalysis.pathRecommendations?.find(
-        (r: any) => r.pathName === path.name
+        (r) => r.pathName === path.name
       );
       score += aiRec?.score || 50;
 
@@ -210,12 +289,12 @@ class AILearningPathGenerator {
 
   private async generateCustomModules(
     user: UserProfile,
-    aiAnalysis: any
+    aiAnalysis: AIAnalysis
   ): Promise<CustomModule[]> {
     const weakAreas = this.identifyWeakAreas(user);
 
     return (
-      aiAnalysis.customModules?.map((module: any) => ({
+      aiAnalysis.customModules?.map((module) => ({
         title: module.title,
         description: module.description,
         focus_areas: weakAreas,
@@ -247,7 +326,10 @@ class AILearningPathGenerator {
     );
   }
 
-  private extractPriorityAreas(user: UserProfile, aiAnalysis: any): string[] {
+  private extractPriorityAreas(
+    user: UserProfile,
+    aiAnalysis: AIAnalysis
+  ): string[] {
     return aiAnalysis.focusAreas || user.recommendations || [];
   }
 
@@ -268,7 +350,10 @@ class AILearningPathGenerator {
     return Math.round(baseTime);
   }
 
-  private calculateConfidence(user: UserProfile, aiAnalysis: any): number {
+  private calculateConfidence(
+    user: UserProfile,
+    aiAnalysis: AIAnalysis
+  ): number {
     let confidence = 70; // Base confidence
 
     if (user.assessment_score > 70) confidence += 20;
@@ -312,56 +397,224 @@ class AILearningPathGenerator {
 
 // Database integration functions
 export async function generateAndSavePersonalizedPath(userId: string) {
-  // 1. Fetch user profile and assessment data
-  const user = await fetchUserProfile(userId);
-  const availablePaths = await fetchLearningPaths();
+  try {
+    // 1. Fetch user profile and assessment data
+    const user = await fetchUserProfile(userId);
+    const availablePaths = await fetchLearningPaths();
 
-  // 2. Generate AI recommendations
-  const generator = new AILearningPathGenerator(process.env.OPENAI_API_KEY!);
-  const recommendation = await generator.generatePersonalizedPath(
-    user,
-    availablePaths
-  );
+    // 2. Generate AI recommendations
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      throw new Error("OpenAI API key not configured");
+    }
 
-  // 3. Save to user_journey_progress table
-  await saveUserJourneyProgress(userId, recommendation);
+    const generator = new AILearningPathGenerator(apiKey);
+    const recommendation = await generator.generatePersonalizedPath(
+      user,
+      availablePaths
+    );
 
-  // 4. Update user_learning_paths table
-  await updateUserLearningPath(userId, recommendation);
+    // 3. Save to user_journey_progress table
+    await saveUserJourneyProgress(userId, recommendation);
 
-  return recommendation;
+    // 4. Update user_learning_paths table
+    await updateUserLearningPath(userId, recommendation);
+
+    return recommendation;
+  } catch (error) {
+    console.error("Failed to generate personalized path:", error);
+    throw error;
+  }
 }
 
 async function fetchUserProfile(userId: string): Promise<UserProfile> {
-  // Implementation depends on your database setup
-  // This should fetch from user_profiles table
-  return {} as UserProfile;
+  const supabase = createClient();
+
+  const { data: profile, error } = await supabase
+    .from("user_profiles")
+    .select(
+      `
+      id,
+      user_type,
+      full_name,
+      dialect,
+      english_level,
+      assessment_score,
+      strengths,
+      recommendations,
+      total_challenges_completed,
+      average_challenge_score,
+      specialization
+    `
+    )
+    .eq("id", userId)
+    .single();
+
+  if (error || !profile) {
+    throw new Error(`Failed to fetch user profile: ${error?.message}`);
+  }
+
+  return profile as UserProfile;
 }
 
 async function fetchLearningPaths(): Promise<LearningPath[]> {
-  // Fetch all available learning paths from learning_paths table
-  return [] as LearningPath[];
+  const supabase = createClient();
+
+  const { data: paths, error } = await supabase
+    .from("learning_paths")
+    .select("*")
+    .eq("government_approved", true)
+    .order("order_index");
+
+  if (error) {
+    throw new Error(`Failed to fetch learning paths: ${error.message}`);
+  }
+
+  return paths as LearningPath[];
 }
 
 async function saveUserJourneyProgress(
   userId: string,
   recommendation: PersonalizedPathRecommendation
 ) {
-  // Insert/update user_journey_progress with:
-  // - current_level: user's English level
-  // - current_unit_id: recommendation.primaryPath.id
-  // - next_recommended_scenario: first scenario from primary path
-  // - journey_status: 'not_started'
+  const supabase = createClient();
+
+  // Get first scenario from the primary path
+  const { data: modules } = await supabase
+    .from("modules")
+    .select("id")
+    .eq("learning_path_id", recommendation.primaryPath.id)
+    .order("module_order")
+    .limit(1);
+
+  let firstScenario: string | null = null;
+  if (modules && modules.length > 0) {
+    const { data: scenarios } = await supabase
+      .from("scenarios")
+      .select("id")
+      .eq("module_id", modules[0].id)
+      .order("order_index")
+      .limit(1);
+
+    firstScenario = scenarios?.[0]?.id || null;
+  }
+
+  const progressData = {
+    user_id: userId,
+    current_scenario_id: firstScenario,
+    current_unit_id: recommendation.primaryPath.id,
+    current_level: recommendation.primaryPath.level,
+    scenarios_completed: 0,
+    total_scenarios: await getTotalScenariosCount(
+      recommendation.primaryPath.id
+    ),
+    last_activity: new Date().toISOString(),
+    next_recommended_scenario: firstScenario,
+    journey_status: "not_started" as const,
+    updated_at: new Date().toISOString(),
+  };
+
+  const { error } = await supabase
+    .from("user_journey_progress")
+    .upsert(progressData, { onConflict: "user_id" });
+
+  if (error) {
+    throw new Error(`Failed to save journey progress: ${error.message}`);
+  }
 }
 
 async function updateUserLearningPath(
   userId: string,
   recommendation: PersonalizedPathRecommendation
 ) {
-  // Insert/update user_learning_paths with:
-  // - recommended_scenarios: scenarios from primary + secondary paths
-  // - current_scenario: first scenario from primary path
-  // - progress_percentage: 0
+  const supabase = createClient();
+
+  // Get all scenarios from primary path
+  const primaryScenarios = await getScenariosForPath(
+    recommendation.primaryPath.id
+  );
+
+  // Get scenarios from secondary paths (limited)
+  const secondaryScenarios: Scenario[] = [];
+  for (const path of recommendation.secondaryPaths.slice(0, 2)) {
+    const scenarios = await getScenariosForPath(path.id, 3);
+    secondaryScenarios.push(...scenarios);
+  }
+
+  const allRecommendedScenarios = [
+    ...primaryScenarios.map((s) => s.id),
+    ...secondaryScenarios.map((s) => s.id),
+  ];
+
+  const learningPathData = {
+    user_id: userId,
+    english_level: recommendation.primaryPath.level,
+    recommended_scenarios: allRecommendedScenarios,
+    completed_scenarios: [] as string[],
+    current_scenario: primaryScenarios[0]?.id || null,
+    progress_percentage: 0,
+    updated_at: new Date().toISOString(),
+  };
+
+  const { error } = await supabase
+    .from("user_learning_paths")
+    .upsert(learningPathData, { onConflict: "user_id" });
+
+  if (error) {
+    throw new Error(`Failed to update learning path: ${error.message}`);
+  }
+}
+
+async function getTotalScenariosCount(pathId: string): Promise<number> {
+  const supabase = createClient();
+
+  const { data: modules } = await supabase
+    .from("modules")
+    .select("id")
+    .eq("learning_path_id", pathId);
+
+  if (!modules || modules.length === 0) return 0;
+
+  const { count } = await supabase
+    .from("scenarios")
+    .select("id", { count: "exact" })
+    .in(
+      "module_id",
+      modules.map((m: Module) => m.id)
+    );
+
+  return count || 0;
+}
+
+async function getScenariosForPath(
+  pathId: string,
+  limit?: number
+): Promise<Scenario[]> {
+  const supabase = createClient();
+
+  const { data: modules } = await supabase
+    .from("modules")
+    .select("id")
+    .eq("learning_path_id", pathId)
+    .order("module_order");
+
+  if (!modules || modules.length === 0) return [];
+
+  let query = supabase
+    .from("scenarios")
+    .select("id, title, difficulty, module_id")
+    .in(
+      "module_id",
+      modules.map((m: Module) => m.id)
+    )
+    .order("order_index");
+
+  if (limit) {
+    query = query.limit(limit);
+  }
+
+  const { data: scenarios } = await query;
+  return (scenarios as Scenario[]) || [];
 }
 
 export { AILearningPathGenerator, type PersonalizedPathRecommendation };

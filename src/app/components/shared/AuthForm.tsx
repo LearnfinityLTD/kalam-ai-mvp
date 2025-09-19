@@ -171,7 +171,6 @@ export default function AuthForm({ userType, displayType, redirectTo }: Props) {
         .eq("id", userId)
         .maybeSingle();
       if (meErr) throw meErr;
-      console.log("HERE", userType);
       const computedDest = (() => {
         switch (userType) {
           case "guard":

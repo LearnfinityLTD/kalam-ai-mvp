@@ -1,4 +1,4 @@
-// app/admin/page.tsx
+// guards/admin/page.tsx
 "use client";
 
 import { useEffect, useMemo, useState, useMemo as useReactMemo } from "react";

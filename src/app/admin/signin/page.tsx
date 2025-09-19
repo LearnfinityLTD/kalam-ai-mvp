@@ -59,7 +59,7 @@ function AdminSignInContent() {
           if (profile?.is_super_admin) {
             router.replace("/super-admin");
           } else {
-            router.replace("/guards/admin");
+            router.replace("/api/admin");
           }
           return;
         }
@@ -95,12 +95,18 @@ function AdminSignInContent() {
     setLoading(true);
     try {
       const cleanEmail = email.trim().toLowerCase();
+      console.log("Attempting signin with:", {
+        email: email.trim().toLowerCase(),
+        password: "***",
+      });
 
       // Sign in with Supabase
       const { data, error } = await supabase.auth.signInWithPassword({
         email: cleanEmail,
         password,
       });
+
+      console.log("Supabase auth response:", { data, error });
 
       if (error) {
         const msg = error.message.toLowerCase();
@@ -137,12 +143,13 @@ function AdminSignInContent() {
       }
 
       // FIXED: Check super admin first, then regular admin
+      // FIXED: Check super admin first, then regular admin
       if (profile?.is_super_admin) {
         toast.success(`Welcome back, Super Admin!`);
         router.replace("/super-admin");
       } else if (profile?.is_admin) {
         toast.success(`Welcome back, ${profile.full_name || "Admin"}!`);
-        router.replace("/guards/admin");
+        router.replace("/api/admin"); // ← Unified admin page for ALL admin types
       } else {
         // Sign out the user since they don't have admin access
         await supabase.auth.signOut();

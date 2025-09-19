@@ -87,21 +87,6 @@ export const Pricing = () => {
     },
   ];
 
-  const testimonials = [
-    {
-      text: "ROI was 340% in the first year. Our guards are now confident welcoming international visitors.",
-      author: "Ahmed Al-Rahman",
-      title: "Facilities Manager",
-      company: "Grand Mosque of Kuwait",
-    },
-    {
-      text: "Reduced training time from 6 months to 2 months. Our tour guides are booking 60% more international tours.",
-      author: "Fatima Hassan",
-      title: "Operations Director",
-      company: "Cairo Heritage Tours",
-    },
-  ];
-
   return (
     <section
       id="pricing"

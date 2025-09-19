@@ -55,7 +55,7 @@ function Inner() {
 
       const { data: me } = await supabase
         .from("user_profiles")
-        .select("user_type, is_admin")
+        .select("user_type, is_admin, is_super_admin")
         .eq("id", user.id)
         .maybeSingle();
 
@@ -63,17 +63,21 @@ function Inner() {
 
       setSignedInEmail(user.email ?? null);
 
-      // Role-based routing logic - REMOVED ADMIN AUTO-REDIRECT
+      // Role-based routing logic - FIXED: Handle admin routing properly
       let dest: string;
 
-      // Only route based on user_type, ignore is_admin flag
-      // Admins should use the dedicated admin login page instead
-      if (me?.user_type === "guard" || type === "tourist_guide") {
-        // Guards and guides go to guard dashboard
-        dest = "/guards/dashboard";
+      // Check admin status first
+      if (me?.is_super_admin) {
+        dest = "/super-admin";
+      } else if (me?.is_admin) {
+        dest = "/api/admin"; // Unified admin dashboard
       } else {
-        // Professionals go to professional dashboard
-        dest = "/professionals/dashboard";
+        // Regular user routing based on user_type
+        if (me?.user_type === "guard" || type === "tourist_guide") {
+          dest = "/guards/dashboard";
+        } else {
+          dest = "/professionals/dashboard";
+        }
       }
 
       setSignedInDest(next || dest);

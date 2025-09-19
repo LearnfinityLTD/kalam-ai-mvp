@@ -50,7 +50,7 @@ function AuthCallbackInner() {
           type === "professional"
             ? "/professionals/dashboard"
             : type === "guide"
-            ? "/guides/dashboard"
+            ? "/tour-guides/dashboard"
             : "/guards/dashboard";
 
         router.replace(redirect);

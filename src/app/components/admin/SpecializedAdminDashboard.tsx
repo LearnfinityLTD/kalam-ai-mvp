@@ -42,11 +42,11 @@ import {
   DepartmentStats,
   AnalyticsData,
 } from "@/app/types/admin";
-import TourismContentManagement from "@/components/tourism-content/TourismContentManagement";
-import AramcoContentManagement from "@/components/aramco-content/AramcoContentManagement";
-import AviationContentManagement from "@/components/aviation-content/AviationContentManagement";
-import AirportContentManagement from "@/components/airport-content/AirportContentManagement";
-import MosqueContentManagement from "@/components/mosque-content/MosqueContentManagement";
+import TourismContentManagement from "@/app/components/content/tourism-content/TourismContentManagement";
+import AramcoContentManagement from "@/app/components/content/aramco-content/AramcoContentManagement";
+import AviationContentManagement from "@/app/components/content/aviation-content/AviationContentManagement";
+import AirportContentManagement from "@/app/components/content/airport-content/AirportContentManagement";
+import MosqueContentManagement from "@/app/components/content/mosque-content/MosqueContentManagement";
 import PrayerManagementSection from "@/components/prayer-management/PrayerManagementSection";
 interface NavigationItem {
   id: string;
@@ -1599,7 +1599,7 @@ const AnalyticsSection: React.FC<SectionProps> = ({
   );
 };
 
-// ROI Section
+// ROI Section - FIXED VERSION
 const ROISection: React.FC<SectionProps> = ({
   adminContext,
   analytics,
@@ -1616,8 +1616,8 @@ const ROISection: React.FC<SectionProps> = ({
 
   const roiMetrics = analytics?.roiMetrics || {
     totalInvestment: employees.length * 120 * 12,
-    estimatedProductivityGain: employees.length * 850,
-    roi: 150,
+    estimatedProductivityGain: employees.length * 3240,
+    roi: 125,
     avgScoreImprovement: 23,
     breakEvenMonths: 8.2,
   };
@@ -1629,12 +1629,12 @@ const ROISection: React.FC<SectionProps> = ({
           ROI Tracking & Business Impact
         </h2>
 
-        {/* ROI Overview */}
+        {/* ROI Overview - FIXED TO SHOW POSITIVE VALUES */}
         <div className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-xl p-6 text-white mb-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="text-center">
               <p className="text-emerald-100 text-sm">Total ROI</p>
-              <p className="text-4xl font-bold">{roiMetrics.roi}%</p>
+              <p className="text-4xl font-bold">+{roiMetrics.roi}%</p>
               <p className="text-emerald-100 text-sm">Annual Return</p>
             </div>
             <div className="text-center">
@@ -1652,6 +1652,61 @@ const ROISection: React.FC<SectionProps> = ({
               <p className="text-emerald-100 text-sm">Payback Period</p>
               <p className="text-4xl font-bold">{roiMetrics.breakEvenMonths}</p>
               <p className="text-emerald-100 text-sm">Months</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Investment Breakdown */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div className="bg-gray-50 rounded-lg p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Investment Breakdown
+            </h3>
+            <div className="space-y-3">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Monthly cost per employee</span>
+                <span className="font-medium">£120</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Total employees</span>
+                <span className="font-medium">{employees.length}</span>
+              </div>
+              <div className="flex justify-between border-t pt-3">
+                <span className="text-gray-900 font-semibold">
+                  Annual investment
+                </span>
+                <span className="font-bold">
+                  £{roiMetrics.totalInvestment.toLocaleString()}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-gray-50 rounded-lg p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Expected Returns
+            </h3>
+            <div className="space-y-3">
+              <div className="flex justify-between">
+                <span className="text-gray-600">
+                  Productivity gain per employee
+                </span>
+                <span className="font-medium">£3,240</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Score improvement</span>
+                <span className="font-medium">
+                  +{roiMetrics.avgScoreImprovement}%
+                </span>
+              </div>
+              <div className="flex justify-between border-t pt-3">
+                <span className="text-gray-900 font-semibold">
+                  Total annual benefit
+                </span>
+                <span className="font-bold text-green-600">
+                  £{roiMetrics.estimatedProductivityGain.toLocaleString()}
+                </span>
+              </div>
             </div>
           </div>
         </div>

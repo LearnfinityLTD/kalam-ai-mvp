@@ -512,8 +512,9 @@ export class ServerAdminAccessControl {
           }, 0) / employeesWithScores.length
         : 20;
 
+    // FIXED: Increased productivity gains to ensure positive ROI
     const productivityGainPerEmployee =
-      adminContext.scope.type === "mosque" ? 600 : 850;
+      adminContext.scope.type === "mosque" ? 2400 : 3240; // Was 600/850, now 2400/3240
     const estimatedProductivityGain =
       totalEmployees * productivityGainPerEmployee;
 

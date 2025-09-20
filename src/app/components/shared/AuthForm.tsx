@@ -117,19 +117,37 @@ export default function AuthForm({ userType, displayType, redirectTo }: Props) {
     }
   };
 
+  // Replace your handleAuth function with this debugging version
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validate()) return;
+    console.log("🚀 Login attempt started");
+
+    if (!validate()) {
+      console.log("❌ Validation failed");
+      return;
+    }
 
     setLoading(true);
     try {
       const cleanEmail = email.trim().toLowerCase();
+      console.log("📧 Cleaned email:", cleanEmail);
+      console.log("🔑 Password length:", password.length);
+      console.log("👤 User type:", userType);
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email: cleanEmail,
         password,
       });
 
+      console.log("🔐 Supabase auth response:", {
+        success: !!data.user,
+        userId: data.user?.id,
+        email: data.user?.email,
+        errorMessage: error?.message,
+      });
+
       if (error) {
+        console.error("❌ Auth error:", error);
         const msg = (error.message || "").toLowerCase();
         if (msg.includes("invalid login credentials")) {
           throw new Error("Incorrect email or password.");
@@ -143,9 +161,29 @@ export default function AuthForm({ userType, displayType, redirectTo }: Props) {
       }
 
       const userId = data.user?.id;
-      if (!userId) throw new Error("No user returned from sign-in.");
+      if (!userId) {
+        console.error("❌ No user ID returned");
+        throw new Error("No user returned from sign-in.");
+      }
+
+      console.log("✅ Authentication successful, user ID:", userId);
+
+      // Check if profile exists before ensuring it
+      console.log("🔍 Checking for existing profile...");
+      const { data: existingProfile, error: checkError } = await supabase
+        .from("user_profiles")
+        .select("id, user_type, is_admin")
+        .eq("id", userId)
+        .maybeSingle();
+
+      console.log("📋 Existing profile check:", {
+        exists: !!existingProfile,
+        profile: existingProfile,
+        error: checkError?.message,
+      });
 
       await ensureProfile(userId);
+      console.log("✅ Profile ensured");
 
       // Check if user is admin and redirect to admin signin page
       const { data: profile, error: profileError } = await supabase
@@ -154,15 +192,26 @@ export default function AuthForm({ userType, displayType, redirectTo }: Props) {
         .eq("id", userId)
         .maybeSingle();
 
-      if (profileError) throw profileError;
+      console.log("📋 Profile lookup result:", {
+        profile,
+        error: profileError?.message,
+      });
+
+      if (profileError) {
+        console.error("❌ Profile error:", profileError);
+        throw profileError;
+      }
 
       // If user is admin, sign them out and redirect to admin signin
       if (profile?.is_admin) {
+        console.log("🔐 User is admin, redirecting to admin signin");
         await supabase.auth.signOut();
         toast.error("Admin users must use the dedicated admin login page");
         router.push("/admin/signin");
         return;
       }
+
+      console.log("🎯 Non-admin user, proceeding with normal flow");
 
       // read profile to decide admin vs normal destination
       const { data: me, error: meErr } = await supabase
@@ -170,7 +219,11 @@ export default function AuthForm({ userType, displayType, redirectTo }: Props) {
         .select("user_type, is_admin")
         .eq("id", userId)
         .maybeSingle();
+
+      console.log("📋 Final profile check:", { me, error: meErr?.message });
+
       if (meErr) throw meErr;
+
       const computedDest = (() => {
         switch (userType) {
           case "guard":
@@ -180,18 +233,23 @@ export default function AuthForm({ userType, displayType, redirectTo }: Props) {
           case "professional":
             return "/professionals/dashboard";
           default:
-            return "/dashboard"; // fallback
+            return "/dashboard";
         }
       })();
 
+      console.log("🎯 Computed destination:", computedDest);
+      console.log("🎯 Redirect URL:", redirectTo || computedDest);
+
       router.replace(redirectTo || computedDest);
+      console.log("✅ Redirect initiated");
     } catch (err: unknown) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to sign in.";
+      console.error("💥 Full error:", err);
       toast.error(errorMessage);
-      console.error("Auth error:", err);
     } finally {
       setLoading(false);
+      console.log("🏁 Login attempt completed");
     }
   };
 

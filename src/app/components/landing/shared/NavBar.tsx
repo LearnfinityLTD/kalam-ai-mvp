@@ -33,6 +33,13 @@ export default function NavBar() {
 
   const userTypes = [
     {
+      type: "professional",
+      label: "Business Professional",
+      icon: Briefcase,
+      color: "blue",
+      description: "Business Professionals",
+    },
+    {
       type: "guard",
       label: "Mosque Host",
       icon: Shield,
@@ -150,22 +157,6 @@ export default function NavBar() {
                       </button>
                     );
                   })}
-
-                  {/* Business Professional Coming Soon */}
-                  <div className="px-3 py-3 flex items-start space-x-3 opacity-60">
-                    <Briefcase className="w-5 h-5 text-gray-400 mt-0.5" />
-                    <div>
-                      <div className="font-medium text-gray-900 text-sm flex items-center">
-                        Business Professional
-                        <Badge variant="secondary" className="ml-2 text-xs">
-                          Soon
-                        </Badge>
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        Corporate communications
-                      </div>
-                    </div>
-                  </div>
                 </div>
               )}
             </div>

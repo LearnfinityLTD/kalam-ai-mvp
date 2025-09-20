@@ -18,8 +18,11 @@ import {
   CheckCircle,
   Plus,
   Trash2,
+  Menu,
+  X,
 } from "lucide-react";
 import { AdminContext, Company, Mosque } from "@/app/types/admin";
+
 interface IslamicDate {
   day: number;
   month: string;
@@ -142,6 +145,7 @@ const PrayerManagementSection: React.FC<PrayerManagementProps> = ({
   onSettingsChange,
 }) => {
   const [activeTab, setActiveTab] = useState("schedule");
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [prayerTimes, setPrayerTimes] = useState<PrayerTime[]>([]);
   const [currentIslamicDate, setCurrentIslamicDate] =
     useState<IslamicDate | null>();
@@ -243,22 +247,22 @@ const PrayerManagementSection: React.FC<PrayerManagementProps> = ({
   };
 
   const demoNotificationButtons = (
-    <div className="flex gap-2 mb-4">
+    <div className="flex flex-col sm:flex-row gap-2 mb-4">
       <button
         onClick={() => triggerDemoNotification("Dhuhr", "reminder")}
-        className="px-3 py-1 bg-yellow-500 text-white rounded text-sm"
+        className="px-3 py-2 bg-yellow-500 text-white rounded text-sm whitespace-nowrap"
       >
         Demo Dhur Reminder
       </button>
       <button
         onClick={() => triggerDemoNotification("Asr", "prayer_time")}
-        className="px-3 py-1 bg-green-500 text-white rounded text-sm"
+        className="px-3 py-2 bg-green-500 text-white rounded text-sm whitespace-nowrap"
       >
         Demo Asr Prayer
       </button>
       <button
         onClick={() => triggerDemoNotification("Maghrib", "iqama")}
-        className="px-3 py-1 bg-red-500 text-white rounded text-sm"
+        className="px-3 py-2 bg-red-500 text-white rounded text-sm whitespace-nowrap"
       >
         Demo Iqama
       </button>
@@ -494,12 +498,45 @@ const PrayerManagementSection: React.FC<PrayerManagementProps> = ({
     { value: "custom", label: "Custom Settings" },
   ];
 
+  const tabs = [
+    {
+      id: "schedule",
+      label: "Prayer Schedule",
+      icon: Clock,
+      shortLabel: "Schedule",
+    },
+    {
+      id: "location",
+      label: "Location Settings",
+      icon: MapPin,
+      shortLabel: "Location",
+    },
+    {
+      id: "announcements",
+      label: "Announcements",
+      icon: Volume2,
+      shortLabel: "Audio",
+    },
+    {
+      id: "workplace",
+      label: "Workplace Integration",
+      icon: Users,
+      shortLabel: "Work",
+    },
+    {
+      id: "calendar",
+      label: "Islamic Calendar",
+      icon: Calendar,
+      shortLabel: "Calendar",
+    },
+  ];
+
   const NotificationPanel = () => (
-    <div className="fixed top-4 right-4 z-50 space-y-2">
+    <div className="fixed top-4 right-4 z-50 space-y-2 max-w-sm">
       {notifications.map((notification) => (
         <div
           key={notification.id}
-          className={`p-4 rounded-lg shadow-lg border-l-4 bg-white animate-slide-in ${
+          className={`p-3 sm:p-4 rounded-lg shadow-lg border-l-4 bg-white animate-slide-in ${
             notification.type === "reminder"
               ? "border-yellow-500"
               : notification.type === "prayer_time"
@@ -507,9 +544,9 @@ const PrayerManagementSection: React.FC<PrayerManagementProps> = ({
               : "border-red-500"
           }`}
         >
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2 sm:space-x-3">
             <div
-              className={`p-2 rounded-full ${
+              className={`p-1 sm:p-2 rounded-full ${
                 notification.type === "reminder"
                   ? "bg-yellow-100 text-yellow-600"
                   : notification.type === "prayer_time"
@@ -517,13 +554,15 @@ const PrayerManagementSection: React.FC<PrayerManagementProps> = ({
                   : "bg-red-100 text-red-600"
               }`}
             >
-              <Bell size={16} />
+              <Bell size={14} className="sm:w-4 sm:h-4" />
             </div>
-            <div>
-              <p className="font-semibold text-gray-900">
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold text-gray-900 text-sm sm:text-base truncate">
                 {notification.prayer}
               </p>
-              <p className="text-sm text-gray-600">{notification.message}</p>
+              <p className="text-xs sm:text-sm text-gray-600 break-words">
+                {notification.message}
+              </p>
               <p className="text-xs text-gray-400">
                 {notification.timestamp.toLocaleTimeString()}
               </p>
@@ -535,59 +574,95 @@ const PrayerManagementSection: React.FC<PrayerManagementProps> = ({
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 p-2 sm:p-0">
       <NotificationPanel />
+
       {/* Header */}
-      <div className="bg-gradient-to-r from-emerald-600 to-green-600 rounded-xl p-6 text-white">
-        <div className="flex items-center justify-between">
+      <div className="bg-gradient-to-r from-emerald-600 to-green-600 rounded-xl p-4 sm:p-6 text-white">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
           <div>
-            <h2 className="text-3xl font-bold flex items-center">
-              <Building className="mr-3" size={32} />
-              Prayer Time Management
+            <h2 className="text-2xl sm:text-3xl font-bold flex items-center">
+              <Building className="mr-2 sm:mr-3" size={28} />
+              <span className="break-words">Prayer Time Management</span>
             </h2>
-            <p className="mt-2 text-emerald-100">
+            <p className="mt-2 text-emerald-100 text-sm sm:text-base">
               Configure prayer times and Islamic calendar integration for{" "}
-              {adminContext.scope.organizationName}
+              <span className="break-words">
+                {adminContext.scope.organizationName}
+              </span>
             </p>
           </div>
-          <div className="text-right">
-            <div className="flex items-center space-x-2 text-emerald-100 mb-1">
-              <MapPin size={16} />
-              <span>
+          <div className="text-left lg:text-right space-y-2">
+            <div className="flex items-center space-x-2 text-emerald-100 text-sm">
+              <MapPin size={14} />
+              <span className="break-words">
                 {settings.location.city}, {settings.location.country}
               </span>
             </div>
-            <div className="flex items-center justify-end space-x-3 text-emerald-100">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end space-y-1 sm:space-y-0 sm:space-x-3 text-emerald-100 text-sm">
               <div className="flex items-center space-x-2">
-                <Calendar size={16} />
-                <span>{currentIslamicDate?.formatted || "Loading..."}</span>
+                <Calendar size={14} />
+                <span className="break-words">
+                  {currentIslamicDate?.formatted || "Loading..."}
+                </span>
               </div>
               <div className="flex items-center space-x-2">
-                <Clock size={16} />
+                <Clock size={14} />
                 <span>Last updated: {lastUpdated}</span>
               </div>
             </div>
             {locationError && (
-              <p className="text-sm text-red-200 mt-1">{locationError}</p>
+              <p className="text-sm text-red-200 mt-1 break-words">
+                {locationError}
+              </p>
             )}
           </div>
         </div>
       </div>
 
-      {/* Tab Navigation */}
-      <div className="border-b border-gray-200">
-        <nav className="flex space-x-8">
-          {[
-            { id: "schedule", label: "Prayer Schedule", icon: Clock },
-            { id: "location", label: "Location Settings", icon: MapPin },
-            { id: "announcements", label: "Announcements", icon: Volume2 },
-            { id: "workplace", label: "Workplace Integration", icon: Users },
-            { id: "calendar", label: "Islamic Calendar", icon: Calendar },
-          ].map(({ id, label, icon: Icon }) => (
+      {/* Mobile Tab Navigation */}
+      <div className="lg:hidden">
+        <button
+          onClick={() => setShowMobileMenu(!showMobileMenu)}
+          className="w-full flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg shadow-sm"
+        >
+          <span className="font-medium text-gray-900">
+            {tabs.find((tab) => tab.id === activeTab)?.label}
+          </span>
+          {showMobileMenu ? <X size={20} /> : <Menu size={20} />}
+        </button>
+
+        {showMobileMenu && (
+          <div className="mt-2 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
+            {tabs.map(({ id, label, icon: Icon }) => (
+              <button
+                key={id}
+                onClick={() => {
+                  setActiveTab(id);
+                  setShowMobileMenu(false);
+                }}
+                className={`w-full flex items-center space-x-3 px-4 py-3 text-left transition-colors ${
+                  activeTab === id
+                    ? "bg-emerald-50 text-emerald-600 border-r-4 border-emerald-600"
+                    : "text-gray-700 hover:bg-gray-50"
+                }`}
+              >
+                <Icon size={18} />
+                <span>{label}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Desktop Tab Navigation */}
+      <div className="hidden lg:block border-b border-gray-200">
+        <nav className="flex space-x-8 overflow-x-auto">
+          {tabs.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
               onClick={() => setActiveTab(id)}
-              className={`flex items-center space-x-2 px-4 py-3 font-medium border-b-2 transition-colors ${
+              className={`flex items-center space-x-2 px-4 py-3 font-medium border-b-2 transition-colors whitespace-nowrap ${
                 activeTab === id
                   ? "text-emerald-600 border-emerald-600"
                   : "text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300"
@@ -602,15 +677,13 @@ const PrayerManagementSection: React.FC<PrayerManagementProps> = ({
 
       {/* Prayer Schedule Tab */}
       {activeTab === "schedule" && (
-        <div className="space-y-6">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-6">
+        <div className="space-y-4 sm:space-y-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0 mb-6">
               <h3 className="text-xl font-semibold text-gray-900">
                 Daily Prayer Times
               </h3>
-
-              {demoNotificationButtons}
-              <div className="flex items-center space-x-3">
+              <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-3">
                 <select
                   value={settings.calculationMethod}
                   onChange={(e) =>
@@ -620,7 +693,7 @@ const PrayerManagementSection: React.FC<PrayerManagementProps> = ({
                         .value as PrayerSettings["calculationMethod"],
                     }))
                   }
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  className="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm"
                 >
                   {calculationMethods.map((method) => (
                     <option key={method.value} value={method.value}>
@@ -631,7 +704,7 @@ const PrayerManagementSection: React.FC<PrayerManagementProps> = ({
                 <button
                   onClick={handleSaveSettings}
                   disabled={isLoading}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 disabled:opacity-50"
+                  className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 disabled:opacity-50"
                 >
                   <Save size={16} />
                   <span>{isLoading ? "Saving..." : "Save Changes"}</span>
@@ -639,13 +712,13 @@ const PrayerManagementSection: React.FC<PrayerManagementProps> = ({
               </div>
             </div>
 
+            {demoNotificationButtons}
+
             <div className="space-y-4">
               {prayerTimes.map((prayer, index) => (
-                <div
-                  key={prayer.name}
-                  className="grid grid-cols-1 md:grid-cols-7 gap-4 p-4 bg-gray-50 rounded-lg"
-                >
-                  <div className="md:col-span-2">
+                <div key={prayer.name} className="p-4 bg-gray-50 rounded-lg">
+                  {/* Mobile Layout */}
+                  <div className="block lg:hidden space-y-4">
                     <div className="flex items-center space-x-3">
                       <div
                         className={`p-2 rounded-lg ${
@@ -662,7 +735,7 @@ const PrayerManagementSection: React.FC<PrayerManagementProps> = ({
                         {prayer.name === "Maghrib" && <Sun size={16} />}
                         {prayer.name === "Isha" && <Moon size={16} />}
                       </div>
-                      <div>
+                      <div className="flex-1">
                         <p className="font-semibold text-gray-900">
                           {prayer.name}
                         </p>
@@ -670,91 +743,207 @@ const PrayerManagementSection: React.FC<PrayerManagementProps> = ({
                           {prayer.arabicName}
                         </p>
                       </div>
+                      <div className="flex items-center space-x-4">
+                        <label className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            checked={prayer.enabled}
+                            onChange={(e) =>
+                              updatePrayerTime(
+                                index,
+                                "enabled",
+                                e.target.checked
+                              )
+                            }
+                            className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
+                          />
+                          <span className="text-sm text-gray-700">On</span>
+                        </label>
+                        <label className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            checked={prayer.announcement}
+                            onChange={(e) =>
+                              updatePrayerTime(
+                                index,
+                                "announcement",
+                                e.target.checked
+                              )
+                            }
+                            className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
+                          />
+                          <span className="text-sm text-gray-700">Audio</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Time
+                        </label>
+                        <input
+                          type="time"
+                          value={prayer.time}
+                          onChange={(e) =>
+                            updatePrayerTime(index, "time", e.target.value)
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Adjustment (±min)
+                        </label>
+                        <input
+                          type="number"
+                          value={prayer.adjustmentMinutes}
+                          onChange={(e) =>
+                            updatePrayerTime(
+                              index,
+                              "adjustmentMinutes",
+                              parseInt(e.target.value) || 0
+                            )
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                          placeholder="±min"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Reminder (min)
+                        </label>
+                        <input
+                          type="number"
+                          value={prayer.reminderMinutes}
+                          onChange={(e) =>
+                            updatePrayerTime(
+                              index,
+                              "reminderMinutes",
+                              parseInt(e.target.value) || 0
+                            )
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                          placeholder="min before"
+                        />
+                      </div>
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Time
-                    </label>
-                    <input
-                      type="time"
-                      value={prayer.time}
-                      onChange={(e) =>
-                        updatePrayerTime(index, "time", e.target.value)
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                    />
-                  </div>
+                  {/* Desktop Layout */}
+                  <div className="hidden lg:grid lg:grid-cols-7 lg:gap-4 lg:items-center">
+                    <div className="lg:col-span-2">
+                      <div className="flex items-center space-x-3">
+                        <div
+                          className={`p-2 rounded-lg ${
+                            prayer.enabled
+                              ? "bg-emerald-100 text-emerald-600"
+                              : "bg-gray-100 text-gray-400"
+                          }`}
+                        >
+                          {prayer.name === "Fajr" && <Moon size={16} />}
+                          {prayer.name === "Sunrise" && <Sun size={16} />}
+                          {(prayer.name === "Dhuhr" ||
+                            prayer.name === "Asr") && <Sun size={16} />}
+                          {prayer.name === "Maghrib" && <Sun size={16} />}
+                          {prayer.name === "Isha" && <Moon size={16} />}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-gray-900">
+                            {prayer.name}
+                          </p>
+                          <p className="text-sm text-gray-500" dir="rtl">
+                            {prayer.arabicName}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Adjustment
-                    </label>
-                    <input
-                      type="number"
-                      value={prayer.adjustmentMinutes}
-                      onChange={(e) =>
-                        updatePrayerTime(
-                          index,
-                          "adjustmentMinutes",
-                          parseInt(e.target.value) || 0
-                        )
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                      placeholder="±min"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Reminder
-                    </label>
-                    <input
-                      type="number"
-                      value={prayer.reminderMinutes}
-                      onChange={(e) =>
-                        updatePrayerTime(
-                          index,
-                          "reminderMinutes",
-                          parseInt(e.target.value) || 0
-                        )
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                      placeholder="min before"
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-center space-x-4">
-                    <label className="flex items-center space-x-2">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Time
+                      </label>
                       <input
-                        type="checkbox"
-                        checked={prayer.enabled}
+                        type="time"
+                        value={prayer.time}
                         onChange={(e) =>
-                          updatePrayerTime(index, "enabled", e.target.checked)
+                          updatePrayerTime(index, "time", e.target.value)
                         }
-                        className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                       />
-                      <span className="text-sm text-gray-700">Enabled</span>
-                    </label>
-                  </div>
+                    </div>
 
-                  <div className="flex items-center justify-center space-x-4">
-                    <label className="flex items-center space-x-2">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Adjustment
+                      </label>
                       <input
-                        type="checkbox"
-                        checked={prayer.announcement}
+                        type="number"
+                        value={prayer.adjustmentMinutes}
                         onChange={(e) =>
                           updatePrayerTime(
                             index,
-                            "announcement",
-                            e.target.checked
+                            "adjustmentMinutes",
+                            parseInt(e.target.value) || 0
                           )
                         }
-                        className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                        placeholder="±min"
                       />
-                      <span className="text-sm text-gray-700">Announce</span>
-                    </label>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Reminder
+                      </label>
+                      <input
+                        type="number"
+                        value={prayer.reminderMinutes}
+                        onChange={(e) =>
+                          updatePrayerTime(
+                            index,
+                            "reminderMinutes",
+                            parseInt(e.target.value) || 0
+                          )
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                        placeholder="min before"
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-center space-x-4">
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          checked={prayer.enabled}
+                          onChange={(e) =>
+                            updatePrayerTime(index, "enabled", e.target.checked)
+                          }
+                          className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
+                        />
+                        <span className="text-sm text-gray-700">Enabled</span>
+                      </label>
+                    </div>
+
+                    <div className="flex items-center justify-center space-x-4">
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          checked={prayer.announcement}
+                          onChange={(e) =>
+                            updatePrayerTime(
+                              index,
+                              "announcement",
+                              e.target.checked
+                            )
+                          }
+                          className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
+                        />
+                        <span className="text-sm text-gray-700">Announce</span>
+                      </label>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -765,7 +954,7 @@ const PrayerManagementSection: React.FC<PrayerManagementProps> = ({
               <h4 className="font-semibold text-gray-900 mb-3">
                 Juridical School (Madhab)
               </h4>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <label className="flex items-center space-x-2">
                   <input
                     type="radio"
@@ -780,7 +969,9 @@ const PrayerManagementSection: React.FC<PrayerManagementProps> = ({
                     }
                     className="h-4 w-4 text-emerald-600 focus:ring-emerald-500"
                   />
-                  <span>Shafi&apos;i (Earlier Asr time)</span>
+                  <span className="text-sm">
+                    Shafi&apos;i (Earlier Asr time)
+                  </span>
                 </label>
                 <label className="flex items-center space-x-2">
                   <input
@@ -796,7 +987,7 @@ const PrayerManagementSection: React.FC<PrayerManagementProps> = ({
                     }
                     className="h-4 w-4 text-emerald-600 focus:ring-emerald-500"
                   />
-                  <span>Hanafi (Later Asr time)</span>
+                  <span className="text-sm">Hanafi (Later Asr time)</span>
                 </label>
                 <label className="flex items-center space-x-2">
                   <input
@@ -812,7 +1003,7 @@ const PrayerManagementSection: React.FC<PrayerManagementProps> = ({
                     }
                     className="h-4 w-4 text-emerald-600 focus:ring-emerald-500"
                   />
-                  <span>Maliki</span>
+                  <span className="text-sm">Maliki</span>
                 </label>
                 <label className="flex items-center space-x-2">
                   <input
@@ -828,7 +1019,7 @@ const PrayerManagementSection: React.FC<PrayerManagementProps> = ({
                     }
                     className="h-4 w-4 text-emerald-600 focus:ring-emerald-500"
                   />
-                  <span>Hanbali</span>
+                  <span className="text-sm">Hanbali</span>
                 </label>
               </div>
             </div>
@@ -838,13 +1029,13 @@ const PrayerManagementSection: React.FC<PrayerManagementProps> = ({
 
       {/* Location Settings Tab */}
       {activeTab === "location" && (
-        <div className="space-y-6">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="space-y-4 sm:space-y-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
             <h3 className="text-xl font-semibold text-gray-900 mb-6">
               Location Configuration
             </h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   City
@@ -929,7 +1120,7 @@ const PrayerManagementSection: React.FC<PrayerManagementProps> = ({
             <button
               onClick={getCurrentLocation}
               disabled={locationLoading}
-              className="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 disabled:opacity-50"
+              className="mt-4 w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 disabled:opacity-50"
             >
               <MapPin size={16} />
               <span>
@@ -957,14 +1148,14 @@ const PrayerManagementSection: React.FC<PrayerManagementProps> = ({
 
       {/* Announcements Tab */}
       {activeTab === "announcements" && (
-        <div className="space-y-6">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="space-y-4 sm:space-y-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
             <h3 className="text-xl font-semibold text-gray-900 mb-6">
               Prayer Announcements
             </h3>
 
             <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 <div>
                   <label className="flex items-center space-x-3 mb-4">
                     <input
@@ -1013,7 +1204,7 @@ const PrayerManagementSection: React.FC<PrayerManagementProps> = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 <div>
                   <label className="flex items-center space-x-3">
                     <input
@@ -1060,7 +1251,7 @@ const PrayerManagementSection: React.FC<PrayerManagementProps> = ({
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Announcement Languages
                   </label>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                     {[
                       "arabic",
                       "english",
@@ -1093,7 +1284,7 @@ const PrayerManagementSection: React.FC<PrayerManagementProps> = ({
                           }}
                           className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
                         />
-                        <span className="capitalize">{lang}</span>
+                        <span className="capitalize text-sm">{lang}</span>
                       </label>
                     ))}
                   </div>
@@ -1106,8 +1297,8 @@ const PrayerManagementSection: React.FC<PrayerManagementProps> = ({
 
       {/* Workplace Integration Tab */}
       {activeTab === "workplace" && (
-        <div className="space-y-6">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="space-y-4 sm:space-y-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
             <h3 className="text-xl font-semibold text-gray-900 mb-6">
               Workplace Integration
             </h3>
@@ -1138,7 +1329,7 @@ const PrayerManagementSection: React.FC<PrayerManagementProps> = ({
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Prayer Break Duration
@@ -1160,7 +1351,9 @@ const PrayerManagementSection: React.FC<PrayerManagementProps> = ({
                       min="10"
                       max="30"
                     />
-                    <span className="text-sm text-gray-500">minutes</span>
+                    <span className="text-sm text-gray-500 whitespace-nowrap">
+                      minutes
+                    </span>
                   </div>
                 </div>
 
@@ -1184,7 +1377,7 @@ const PrayerManagementSection: React.FC<PrayerManagementProps> = ({
                         }
                         className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
                       />
-                      <span>Staff notifications</span>
+                      <span className="text-sm">Staff notifications</span>
                     </label>
                     <label className="flex items-center space-x-3">
                       <input
@@ -1201,7 +1394,7 @@ const PrayerManagementSection: React.FC<PrayerManagementProps> = ({
                         }
                         className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
                       />
-                      <span>Iqama notifications</span>
+                      <span className="text-sm">Iqama notifications</span>
                     </label>
                   </div>
                 </div>
@@ -1300,8 +1493,8 @@ const PrayerManagementSection: React.FC<PrayerManagementProps> = ({
 
       {/* Islamic Calendar Tab */}
       {activeTab === "calendar" && (
-        <div className="space-y-6">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="space-y-4 sm:space-y-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
             <h3 className="text-xl font-semibold text-gray-900 mb-6">
               Islamic Calendar Integration
             </h3>
@@ -1315,10 +1508,13 @@ const PrayerManagementSection: React.FC<PrayerManagementProps> = ({
                     Current Islamic Date
                   </h4>
                 </div>
-                <p className="text-xl font-bold text-emerald-800" dir="rtl">
+                <p
+                  className="text-lg sm:text-xl font-bold text-emerald-800 break-words"
+                  dir="rtl"
+                >
                   {currentIslamicDate?.formattedArabic}
                 </p>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-600 break-words">
                   {currentIslamicDate?.formatted} (
                   {new Date().toLocaleDateString("en-US", {
                     year: "numeric",
@@ -1385,19 +1581,22 @@ const PrayerManagementSection: React.FC<PrayerManagementProps> = ({
                           : "bg-blue-50 border-blue-200"
                       }`}
                     >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h5 className="font-semibold text-gray-900">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
+                        <div className="flex-1">
+                          <h5 className="font-semibold text-gray-900 break-words">
                             {event.name}
                           </h5>
-                          <p className="text-sm text-gray-600" dir="rtl">
+                          <p
+                            className="text-sm text-gray-600 break-words"
+                            dir="rtl"
+                          >
                             {event.arabicName}
                           </p>
-                          <p className="text-sm text-gray-500">
+                          <p className="text-sm text-gray-500 break-words">
                             {event.date} • {event.gregorianDate}
                           </p>
                         </div>
-                        <div className="text-right">
+                        <div className="text-left sm:text-right">
                           <p className="text-sm font-medium text-gray-900">
                             {event.daysUntil} days
                           </p>
@@ -1415,36 +1614,44 @@ const PrayerManagementSection: React.FC<PrayerManagementProps> = ({
                   Calendar Integration Settings
                 </h4>
                 <div className="space-y-3">
-                  <label className="flex items-center space-x-3">
+                  <label className="flex items-start space-x-3">
                     <input
                       type="checkbox"
                       defaultChecked
-                      className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded mt-0.5"
                     />
-                    <span>Show Islamic dates in all announcements</span>
+                    <span className="text-sm">
+                      Show Islamic dates in all announcements
+                    </span>
                   </label>
-                  <label className="flex items-center space-x-3">
+                  <label className="flex items-start space-x-3">
                     <input
                       type="checkbox"
                       defaultChecked
-                      className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded mt-0.5"
                     />
-                    <span>Automatic Ramadan/Hajj schedule adjustments</span>
+                    <span className="text-sm">
+                      Automatic Ramadan/Hajj schedule adjustments
+                    </span>
                   </label>
-                  <label className="flex items-center space-x-3">
+                  <label className="flex items-start space-x-3">
                     <input
                       type="checkbox"
                       defaultChecked
-                      className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded mt-0.5"
                     />
-                    <span>Send notifications for major Islamic events</span>
+                    <span className="text-sm">
+                      Send notifications for major Islamic events
+                    </span>
                   </label>
-                  <label className="flex items-center space-x-3">
+                  <label className="flex items-start space-x-3">
                     <input
                       type="checkbox"
-                      className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded mt-0.5"
                     />
-                    <span>Integrate with external calendar systems</span>
+                    <span className="text-sm">
+                      Integrate with external calendar systems
+                    </span>
                   </label>
                 </div>
               </div>
@@ -1454,11 +1661,11 @@ const PrayerManagementSection: React.FC<PrayerManagementProps> = ({
       )}
 
       {/* Save Button (shown on all tabs) */}
-      <div className="flex justify-end">
+      <div className="flex justify-center sm:justify-end">
         <button
           onClick={handleSaveSettings}
           disabled={isLoading}
-          className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? (
             <>
@@ -1478,7 +1685,9 @@ const PrayerManagementSection: React.FC<PrayerManagementProps> = ({
       {lastUpdated && (
         <div className="flex items-center justify-center space-x-2 text-sm text-green-600 bg-green-50 p-3 rounded-lg">
           <CheckCircle size={16} />
-          <span>Prayer settings saved successfully on {lastUpdated}</span>
+          <span className="text-center break-words">
+            Prayer settings saved successfully on {lastUpdated}
+          </span>
         </div>
       )}
     </div>

@@ -326,7 +326,7 @@ export class ServerAdminAccessControl {
       culturalScore: Math.min(100, culturalScore),
       status: employee.assessment_completed ? "active" : ("pending" as const),
       department: employee.department || this.mapDepartment(employee),
-      email: this.getEmailFromAuth(employee.id),
+      email: this.getEmailFromAuth(employee),
       invitation_sent: employee.assessment_completed,
       // keep optional arrays if present; cast to the narrower EmployeeData types
       user_progress: (employee.user_progress ??
@@ -364,40 +364,20 @@ export class ServerAdminAccessControl {
     }
   }
 
-  private getEmailFromAuth(_userId: string): string {
-    // This would ideally fetch from auth.users, but for demo purposes
-    // we'll generate based on the user patterns from SQL
-    const names = [
-      "ahmed.rashid",
-      "fatima.zahra",
-      "omar.khattab",
-      "aisha.siddique",
-      "hassan.maktoum",
-      "layla.faisal",
-      "khalid.abdulaziz",
-      "nora.almutairi",
-      "sarah.mansouri",
-      "mohammed.alotaibi",
-      "maryam.alkhalid",
-      "yazeed.alsaud",
-      "rania.alnemer",
-      "tariq.alharbi",
-      "amina.alghamdi",
-      "faisal.alshehri",
-      "hanan.alqahtani",
-      "abdullah.almecca",
-      "omar.alghamdi",
-      "saleh.alharbi",
-      "mahmoud.alzahrani",
-      "youssef.almutairi",
-      "ahmad.almadinah",
-      "khalid.alnasir",
-      "ibrahim.alsaleh",
-      "hassan.almohammed",
-    ];
+  private getEmailFromAuth(employee: RawEmployee): string {
+    // If we have the user's full_name, generate email from that
+    if (employee.full_name) {
+      // Convert full name to email format
+      const emailUsername = employee.full_name
+        .toLowerCase()
+        .replace(/\s+/g, ".") // Replace spaces with dots
+        .replace(/[^a-z0-9.]/g, ""); // Remove special characters except dots
 
-    const randomName = names[Math.floor(Math.random() * names.length)];
-    return `${randomName}@company.com`;
+      return `${emailUsername}@company.com`;
+    }
+
+    // Fallback to user ID if no full name
+    return `user.${employee.id.slice(0, 8)}@company.com`;
   }
 
   async getAnalytics(adminContext: AdminContext) {

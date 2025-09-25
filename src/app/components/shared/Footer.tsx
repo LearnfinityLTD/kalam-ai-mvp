@@ -14,8 +14,9 @@ export default function Footer() {
               <span className="ml-2 text-lg font-bold">AI</span>
             </Link>
             <p className="text-gray-400">
-              AI English tutor for Arabic speakers, built with Islamic values
-              and cultural understanding.
+              Enterprise cultural intelligence platform that prevents costly
+              miscommunication and ensures regulatory compliance across
+              multinational organizations.
             </p>
           </div>
 

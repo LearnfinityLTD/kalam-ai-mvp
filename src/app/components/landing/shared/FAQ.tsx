@@ -8,39 +8,41 @@ export const FAQ = () => {
 
   const faqs = [
     {
-      question: "How is KalamAI different from other English learning apps?",
+      question:
+        "How does Kalam AI prevent $80 billion in communication losses?",
       answer:
-        "KalamAI is specifically designed for Arabic speakers with deep cultural understanding. Unlike generic apps, we provide culturally-aware scenarios, support multiple Arabic dialects, include prayer-respectful timing, and focus on real-world situations you'll actually encounter.",
+        "Our AI platform analyzes communications in real-time for cultural appropriateness, hierarchy respect, and clarity. By preventing cultural miscommunication incidents that lead to project delays, compliance violations, and failed business relationships, enterprises save millions annually. Our clients report average ROI of 340% in year one.",
     },
     {
-      question: "Does KalamAI really pause during prayer times?",
+      question: "What compliance requirements does the platform support?",
       answer:
-        "Yes! KalamAI automatically detects prayer times based on your location and Islamic calendar, pausing lessons respectfully. This shows our commitment to technology that aligns with your values and daily worship schedule.",
+        "Kalam AI generates complete audit trails for GCC nationalization mandates, SOC 2 Type II compliance, GDPR data protection, and regional regulatory requirements. Our automated documentation includes timestamp logs, cultural risk scores, and compliance verification reports required by government auditors.",
     },
     {
-      question: "Which Arabic dialects are supported?",
+      question:
+        "How quickly can we see ROI from cultural intelligence training?",
       answer:
-        "We currently support Gulf Arabic, Egyptian Arabic, Levantine Arabic, and Modern Standard Arabic. Our AI recognizes dialect-specific pronunciations and provides appropriate feedback for each variation.",
+        "Most enterprises see measurable results within 30-90 days. Key metrics include: 67% reduction in cross-cultural miscommunication incidents, 30% faster knowledge transfer to local talent, and 85% improvement in regulatory compliance scores. Full ROI typically achieved within 8-12 months.",
     },
     {
-      question: "Can mosque administrators track their team's progress?",
+      question: "Is the platform secure enough for Fortune 500 enterprises?",
       answer:
-        "Absolutely! Our team management features allow mosque administrators and business managers to monitor learning progress, engagement metrics, and improvement areas across their entire team while respecting individual privacy.",
+        "Yes. Kalam AI maintains SOC 2 Type II certification, supports regional data residency requirements, integrates with enterprise SSO systems, and provides comprehensive audit logging. Our security architecture meets the strictest enterprise and government security standards.",
     },
     {
-      question: "Is there a free trial available?",
+      question: "How does knowledge transfer scoring work for compliance?",
       answer:
-        "Yes! We offer a 14-day free trial with full access to all features. No credit card required to start. Experience the difference of culturally-aware English learning before committing.",
+        "Our AI evaluates documentation clarity, cultural context, and actionability on a 0-100 scale. Documents scoring 90%+ meet audit requirements for knowledge transfer mandates. The system flags unclear instructions, missing cultural context, and compliance gaps before regulatory review.",
     },
     {
-      question: "How does the AI voice recognition work for Arabic speakers?",
+      question: "Can the platform integrate with existing enterprise systems?",
       answer:
-        "Our AI is trained specifically on Arabic-accented English, understanding common pronunciation challenges faced by Arabic speakers. It provides targeted feedback and corrections that generic voice recognition systems miss.",
+        "Absolutely. Kalam AI provides REST APIs for integration with HR platforms, communication tools, compliance systems, and learning management platforms. We support single sign-on, automated user provisioning, and real-time data synchronization with enterprise workflows.",
     },
   ];
 
   return (
-    <section id="faq" className="py-20 bg-white">
+    <section id="faq" className="py-20 bg-gray-50">
       <div className="container mx-auto px-4 max-w-4xl">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -49,10 +51,11 @@ export const FAQ = () => {
           className="text-center mb-16"
         >
           <h2 className="text-4xl font-bold text-gray-900 mb-4">
-            Frequently Asked Questions
+            Enterprise Implementation Questions
           </h2>
           <p className="text-xl text-gray-600">
-            Everything you need to know about KalamAI
+            Common questions from Chief Compliance Officers and VPs of Global
+            Operations
           </p>
         </motion.div>
 
@@ -64,7 +67,7 @@ export const FAQ = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
             >
-              <Card className="border-2 border-gray-200 hover:border-green-300 transition-colors">
+              <Card className="border-2 border-gray-200 hover:border-emerald-300 transition-colors">
                 <CardContent className="p-0">
                   <button
                     className="w-full text-left p-6 focus:outline-none"
@@ -82,7 +85,7 @@ export const FAQ = () => {
                         }`}
                       >
                         <svg
-                          className="w-6 h-6 text-green-600"
+                          className="w-6 h-6 text-emerald-600"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"

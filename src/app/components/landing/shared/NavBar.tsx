@@ -4,12 +4,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Shield, MapPin, Briefcase } from "lucide-react";
+import { Building, Shield, Users } from "lucide-react";
 
 export default function NavBar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [showUserTypeMenu, setShowUserTypeMenu] = useState(false);
+  const [showSolutionsMenu, setShowSolutionsMenu] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -18,96 +18,90 @@ export default function NavBar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = () => {
-      setShowUserTypeMenu(false);
+      setShowSolutionsMenu(false);
       setIsMobileMenuOpen(false);
     };
 
-    if (showUserTypeMenu || isMobileMenuOpen) {
+    if (showSolutionsMenu || isMobileMenuOpen) {
       document.addEventListener("click", handleClickOutside);
       return () => document.removeEventListener("click", handleClickOutside);
     }
-  }, [showUserTypeMenu, isMobileMenuOpen]);
+  }, [showSolutionsMenu, isMobileMenuOpen]);
 
-  const userTypes = [
+  const solutions = [
     {
-      type: "professional",
-      label: "Business Professional",
-      icon: Briefcase,
-      color: "blue",
-      description: "Business Professionals",
-    },
-    {
-      type: "guard",
-      label: "Mosque Host",
+      type: "compliance",
+      label: "Compliance & Risk",
       icon: Shield,
-      color: "green",
-      description: "Welcome tourists & manage visits",
+      color: "emerald",
+      description: "Regulatory compliance automation",
     },
     {
-      type: "tourist_guide",
-      label: "Tour Guide",
-      icon: MapPin,
-      color: "amber",
-      description: "Lead cultural tours",
+      type: "nationalization",
+      label: "Nationalization Programs",
+      icon: Users,
+      color: "blue",
+      description: "Knowledge transfer acceleration",
+    },
+    {
+      type: "enterprise",
+      label: "Global Operations",
+      icon: Building,
+      color: "purple",
+      description: "Enterprise-wide deployment",
     },
   ];
 
-  const handleSignIn = (userType: string) => {
-    router.push(`/auth/signin?type=${userType}`);
-    setShowUserTypeMenu(false);
+  const handleSolutionSelect = (solutionType: string) => {
+    router.push(`/solutions/${solutionType}`);
+    setShowSolutionsMenu(false);
     setIsMobileMenuOpen(false);
   };
 
-  const handleStartTrial = () => {
-    // Scroll to user selection section first
-    const userSelection = document.getElementById("user-selection");
-    if (userSelection) {
-      userSelection.scrollIntoView({ behavior: "smooth" });
-    } else {
-      // Fallback to guards if section not found
-      router.push("/auth/signin?type=guard");
-    }
+  const handleDemo = () => {
+    router.push("/demo-request");
     setIsMobileMenuOpen(false);
   };
 
   return (
     <header
       className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-        isScrolled ? "bg-white/95 backdrop-blur-md shadow-lg" : "bg-white/90"
+        isScrolled
+          ? "bg-slate-900/95 backdrop-blur-md shadow-lg"
+          : "bg-slate-900/90"
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20">
           {/* Logo Section */}
           <Link href="/" className="flex items-center flex-shrink-0">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center text-white font-bold text-base sm:text-lg">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg flex items-center justify-center text-white font-bold text-base sm:text-lg">
               كلام
             </div>
-            <span className="ml-2 sm:ml-3 text-xl sm:text-2xl font-bold text-gray-900">
+            <span className="ml-2 sm:ml-3 text-xl sm:text-2xl font-bold text-white">
               AI
             </span>
-            <Badge className="ml-2 sm:ml-3 bg-green-100 text-green-800 text-xs px-2 py-1">
-              Beta
+            <Badge className="ml-2 sm:ml-3 bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs px-2 py-1">
+              Enterprise
             </Badge>
           </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden sm:flex items-center space-x-3 lg:space-x-4">
-            {/* Sign In Dropdown */}
+            {/* Solutions Dropdown */}
             <div className="relative">
               <Button
-                variant="outline"
+                variant="ghost"
                 size="sm"
-                className="border-green-600 text-green-600 hover:bg-green-50 px-4 py-2 text-sm font-medium"
+                className="text-slate-300 hover:text-white hover:bg-slate-800 px-4 py-2 text-sm font-medium"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setShowUserTypeMenu(!showUserTypeMenu);
+                  setShowSolutionsMenu(!showSolutionsMenu);
                 }}
               >
-                Sign In
+                Solutions
                 <svg
                   className="ml-1 h-4 w-4"
                   fill="none"
@@ -124,34 +118,34 @@ export default function NavBar() {
               </Button>
 
               {/* Dropdown Menu */}
-              {showUserTypeMenu && (
-                <div className="absolute top-full mt-2 right-0 w-64 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50">
-                  <div className="px-3 py-2 text-xs font-medium text-gray-500 border-b border-gray-100">
-                    Choose your role
+              {showSolutionsMenu && (
+                <div className="absolute top-full mt-2 right-0 w-72 bg-slate-800 rounded-lg shadow-xl border border-slate-700 py-2 z-50">
+                  <div className="px-3 py-2 text-xs font-medium text-slate-400 border-b border-slate-700">
+                    Choose your solution
                   </div>
-                  {userTypes.map((userType) => {
-                    const IconComponent = userType.icon;
+                  {solutions.map((solution) => {
+                    const IconComponent = solution.icon;
                     return (
                       <button
-                        key={userType.type}
-                        onClick={() => handleSignIn(userType.type)}
-                        className="w-full px-3 py-3 text-left hover:bg-gray-50 transition-colors flex items-start space-x-3"
+                        key={solution.type}
+                        onClick={() => handleSolutionSelect(solution.type)}
+                        className="w-full px-3 py-3 text-left hover:bg-slate-700 transition-colors flex items-start space-x-3"
                       >
                         <IconComponent
                           className={`h-5 w-5 ${
-                            userType.color === "green"
-                              ? "text-green-600"
-                              : userType.color === "amber"
-                              ? "text-amber-600"
-                              : "text-blue-600"
+                            solution.color === "emerald"
+                              ? "text-emerald-400"
+                              : solution.color === "blue"
+                              ? "text-blue-400"
+                              : "text-purple-400"
                           }`}
                         />
                         <div>
-                          <div className="font-medium text-gray-900 text-sm">
-                            {userType.label}
+                          <div className="font-medium text-white text-sm">
+                            {solution.label}
                           </div>
-                          <div className="text-xs text-gray-500">
-                            {userType.description}
+                          <div className="text-xs text-slate-400">
+                            {solution.description}
                           </div>
                         </div>
                       </button>
@@ -162,17 +156,30 @@ export default function NavBar() {
             </div>
 
             <Button
+              variant="ghost"
               size="sm"
-              className="bg-green-600 hover:bg-green-700 text-white px-4 lg:px-6 py-2 text-sm font-medium"
-              onClick={handleStartTrial}
+              className="text-slate-300 hover:text-white hover:bg-slate-800 px-4 py-2 text-sm font-medium"
+              onClick={() =>
+                document
+                  .getElementById("pricing")
+                  ?.scrollIntoView({ behavior: "smooth" })
+              }
             >
-              Start Free Trial
+              Pricing
+            </Button>
+
+            <Button
+              size="sm"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 lg:px-6 py-2 text-sm font-medium"
+              onClick={handleDemo}
+            >
+              Schedule Demo
             </Button>
           </div>
 
           {/* Mobile Menu Button */}
           <button
-            className="sm:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-green-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-green-500"
+            className="sm:hidden inline-flex items-center justify-center p-2 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-emerald-500"
             onClick={(e) => {
               e.stopPropagation();
               setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -215,43 +222,42 @@ export default function NavBar() {
 
         {/* Mobile Navigation Menu */}
         {isMobileMenuOpen && (
-          <div className="sm:hidden border-t border-gray-200 bg-white/95 backdrop-blur-md">
+          <div className="sm:hidden border-t border-slate-700 bg-slate-900/95 backdrop-blur-md">
             <div className="px-2 pt-3 pb-3 space-y-3">
-              {/* Mobile Sign In Options */}
+              {/* Mobile Solutions */}
               <div className="space-y-2">
-                <div className="text-xs font-medium text-gray-500 px-2">
-                  Sign in as:
+                <div className="text-xs font-medium text-slate-400 px-2">
+                  Solutions:
                 </div>
-                {userTypes.map((userType) => {
-                  const IconComponent = userType.icon;
+                {solutions.map((solution) => {
+                  const IconComponent = solution.icon;
                   return (
                     <Button
-                      key={userType.type}
-                      variant="outline"
-                      className="w-full border-green-600 text-green-600 hover:bg-green-50 justify-start text-sm"
-                      onClick={() => handleSignIn(userType.type)}
+                      key={solution.type}
+                      variant="ghost"
+                      className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800 text-sm"
+                      onClick={() => handleSolutionSelect(solution.type)}
                     >
-                      <IconComponent
-                        className={`h-5 w-5 ${
-                          userType.color === "green"
-                            ? "text-green-600"
-                            : userType.color === "amber"
-                            ? "text-amber-600"
-                            : "text-blue-600"
-                        }`}
-                      />
-                      {userType.label}
+                      <IconComponent className="h-5 w-5 mr-2" />
+                      {solution.label}
                     </Button>
                   );
                 })}
               </div>
 
-              <div className="border-t border-gray-200 pt-3">
+              <div className="border-t border-slate-700 pt-3">
                 <Button
-                  className="w-full bg-green-600 hover:bg-green-700 text-white justify-center"
-                  onClick={handleStartTrial}
+                  variant="ghost"
+                  className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800"
+                  onClick={() => router.push("/#pricing")}
                 >
-                  Start Free Trial
+                  Pricing
+                </Button>
+                <Button
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white justify-center mt-2"
+                  onClick={handleDemo}
+                >
+                  Schedule Demo
                 </Button>
               </div>
             </div>

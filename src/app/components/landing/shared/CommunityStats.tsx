@@ -26,13 +26,13 @@ function useCountUp(target: number, duration = 2000) {
 }
 
 export const CommunityStats = () => {
-  const learners = useCountUp(500);
-  const countries = useCountUp(15);
-  const rating = useCountUp(49);
+  const savings = useCountUp(250);
+  const companies = useCountUp(45);
+  const compliance = useCountUp(99);
 
   return (
-    <section className="py-16 bg-gradient-to-r from-green-600 to-blue-600 relative overflow-hidden">
-      <div className="absolute inset-0 bg-black/10"></div>
+    <section className="py-16 bg-slate-900 relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-r from-emerald-600/10 to-blue-600/10"></div>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
         <motion.h2
           initial={{ opacity: 0, y: 30 }}
@@ -40,16 +40,16 @@ export const CommunityStats = () => {
           transition={{ duration: 0.6 }}
           className="text-4xl font-bold text-white mb-4"
         >
-          Join Our Growing Community
+          Trusted by Global Enterprises
         </motion.h2>
         <motion.p
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="text-xl text-green-100 mb-12 max-w-3xl mx-auto"
+          className="text-xl text-slate-300 mb-12 max-w-3xl mx-auto"
         >
-          Discover how KalamAI has transformed English communication for Arabic
-          speakers across the Muslim world
+          Leading multinationals rely on Kalam AI to eliminate cultural
+          miscommunication and ensure compliant knowledge transfer
         </motion.p>
 
         <div className="grid md:grid-cols-3 gap-8 text-white">
@@ -59,9 +59,11 @@ export const CommunityStats = () => {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-center bg-white/10 backdrop-blur rounded-lg p-6"
           >
-            <div className="text-4xl font-bold mb-2">{learners}+</div>
-            <div className="text-green-200 text-lg">Active Learners</div>
-            <div className="text-green-300 text-sm mt-2">Growing daily 📈</div>
+            <div className="text-4xl font-bold mb-2">${savings}M+</div>
+            <div className="text-emerald-300 text-lg">Risk Mitigation</div>
+            <div className="text-slate-400 text-sm mt-2">
+              Prevented losses annually
+            </div>
           </motion.div>
 
           <motion.div
@@ -70,10 +72,10 @@ export const CommunityStats = () => {
             transition={{ duration: 0.6, delay: 0.3 }}
             className="text-center bg-white/10 backdrop-blur rounded-lg p-6"
           >
-            <div className="text-4xl font-bold mb-2">{countries}+</div>
-            <div className="text-green-200 text-lg">Countries</div>
-            <div className="text-green-300 text-sm mt-2">
-              Across MENA region 🌍
+            <div className="text-4xl font-bold mb-2">{companies}+</div>
+            <div className="text-emerald-300 text-lg">Enterprise Clients</div>
+            <div className="text-slate-400 text-sm mt-2">
+              Fortune 500 & Government
             </div>
           </motion.div>
 
@@ -83,12 +85,10 @@ export const CommunityStats = () => {
             transition={{ duration: 0.6, delay: 0.4 }}
             className="text-center bg-white/10 backdrop-blur rounded-lg p-6"
           >
-            <div className="text-4xl font-bold mb-2">
-              {(rating / 10).toFixed(1)}/5
-            </div>
-            <div className="text-green-200 text-lg">User Rating</div>
-            <div className="text-green-300 text-sm mt-2">
-              ⭐⭐⭐⭐⭐ Reviews
+            <div className="text-4xl font-bold mb-2">{compliance}%</div>
+            <div className="text-emerald-300 text-lg">Compliance Rate</div>
+            <div className="text-slate-400 text-sm mt-2">
+              Audit success rate
             </div>
           </motion.div>
         </div>

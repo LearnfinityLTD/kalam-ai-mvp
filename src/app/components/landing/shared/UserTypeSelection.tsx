@@ -3,94 +3,100 @@ import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Shield, Briefcase, Star, Clock, MapPin } from "lucide-react";
+import {
+  Building,
+  Users,
+  FileCheck,
+  TrendingUp,
+  Shield,
+  Globe,
+} from "lucide-react";
 import Link from "next/link";
 
 export const UserTypeSelection = () => {
-  const userTypes = [
+  const solutions = [
     {
-      icon: Shield,
-      title: "Mosque Guards",
-      description: "Master tourist interactions with cultural confidence",
-      color: "green",
+      icon: Building,
+      title: "Compliance & Risk Management",
+      description:
+        "Ensure regulatory compliance with automated cultural intelligence",
+      color: "emerald",
       features: [
         {
-          icon: Star,
-          title: "Real Tourist Scenarios",
-          desc: "Practice greetings, directions, cultural explanations",
+          icon: Shield,
+          title: "Audit Trail Generation",
+          desc: "Complete documentation for regulatory compliance",
         },
         {
-          icon: Clock,
-          title: "Prayer-Aware Learning",
-          desc: "Automatic breaks during prayer times",
+          icon: FileCheck,
+          title: "Knowledge Transfer Scoring",
+          desc: "90%+ clarity scores mandated for compliance",
         },
         {
-          icon: Briefcase,
-          title: "Team Management",
-          desc: "Track progress across your mosque team",
+          icon: TrendingUp,
+          title: "Risk Metrics Dashboard",
+          desc: "Real-time cultural miscommunication risk assessment",
         },
       ],
-      cta: "Start as Mosque Host",
-      href: "/guards",
+      cta: "Schedule Compliance Demo",
+      href: "/compliance",
+      popular: true,
     },
     {
-      icon: Briefcase,
-      title: "Business Professionals",
-      description: "Excel in international business communication",
+      icon: Users,
+      title: "Nationalization Programs",
+      description: "Accelerate knowledge transfer from expats to local talent",
       color: "blue",
       features: [
         {
-          icon: Star,
-          title: "Business Scenarios",
-          desc: "Meetings, presentations, negotiations",
+          icon: Globe,
+          title: "Cultural Bridge Training",
+          desc: "Bridge communication gaps between cultures",
         },
         {
-          icon: Clock,
-          title: "Industry-Specific",
-          desc: "Tailored vocabulary and scenarios",
+          icon: TrendingUp,
+          title: "Transfer Effectiveness",
+          desc: "30% faster local talent proficiency",
         },
         {
-          icon: Briefcase,
-          title: "Team Analytics",
-          desc: "Corporate progress tracking",
+          icon: FileCheck,
+          title: "Government Reporting",
+          desc: "Automated compliance reporting for authorities",
         },
       ],
-      cta: "Start as a professional",
-      popular: true,
-      comingSoon: false,
-      href: "/professionals",
+      cta: "Explore Nationalization Solution",
+      href: "/nationalization",
     },
     {
-      icon: MapPin,
-      title: "Tour Guides",
+      icon: Globe,
+      title: "Global Operations",
       description:
-        "Lead international visitors with clarity and cultural confidence",
-      color: "amber",
+        "Scale cross-cultural communication across international teams",
+      color: "purple",
       features: [
         {
-          icon: Star,
-          title: "Guided Tour Scripts",
-          desc: "Ready-to-use routes, intros, and FAQs",
+          icon: Users,
+          title: "Multi-Cultural Teams",
+          desc: "Seamless communication across cultures",
         },
         {
-          icon: Clock,
-          title: "Crowd Management",
-          desc: "Manage groups smoothly around prayer times",
+          icon: Shield,
+          title: "Enterprise Security",
+          desc: "SOC 2, GDPR, regional compliance",
         },
         {
-          icon: MapPin,
-          title: "Cultural Briefings",
-          desc: "Explain etiquette and history respectfully",
+          icon: TrendingUp,
+          title: "ROI Analytics",
+          desc: "Measure impact on productivity and risk",
         },
       ],
-      comingSoon: true,
-      cta: "Start as Tour Guide",
-      href: "/tour-guides",
+      cta: "Request Enterprise Demo",
+      href: "/enterprise",
     },
   ];
 
   return (
-    <section id="user-selection" className="py-20 bg-gray-50">
+    <section id="solutions" className="py-20 bg-white">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -99,86 +105,77 @@ export const UserTypeSelection = () => {
           className="text-center mb-16"
         >
           <h2 className="text-4xl font-bold text-gray-900 mb-4">
-            Choose Your Learning Path
+            Enterprise Solutions
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Tailored experiences designed for your specific professional
-            communication needs
+            Choose the solution that addresses your organization&apos;s specific
+            cross-cultural communication challenges
           </p>
         </motion.div>
 
         <div className="grid lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-          {userTypes.map((type, index) => (
+          {solutions.map((solution, index) => (
             <motion.div
-              key={type.title}
+              key={solution.title}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
               className="relative"
             >
-              {type.popular && (
+              {solution.popular && (
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
-                  <Badge className="bg-green-600 text-white px-4 py-2 font-semibold">
-                    Most Popular 🔥
+                  <Badge className="bg-emerald-600 text-white px-4 py-2 font-semibold">
+                    Most Critical
                   </Badge>
                 </div>
               )}
 
               <Card
                 className={`h-full border-2 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 ${
-                  type.popular
-                    ? "border-green-400 shadow-lg"
-                    : "border-gray-200 hover:border-green-300"
-                } ${type.comingSoon ? "opacity-90" : ""}`}
+                  solution.popular
+                    ? "border-emerald-400 shadow-lg bg-emerald-50/50"
+                    : "border-gray-200 hover:border-emerald-300"
+                }`}
               >
-                {type.comingSoon && (
-                  <div className="absolute top-4 right-4 z-10">
-                    <Badge
-                      variant="secondary"
-                      className="bg-gray-100 text-gray-700"
-                    >
-                      Coming Soon
-                    </Badge>
-                  </div>
-                )}
-
                 <CardContent className="p-8">
                   <div className="text-center mb-8">
                     <div
                       className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 transition-colors ${
-                        type.color === "green"
-                          ? "bg-green-100 group-hover:bg-green-200"
-                          : type.color === "blue"
-                          ? "bg-blue-100 group-hover:bg-blue-200"
-                          : "bg-amber-100 group-hover:bg-amber-200"
+                        solution.color === "emerald"
+                          ? "bg-emerald-100"
+                          : solution.color === "blue"
+                          ? "bg-blue-100"
+                          : "bg-purple-100"
                       }`}
                     >
-                      <type.icon
+                      <solution.icon
                         className={`h-8 w-8 ${
-                          type.color === "green"
-                            ? "text-green-600"
-                            : type.color === "blue"
+                          solution.color === "emerald"
+                            ? "text-emerald-600"
+                            : solution.color === "blue"
                             ? "text-blue-600"
-                            : "text-amber-600"
+                            : "text-purple-600"
                         }`}
                       />
                     </div>
-                    <h3 className="text-2xl font-bold mb-3">{type.title}</h3>
+                    <h3 className="text-2xl font-bold mb-3">
+                      {solution.title}
+                    </h3>
                     <p className="text-gray-600 text-lg leading-relaxed">
-                      {type.description}
+                      {solution.description}
                     </p>
                   </div>
 
                   <div className="space-y-4 mb-8">
-                    {type.features.map((feature, idx) => (
+                    {solution.features.map((feature, idx) => (
                       <div key={idx} className="flex items-start gap-3">
                         <feature.icon
                           className={`h-5 w-5 mt-0.5 ${
-                            type.color === "green"
-                              ? "text-green-500"
-                              : type.color === "blue"
+                            solution.color === "emerald"
+                              ? "text-emerald-500"
+                              : solution.color === "blue"
                               ? "text-blue-500"
-                              : "text-amber-500"
+                              : "text-purple-500"
                           }`}
                         />
                         <div>
@@ -193,43 +190,17 @@ export const UserTypeSelection = () => {
                     ))}
                   </div>
 
-                  {type.href ? (
-                    <Link href={type.href}>
-                      <Button
-                        className={`w-full py-4 text-lg font-semibold transition-all ${
-                          type.color === "green"
-                            ? "bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-xl"
-                            : type.color === "blue"
-                            ? "bg-blue-600 hover:bg-blue-700 text-white"
-                            : "bg-amber-600 hover:bg-amber-700 text-white"
-                        } ${
-                          type.comingSoon
-                            ? "opacity-75"
-                            : "hover:-translate-y-0.5"
-                        }`}
-                        disabled={type.comingSoon}
-                      >
-                        {type.cta} {!type.comingSoon && "→"}
-                      </Button>
-                    </Link>
-                  ) : (
-                    <Button
-                      className={`w-full py-4 text-lg font-semibold transition-all ${
-                        type.color === "green"
-                          ? "bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-xl"
-                          : type.color === "blue"
-                          ? "bg-blue-600 hover:bg-blue-700 text-white"
-                          : "bg-amber-600 hover:bg-amber-700 text-white"
-                      } ${
-                        type.comingSoon
-                          ? "opacity-75"
-                          : "hover:-translate-y-0.5"
-                      }`}
-                      disabled={type.comingSoon}
-                    >
-                      {type.cta} {!type.comingSoon && "→"}
-                    </Button>
-                  )}
+                  <Button
+                    className={`w-full py-4 text-lg font-semibold transition-all ${
+                      solution.color === "emerald"
+                        ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg hover:shadow-xl"
+                        : solution.color === "blue"
+                        ? "bg-blue-600 hover:bg-blue-700 text-white"
+                        : "bg-purple-600 hover:bg-purple-700 text-white"
+                    } hover:-translate-y-0.5`}
+                  >
+                    {solution.cta}
+                  </Button>
                 </CardContent>
               </Card>
             </motion.div>

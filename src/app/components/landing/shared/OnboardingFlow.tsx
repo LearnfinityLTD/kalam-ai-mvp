@@ -1,27 +1,33 @@
 import React from "react";
-import { UserPlus, Shield, Play, ArrowRight, Clock } from "lucide-react";
+import {
+  Calendar,
+  Settings,
+  TrendingUp,
+  ArrowRight,
+  Clock,
+} from "lucide-react";
 
 export default function OnboardingFlow() {
   const steps = [
     {
       number: 1,
-      title: "Sign Up",
-      description: "Create account in 30 seconds",
-      icon: UserPlus,
-      color: "blue" as const,
+      title: "Risk Assessment",
+      description: "Comprehensive cultural risk audit",
+      icon: Settings,
+      color: "emerald" as const,
     },
     {
       number: 2,
-      title: "Choose Your Role",
-      description: "Select your professional path",
-      icon: Shield,
-      color: "green" as const,
+      title: "Pilot Implementation",
+      description: "30-day proof of concept",
+      icon: Calendar,
+      color: "blue" as const,
     },
     {
       number: 3,
-      title: "Start Practicing",
-      description: "Jump into real scenarios",
-      icon: Play,
+      title: "Enterprise Rollout",
+      description: "Full-scale deployment & ROI tracking",
+      icon: TrendingUp,
       color: "purple" as const,
     },
   ];
@@ -32,15 +38,15 @@ export default function OnboardingFlow() {
         {/* Header */}
         <div className="text-center mb-12">
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
-            Get Started in Minutes, Not Hours
+            Enterprise Implementation Process
           </h2>
           <p className="text-lg text-gray-600 max-w-xl mx-auto mb-4">
-            No complicated setup, no lengthy assessments. Start practicing real
-            scenarios immediately.
+            Proven methodology for Fortune 500 cultural intelligence deployment
+            with measurable ROI from day one.
           </p>
-          <div className="flex items-center justify-center text-green-600 font-semibold">
+          <div className="flex items-center justify-center text-emerald-600 font-semibold">
             <Clock className="w-4 h-4 mr-2" />
-            <span className="text-sm">Average setup time: Under 2 minutes</span>
+            <span className="text-sm">Typical implementation: 30-90 days</span>
           </div>
         </div>
 
@@ -49,8 +55,8 @@ export default function OnboardingFlow() {
           {steps.map((step, index) => {
             const IconComponent = step.icon;
             const colorClasses = {
+              emerald: "bg-emerald-500 text-white",
               blue: "bg-blue-500 text-white",
-              green: "bg-green-500 text-white",
               purple: "bg-purple-500 text-white",
             };
 
@@ -74,7 +80,7 @@ export default function OnboardingFlow() {
                   <h3 className="text-lg font-bold text-gray-900 mb-1">
                     {step.title}
                   </h3>
-                  <p className="text-sm text-gray-600 max-w-[120px]">
+                  <p className="text-sm text-gray-600 max-w-[140px]">
                     {step.description}
                   </p>
                 </div>

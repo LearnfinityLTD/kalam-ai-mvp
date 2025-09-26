@@ -155,7 +155,11 @@ export default function EnterpriseDashboard() {
         .eq("is_active", true)
         .single();
 
-      if (userTenant?.organizations) {
+      // Fix: Handle the organizations array properly
+      if (userTenant?.organizations && Array.isArray(userTenant.organizations) && userTenant.organizations.length > 0) {
+        setOrganization(userTenant.organizations[0] as OrganizationData);
+      } else if (userTenant?.organizations && !Array.isArray(userTenant.organizations)) {
+        // In case the query returns a single object instead of array
         setOrganization(userTenant.organizations as OrganizationData);
       }
 

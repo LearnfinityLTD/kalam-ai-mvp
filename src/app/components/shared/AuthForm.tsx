@@ -12,21 +12,17 @@ import {
   Eye,
   EyeOff,
   Shield,
-  MapPin,
-  Briefcase,
   CheckCircle,
 } from "lucide-react";
 
 type Props = {
-  userType: "guard" | "professional" | "tourist_guide"; // For database operations
-  displayType?: "guard" | "professional" | "tourist_guide"; // For UI display
   redirectTo?: string;
 };
 
 const EMAIL_RE =
   /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/;
 
-export default function AuthForm({ userType, displayType, redirectTo }: Props) {
+export default function AuthForm({ redirectTo }: Props) {
   const supabase = useMemo(() => createClient(), []);
   const router = useRouter();
 
@@ -35,54 +31,16 @@ export default function AuthForm({ userType, displayType, redirectTo }: Props) {
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const typeForTitle = displayType || userType;
-
-  // Get user-specific configuration
-  const getUserConfig = (type: string) => {
-    switch (type) {
-      case "guard":
-        return {
-          title: "Mosque Host Sign In",
-          subtitle: "Welcome back! Continue your English learning journey",
-          icon: Shield,
-          color: "green",
-          description:
-            "Access your personalized mosque scenarios and tourist interaction practice",
-          signupText: "Join as Mosque Host",
-        };
-      case "tourist_guide":
-        return {
-          title: "Tour Guide Sign In",
-          subtitle: "Welcome back! Lead with confidence",
-          icon: MapPin,
-          color: "amber",
-          description:
-            "Access your tour guide scenarios and cultural communication tools",
-          signupText: "Join as Tour Guide",
-        };
-      case "professional":
-        return {
-          title: "Business Professional Sign In",
-          subtitle: "Welcome back! Excel in international business",
-          icon: Briefcase,
-          color: "blue",
-          description:
-            "Access your business scenarios and professional communication training",
-          signupText: "Join as Professional",
-        };
-      default:
-        return {
-          title: "Sign In",
-          subtitle: "Welcome back!",
-          icon: Shield,
-          color: "green",
-          description: "Continue your learning journey",
-          signupText: "Create Account",
-        };
-    }
+  // Enterprise platform configuration
+  const config = {
+    title: "Enterprise Cultural Intelligence",
+    subtitle: "Risk Management & Compliance Platform",
+    icon: Shield,
+    color: "emerald",
+    description: "Access enterprise-grade cultural risk assessment and compliance tools",
+    signupText: "Request Enterprise Access",
   };
 
-  const config = getUserConfig(typeForTitle);
   const IconComponent = config.icon;
 
   const validate = useCallback(() => {
@@ -97,57 +55,23 @@ export default function AuthForm({ userType, displayType, redirectTo }: Props) {
     return true;
   }, [email, password]);
 
-  // insert profile ONLY if missing; don't clobber is_admin
-  const ensureProfile = async (userId: string) => {
-    const { data: existing, error: existErr } = await supabase
-      .from("user_profiles")
-      .select("id")
-      .eq("id", userId)
-      .maybeSingle();
-    if (existErr) throw existErr;
-
-    if (!existing) {
-      const { error: insertErr } = await supabase.from("user_profiles").insert({
-        id: userId,
-        user_type: userType,
-        is_admin: false,
-      });
-      console.log("useDFDG", userType);
-      if (insertErr) throw insertErr;
-    }
-  };
-
-  // Replace your handleAuth function with this debugging version
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("🚀 Login attempt started");
-
+    
     if (!validate()) {
-      console.log("❌ Validation failed");
       return;
     }
 
     setLoading(true);
     try {
       const cleanEmail = email.trim().toLowerCase();
-      console.log("📧 Cleaned email:", cleanEmail);
-      console.log("🔑 Password length:", password.length);
-      console.log("👤 User type:", userType);
-
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email: cleanEmail,
         password,
       });
 
-      console.log("🔐 Supabase auth response:", {
-        success: !!data.user,
-        userId: data.user?.id,
-        email: data.user?.email,
-        errorMessage: error?.message,
-      });
-
       if (error) {
-        console.error("❌ Auth error:", error);
         const msg = (error.message || "").toLowerCase();
         if (msg.includes("invalid login credentials")) {
           throw new Error("Incorrect email or password.");
@@ -162,94 +86,57 @@ export default function AuthForm({ userType, displayType, redirectTo }: Props) {
 
       const userId = data.user?.id;
       if (!userId) {
-        console.error("❌ No user ID returned");
         throw new Error("No user returned from sign-in.");
       }
 
-      console.log("✅ Authentication successful, user ID:", userId);
-
-      // Check if profile exists before ensuring it
-      console.log("🔍 Checking for existing profile...");
-      const { data: existingProfile, error: checkError } = await supabase
-        .from("user_profiles")
-        .select("id, user_type, is_admin")
-        .eq("id", userId)
+      // Check user profile and tenant relationship for enterprise schema
+      const { data: userTenant, error: tenantError } = await supabase
+        .from("user_tenants")
+        .select(`
+          role,
+          tenant_id,
+          organizations!inner(name, type, status)
+        `)
+        .eq("user_id", userId)
+        .eq("is_active", true)
         .maybeSingle();
 
-      console.log("📋 Existing profile check:", {
-        exists: !!existingProfile,
-        profile: existingProfile,
-        error: checkError?.message,
-      });
-
-      await ensureProfile(userId);
-      console.log("✅ Profile ensured");
-
-      // Check if user is admin and redirect to admin signin page
-      const { data: profile, error: profileError } = await supabase
-        .from("user_profiles")
-        .select("user_type, is_admin")
-        .eq("id", userId)
-        .maybeSingle();
-
-      console.log("📋 Profile lookup result:", {
-        profile,
-        error: profileError?.message,
-      });
-
-      if (profileError) {
-        console.error("❌ Profile error:", profileError);
-        throw profileError;
+      if (tenantError) {
+        console.error("Tenant lookup error:", tenantError);
+        throw new Error("Access denied: No valid organization found.");
       }
 
-      // If user is admin, sign them out and redirect to admin signin
-      if (profile?.is_admin) {
-        console.log("🔐 User is admin, redirecting to admin signin");
-        await supabase.auth.signOut();
-        toast.error("Admin users must use the dedicated admin login page");
-        router.push("/admin/signin");
-        return;
+      if (!userTenant) {
+        throw new Error("Access denied: No organization access found.");
       }
 
-      console.log("🎯 Non-admin user, proceeding with normal flow");
+      // Check if organization is active
+      if (userTenant.organizations?.status !== "active" && userTenant.organizations?.status !== "trial") {
+        throw new Error("Organization access is suspended. Contact your administrator.");
+      }
 
-      // read profile to decide admin vs normal destination
-      const { data: me, error: meErr } = await supabase
-        .from("user_profiles")
-        .select("user_type, is_admin")
-        .eq("id", userId)
-        .maybeSingle();
+      // Route based on role - all users go to enterprise dashboard
+      let destination = "/enterprise/dashboard";
+      
+      // Override with redirectTo if provided
+      if (redirectTo) {
+        destination = redirectTo;
+      }
 
-      console.log("📋 Final profile check:", { me, error: meErr?.message });
+      // Store tenant context in session for dashboard
+      sessionStorage.setItem("kalam_tenant_id", userTenant.tenant_id);
+      sessionStorage.setItem("kalam_user_role", userTenant.role);
 
-      if (meErr) throw meErr;
+      toast.success(`Welcome to ${userTenant.organizations?.name || 'Kalam AI Enterprise'}`);
+      router.replace(destination);
 
-      const computedDest = (() => {
-        switch (userType) {
-          case "guard":
-            return me?.is_admin ? "/guards/admin" : "/guards/dashboard";
-          case "tourist_guide":
-            return "/tour-guides/dashboard";
-          case "professional":
-            return "/professionals/dashboard";
-          default:
-            return "/dashboard";
-        }
-      })();
-
-      console.log("🎯 Computed destination:", computedDest);
-      console.log("🎯 Redirect URL:", redirectTo || computedDest);
-
-      router.replace(redirectTo || computedDest);
-      console.log("✅ Redirect initiated");
     } catch (err: unknown) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to sign in.";
-      console.error("💥 Full error:", err);
+      console.error("Login error:", err);
       toast.error(errorMessage);
     } finally {
       setLoading(false);
-      console.log("🏁 Login attempt completed");
     }
   };
 
@@ -260,15 +147,15 @@ export default function AuthForm({ userType, displayType, redirectTo }: Props) {
       {/* Header */}
       <div className="text-center mb-8">
         <div className="flex justify-center mb-6">
-          <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center text-white font-bold text-xl shadow-lg">
+          <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl flex items-center justify-center text-white font-bold text-xl shadow-lg">
             كلام
           </div>
           <span className="ml-3 text-3xl font-bold text-gray-900 self-center">
             AI
           </span>
         </div>
-        <Badge className="mb-4 bg-green-100 text-green-700 px-4 py-2">
-          Secure Login
+        <Badge className="mb-4 bg-emerald-100 text-emerald-700 px-4 py-2">
+          Enterprise Platform
         </Badge>
       </div>
 
@@ -277,11 +164,11 @@ export default function AuthForm({ userType, displayType, redirectTo }: Props) {
         {/* Header Section */}
         <div
           className={`bg-gradient-to-r ${
-            config.color === "green"
-              ? "from-green-500 to-green-600"
-              : config.color === "amber"
-              ? "from-amber-500 to-amber-600"
-              : "from-blue-500 to-blue-600"
+            config.color === "emerald"
+              ? "from-emerald-600 to-emerald-700"
+              : config.color === "blue"
+              ? "from-blue-600 to-blue-700"
+              : "from-slate-700 to-slate-800"
           } p-6 text-white text-center`}
         >
           <div className="flex justify-center mb-3">
@@ -297,7 +184,7 @@ export default function AuthForm({ userType, displayType, redirectTo }: Props) {
             {config.description}
           </p>
 
-          <div onSubmit={handleAuth} className="space-y-6">
+          <form onSubmit={handleAuth} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Email Address
@@ -306,12 +193,12 @@ export default function AuthForm({ userType, displayType, redirectTo }: Props) {
                 type="email"
                 inputMode="email"
                 autoComplete="email"
-                placeholder="your.email@example.com"
+                placeholder="your.email@company.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value.trim())}
                 required
                 disabled={loading}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 bg-white hover:border-gray-300"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all duration-200 bg-white hover:border-gray-300"
               />
             </div>
 
@@ -328,7 +215,7 @@ export default function AuthForm({ userType, displayType, redirectTo }: Props) {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   disabled={loading}
-                  className="w-full px-4 py-3 pr-12 border-2 border-gray-200 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 bg-white hover:border-gray-300"
+                  className="w-full px-4 py-3 pr-12 border-2 border-gray-200 rounded-lg focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all duration-200 bg-white hover:border-gray-300"
                 />
                 <button
                   type="button"
@@ -348,52 +235,55 @@ export default function AuthForm({ userType, displayType, redirectTo }: Props) {
 
             <Button
               type="submit"
-              onClick={handleAuth}
               disabled={loading}
               className={`w-full py-4 text-lg font-semibold ${
-                config.color === "green"
-                  ? "bg-green-600 hover:bg-green-700"
-                  : config.color === "amber"
-                  ? "bg-amber-600 hover:bg-amber-700"
-                  : "bg-blue-600 hover:bg-blue-700"
+                config.color === "emerald"
+                  ? "bg-emerald-600 hover:bg-emerald-700"
+                  : config.color === "blue"
+                  ? "bg-blue-600 hover:bg-blue-700"
+                  : "bg-slate-700 hover:bg-slate-800"
               } text-white shadow-lg transition-all duration-200 hover:transform hover:scale-105`}
             >
               {loading ? (
                 <div className="flex items-center justify-center">
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                  Signing In...
+                  Authenticating...
                 </div>
               ) : (
-                "Sign In"
+                "Access Dashboard"
               )}
             </Button>
-          </div>
+          </form>
 
           {/* Footer */}
           <div className="mt-8 text-center">
             <p className="text-gray-600 text-sm">
-              Don&apos;t have an account?{" "}
+              Need access?{" "}
               <Link
-                href={`/auth/signup?type=${displayType || userType}${nextQ}`}
-                className="font-semibold text-green-600 hover:text-green-700 transition-colors"
+                href={`/enterprise/request-access`}
+                className="font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
               >
-                {config.signupText}
+                Request Enterprise Access
               </Link>
             </p>
 
             <div className="mt-6 pt-6 border-t border-gray-200">
               <div className="flex items-center justify-center space-x-6 text-xs text-gray-500">
                 <span className="flex items-center">
-                  <CheckCircle className="h-4 w-4 text-green-500 mr-1" />
-                  Secure
+                  <CheckCircle className="h-4 w-4 text-emerald-500 mr-1" />
+                  SOC 2 Compliant
                 </span>
                 <span className="flex items-center">
-                  <CheckCircle className="h-4 w-4 text-green-500 mr-1" />
-                  Privacy Protected
+                  <CheckCircle className="h-4 w-4 text-emerald-500 mr-1" />
+                  GDPR Protected
+                </span>
+                <span className="flex items-center">
+                  <CheckCircle className="h-4 w-4 text-emerald-500 mr-1" />
+                  Enterprise Security
                 </span>
               </div>
               <p className="mt-3 text-xs text-gray-500">
-                By continuing, you agree to our Terms and Privacy Policy
+                Enterprise-grade cultural intelligence platform
               </p>
             </div>
           </div>

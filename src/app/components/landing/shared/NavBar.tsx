@@ -65,6 +65,12 @@ export default function NavBar() {
     setIsMobileMenuOpen(false);
   };
 
+  const handleEnterpriseLogin = () => {
+    // Route to enterprise login - defaults to professional type for enterprise users
+    router.push("/auth?type=professional");
+    setIsMobileMenuOpen(false);
+  };
+
   return (
     <header
       className={`fixed top-0 w-full z-50 transition-all duration-300 ${
@@ -168,6 +174,16 @@ export default function NavBar() {
               Pricing
             </Button>
 
+            {/* Enterprise Login Button */}
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-slate-600 text-slate-300 hover:text-white hover:bg-slate-800 px-4 py-2 text-sm font-medium"
+              onClick={handleEnterpriseLogin}
+            >
+              Enterprise Login
+            </Button>
+
             <Button
               size="sm"
               className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 lg:px-6 py-2 text-sm font-medium"
@@ -245,7 +261,7 @@ export default function NavBar() {
                 })}
               </div>
 
-              <div className="border-t border-slate-700 pt-3">
+              <div className="border-t border-slate-700 pt-3 space-y-2">
                 <Button
                   variant="ghost"
                   className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800"
@@ -254,7 +270,14 @@ export default function NavBar() {
                   Pricing
                 </Button>
                 <Button
-                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white justify-center mt-2"
+                  variant="ghost"
+                  className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800"
+                  onClick={handleEnterpriseLogin}
+                >
+                  Enterprise Login
+                </Button>
+                <Button
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white justify-center"
                   onClick={handleDemo}
                 >
                   Schedule Demo

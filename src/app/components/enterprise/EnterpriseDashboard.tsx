@@ -428,7 +428,7 @@ export default function EnterpriseDashboard() {
                     
                     <div className="mb-3">
                       <p className="text-sm text-gray-800 font-medium mb-1">Communication Preview:</p>
-                      <p className="text-sm text-gray-600 italic">"{incident.preview}"</p>
+                      <p className="text-sm text-gray-600 italic">&apos;{incident.preview}&apos;</p>
                     </div>
                     
                     <div className="space-y-2">

@@ -38,6 +38,7 @@ interface OrganizationData {
   name: string;
   type: string;
   status: string;
+  industry?: string;
 }
 
 interface UserProfile {
@@ -155,7 +156,7 @@ export default function EnterpriseDashboard() {
         .single();
 
       if (userTenant?.organizations) {
-        setOrganization(userTenant.organizations as unknown);
+        setOrganization(userTenant.organizations as OrganizationData);
       }
 
       // Get user profile

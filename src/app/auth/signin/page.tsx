@@ -149,11 +149,7 @@ function Inner() {
           </div>
         )}
 
-        <AuthForm
-          userType={mappedType}
-          displayType={type}
-          redirectTo={next || undefined}
-        />
+        <AuthForm />
 
         <div className="text-center mt-6">
           <button

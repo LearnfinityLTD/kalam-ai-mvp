@@ -155,7 +155,7 @@ export default function EnterpriseDashboard() {
         .single();
 
       if (userTenant?.organizations) {
-        setOrganization(userTenant.organizations as any);
+        setOrganization(userTenant.organizations as unknown);
       }
 
       // Get user profile

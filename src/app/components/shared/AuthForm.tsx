@@ -8,12 +8,7 @@ import { Button } from "@/ui/button";
 import { Input } from "@/ui/input";
 import { Badge } from "@/ui/badge";
 import { toast } from "react-hot-toast";
-import {
-  Eye,
-  EyeOff,
-  Shield,
-  CheckCircle,
-} from "lucide-react";
+import { Eye, EyeOff, Shield, CheckCircle } from "lucide-react";
 
 type Props = {
   redirectTo?: string;
@@ -37,7 +32,8 @@ export default function AuthForm({ redirectTo }: Props) {
     subtitle: "Risk Management & Compliance Platform",
     icon: Shield,
     color: "emerald",
-    description: "Access enterprise-grade cultural risk assessment and compliance tools",
+    description:
+      "Access enterprise-grade cultural risk assessment and compliance tools",
     signupText: "Request Enterprise Access",
   };
 
@@ -57,7 +53,7 @@ export default function AuthForm({ redirectTo }: Props) {
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validate()) {
       return;
     }
@@ -65,7 +61,7 @@ export default function AuthForm({ redirectTo }: Props) {
     setLoading(true);
     try {
       const cleanEmail = email.trim().toLowerCase();
-      
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email: cleanEmail,
         password,
@@ -92,11 +88,13 @@ export default function AuthForm({ redirectTo }: Props) {
       // Check user profile and tenant relationship for enterprise schema
       const { data: userTenant, error: tenantError } = await supabase
         .from("user_tenants")
-        .select(`
+        .select(
+          `
           role,
           tenant_id,
           organizations!inner(name, type, status)
-        `)
+        `
+        )
         .eq("user_id", userId)
         .eq("is_active", true)
         .maybeSingle();
@@ -109,15 +107,22 @@ export default function AuthForm({ redirectTo }: Props) {
       if (!userTenant) {
         throw new Error("Access denied: No organization access found.");
       }
-
+      const organization = Array.isArray(userTenant.organizations)
+        ? userTenant.organizations[0]
+        : userTenant.organizations;
       // Check if organization is active
-      if (userTenant.organizations?.status !== "active" && userTenant.organizations?.status !== "trial") {
-        throw new Error("Organization access is suspended. Contact your administrator.");
+      if (
+        organization?.status !== "active" &&
+        organization?.status !== "trial"
+      ) {
+        throw new Error(
+          "Organization access is suspended. Contact your administrator."
+        );
       }
 
       // Route based on role - all users go to enterprise dashboard
       let destination = "/enterprise/dashboard";
-      
+
       // Override with redirectTo if provided
       if (redirectTo) {
         destination = redirectTo;
@@ -127,9 +132,10 @@ export default function AuthForm({ redirectTo }: Props) {
       sessionStorage.setItem("kalam_tenant_id", userTenant.tenant_id);
       sessionStorage.setItem("kalam_user_role", userTenant.role);
 
-      toast.success(`Welcome to ${userTenant.organizations?.name || 'Kalam AI Enterprise'}`);
+      toast.success(
+        `Welcome to ${organization?.name || "Kalam AI Enterprise"}`
+      );
       router.replace(destination);
-
     } catch (err: unknown) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to sign in.";

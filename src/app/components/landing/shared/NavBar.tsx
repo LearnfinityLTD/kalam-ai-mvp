@@ -67,7 +67,7 @@ export default function NavBar() {
 
   const handleEnterpriseLogin = () => {
     // Route to enterprise login - defaults to professional type for enterprise users
-    router.push("/auth?type=professional");
+    router.push("/auth/signin");
     setIsMobileMenuOpen(false);
   };
 

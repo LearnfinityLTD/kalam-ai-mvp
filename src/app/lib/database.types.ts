@@ -1,13 +1,57 @@
 // lib/database.types.ts
 
-export type UserType = "guard" | "professional" | "tourist_guide" | "admin";
-export type Dialect = "gulf" | "egyptian" | "levantine" | "standard";
-export type Segment = "guard" | "professional" | "tourist_guide";
-export type Difficulty = "a1" | "a2" | "b1" | "b2" | "c1";
-export type ProgressStatus = "not_started" | "in_progress" | "completed";
-export type OrgStatus = "trial" | "active" | "inactive";
+export type RiskLevel = "low" | "medium" | "high" | "critical";
+export type DocumentType =
+  | "email"
+  | "memo"
+  | "presentation"
+  | "policy"
+  | "manual"
+  | "contract";
+export type AudienceType =
+  | "internal"
+  | "external"
+  | "government"
+  | "international";
+export type DocumentStatus =
+  | "draft"
+  | "analysis_pending"
+  | "analyzed"
+  | "approved"
+  | "rejected";
+export type MetricType =
+  | "risk_reduction"
+  | "compliance_score"
+  | "knowledge_transfer_effectiveness"
+  | "user_adoption"
+  | "cost_savings";
+export type TimePeriod =
+  | "daily"
+  | "weekly"
+  | "monthly"
+  | "quarterly"
+  | "yearly";
+export type ActionType =
+  | "login"
+  | "logout"
+  | "document_upload"
+  | "document_analysis"
+  | "knowledge_transfer"
+  | "data_export"
+  | "settings_change"
+  | "user_management";
+export type ResourceType =
+  | "document"
+  | "user"
+  | "session"
+  | "analytics"
+  | "system";
+export type DataClassification =
+  | "public"
+  | "internal"
+  | "confidential"
+  | "restricted";
 
-// Supabase-style JSON type to replace all `any` JSON columns
 export type Json =
   | string
   | number
@@ -19,82 +63,380 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      companies: {
+      organizations: {
         Row: {
           id: string;
           name: string;
+          type: "enterprise" | "government" | "consulting";
           industry: string | null;
-          admin_email: string | null;
-          license_count: number | null;
-          status: OrgStatus | null;
-          admin_settings: Json | null;
-          custom_branding: Json | null;
-          created_at: string | null;
-          updated_at: string | null;
+          country: string;
+          region: string | null;
+          license_number: string | null;
+          compliance_level: "basic" | "advanced" | "government";
+          subscription_tier: "pilot" | "standard" | "enterprise" | "government";
+          max_users: number;
+          contract_value: number | null;
+          contact_email: string;
+          contact_phone: string | null;
+          status: "trial" | "active" | "suspended" | "cancelled";
+          data_residency_region: string;
+          sso_enabled: boolean;
+          audit_logging_enabled: boolean;
+          created_at: string;
+          updated_at: string;
         };
         Insert: {
           id?: string;
           name: string;
+          type: "enterprise" | "government" | "consulting";
           industry?: string | null;
-          admin_email?: string | null;
-          license_count?: number | null;
-          status?: OrgStatus | null;
-          admin_settings?: Json | null;
-          custom_branding?: Json | null;
-          created_at?: string | null;
-          updated_at?: string | null;
+          country?: string;
+          region?: string | null;
+          license_number?: string | null;
+          compliance_level?: "basic" | "advanced" | "government";
+          subscription_tier?:
+            | "pilot"
+            | "standard"
+            | "enterprise"
+            | "government";
+          max_users?: number;
+          contract_value?: number | null;
+          contact_email: string;
+          contact_phone?: string | null;
+          status?: "trial" | "active" | "suspended" | "cancelled";
+          data_residency_region?: string;
+          sso_enabled?: boolean;
+          audit_logging_enabled?: boolean;
+          created_at?: string;
+          updated_at?: string;
         };
         Update: {
           id?: string;
           name?: string;
+          type?: "enterprise" | "government" | "consulting";
           industry?: string | null;
-          admin_email?: string | null;
-          license_count?: number | null;
-          status?: OrgStatus | null;
-          admin_settings?: Json | null;
-          custom_branding?: Json | null;
-          created_at?: string | null;
-          updated_at?: string | null;
+          country?: string;
+          region?: string | null;
+          license_number?: string | null;
+          compliance_level?: "basic" | "advanced" | "government";
+          subscription_tier?:
+            | "pilot"
+            | "standard"
+            | "enterprise"
+            | "government";
+          max_users?: number;
+          contract_value?: number | null;
+          contact_email?: string;
+          contact_phone?: string | null;
+          status?: "trial" | "active" | "suspended" | "cancelled";
+          data_residency_region?: string;
+          sso_enabled?: boolean;
+          audit_logging_enabled?: boolean;
+          created_at?: string;
+          updated_at?: string;
         };
         Relationships: [];
       };
 
-      mosques: {
+      documents: {
         Row: {
           id: string;
-          name: string;
-          location: string | null;
-          admin_email: string | null;
-          admin_phone: string | null;
-          license_count: number | null;
-          contract_value: number | null;
-          status: OrgStatus | null;
-          created_at: string | null;
-          updated_at: string | null;
+          tenant_id: string;
+          user_id: string;
+          title: string;
+          content: string;
+          document_type: DocumentType | null;
+          source_language: string;
+          target_audience: AudienceType | null;
+          sensitivity_level: "low" | "normal" | "high" | "confidential";
+          status: DocumentStatus;
+          created_at: string;
+          analyzed_at: string | null;
+          approved_at: string | null;
+          approved_by: string | null;
         };
         Insert: {
           id?: string;
-          name: string;
-          location?: string | null;
-          admin_email?: string | null;
-          admin_phone?: string | null;
-          license_count?: number | null;
-          contract_value?: number | null;
-          status?: OrgStatus | null;
-          created_at?: string | null;
-          updated_at?: string | null;
+          tenant_id: string;
+          user_id: string;
+          title: string;
+          content: string;
+          document_type?: DocumentType | null;
+          source_language?: string;
+          target_audience?: AudienceType | null;
+          sensitivity_level?: "low" | "normal" | "high" | "confidential";
+          status?: DocumentStatus;
+          created_at?: string;
+          analyzed_at?: string | null;
+          approved_at?: string | null;
+          approved_by?: string | null;
         };
         Update: {
           id?: string;
-          name?: string;
-          location?: string | null;
-          admin_email?: string | null;
-          admin_phone?: string | null;
-          license_count?: number | null;
-          contract_value?: number | null;
-          status?: OrgStatus | null;
-          created_at?: string | null;
-          updated_at?: string | null;
+          tenant_id?: string;
+          user_id?: string;
+          title?: string;
+          content?: string;
+          document_type?: DocumentType | null;
+          source_language?: string;
+          target_audience?: AudienceType | null;
+          sensitivity_level?: "low" | "normal" | "high" | "confidential";
+          status?: DocumentStatus;
+          created_at?: string;
+          analyzed_at?: string | null;
+          approved_at?: string | null;
+          approved_by?: string | null;
+        };
+        Relationships: [];
+      };
+
+      clarity_scores: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          document_id: string;
+          analyzed_by: string;
+          overall_clarity_score: number | null;
+          cultural_appropriateness_score: number | null;
+          hierarchy_respect_score: number | null;
+          directness_balance_score: number | null;
+          formality_level_score: number | null;
+          risk_level: RiskLevel | null;
+          compliance_risk_score: number | null;
+          identified_issues: Json;
+          improvement_suggestions: Json;
+          cultural_context_notes: string | null;
+          suggested_revisions: string | null;
+          analysis_model_version: string;
+          analysis_duration_ms: number | null;
+          confidence_level: number | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          document_id: string;
+          analyzed_by: string;
+          overall_clarity_score?: number | null;
+          cultural_appropriateness_score?: number | null;
+          hierarchy_respect_score?: number | null;
+          directness_balance_score?: number | null;
+          formality_level_score?: number | null;
+          risk_level?: RiskLevel | null;
+          compliance_risk_score?: number | null;
+          identified_issues?: Json;
+          improvement_suggestions?: Json;
+          cultural_context_notes?: string | null;
+          suggested_revisions?: string | null;
+          analysis_model_version?: string;
+          analysis_duration_ms?: number | null;
+          confidence_level?: number | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          tenant_id?: string;
+          document_id?: string;
+          analyzed_by?: string;
+          overall_clarity_score?: number | null;
+          cultural_appropriateness_score?: number | null;
+          hierarchy_respect_score?: number | null;
+          directness_balance_score?: number | null;
+          formality_level_score?: number | null;
+          risk_level?: RiskLevel | null;
+          compliance_risk_score?: number | null;
+          identified_issues?: Json;
+          improvement_suggestions?: Json;
+          cultural_context_notes?: string | null;
+          suggested_revisions?: string | null;
+          analysis_model_version?: string;
+          analysis_duration_ms?: number | null;
+          confidence_level?: number | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+
+      audit_logs: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          user_id: string | null;
+          action_type: ActionType;
+          resource_type: ResourceType | null;
+          resource_id: string | null;
+          action_description: string;
+          old_values: Json | null;
+          new_values: Json | null;
+          ip_address: string | null;
+          user_agent: string | null;
+          session_id: string | null;
+          risk_level: RiskLevel;
+          regulatory_impact: boolean;
+          data_classification: DataClassification | null;
+          retention_period_days: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          user_id?: string | null;
+          action_type: ActionType;
+          resource_type?: ResourceType | null;
+          resource_id?: string | null;
+          action_description: string;
+          old_values?: Json | null;
+          new_values?: Json | null;
+          ip_address?: string | null;
+          user_agent?: string | null;
+          session_id?: string | null;
+          risk_level?: RiskLevel;
+          regulatory_impact?: boolean;
+          data_classification?: DataClassification | null;
+          retention_period_days?: number;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          tenant_id?: string;
+          user_id?: string | null;
+          action_type?: ActionType;
+          resource_type?: ResourceType | null;
+          resource_id?: string | null;
+          action_description?: string;
+          old_values?: Json | null;
+          new_values?: Json | null;
+          ip_address?: string | null;
+          user_agent?: string | null;
+          session_id?: string | null;
+          risk_level?: RiskLevel;
+          regulatory_impact?: boolean;
+          data_classification?: DataClassification | null;
+          retention_period_days?: number;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      user_conversations: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          user_id: string;
+          conversation_title: string | null;
+          conversation_type:
+            | "risk_analysis"
+            | "clarity_improvement"
+            | "cultural_training"
+            | "knowledge_transfer"
+            | null;
+          document_id: string | null;
+          knowledge_session_id: string | null;
+          messages: Json;
+          total_messages: number;
+          user_satisfaction_score: number | null;
+          ai_confidence_avg: number | null;
+          cultural_accuracy_score: number | null;
+          started_at: string;
+          last_message_at: string;
+          ended_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          user_id: string;
+          conversation_title?: string | null;
+          conversation_type?:
+            | "risk_analysis"
+            | "clarity_improvement"
+            | "cultural_training"
+            | "knowledge_transfer"
+            | null;
+          document_id?: string | null;
+          knowledge_session_id?: string | null;
+          messages?: Json;
+          total_messages?: number;
+          user_satisfaction_score?: number | null;
+          ai_confidence_avg?: number | null;
+          cultural_accuracy_score?: number | null;
+          started_at?: string;
+          last_message_at?: string;
+          ended_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          tenant_id?: string;
+          user_id?: string;
+          conversation_title?: string | null;
+          conversation_type?:
+            | "risk_analysis"
+            | "clarity_improvement"
+            | "cultural_training"
+            | "knowledge_transfer"
+            | null;
+          document_id?: string | null;
+          knowledge_session_id?: string | null;
+          messages?: Json;
+          total_messages?: number;
+          user_satisfaction_score?: number | null;
+          ai_confidence_avg?: number | null;
+          cultural_accuracy_score?: number | null;
+          started_at?: string;
+          last_message_at?: string;
+          ended_at?: string | null;
+        };
+        Relationships: [];
+      };
+      user_tenants: {
+        Row: {
+          id: string;
+          user_id: string;
+          tenant_id: string;
+          role:
+            | "super_admin"
+            | "org_admin"
+            | "team_lead"
+            | "manager"
+            | "employee"
+            | "viewer";
+          department: string | null;
+          permissions: Json;
+          is_active: boolean;
+          joined_at: string;
+          last_active: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          tenant_id: string;
+          role:
+            | "super_admin"
+            | "org_admin"
+            | "team_lead"
+            | "manager"
+            | "employee"
+            | "viewer";
+          department?: string | null;
+          permissions?: Json;
+          is_active?: boolean;
+          joined_at?: string;
+          last_active?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          tenant_id?: string;
+          role?:
+            | "super_admin"
+            | "org_admin"
+            | "team_lead"
+            | "manager"
+            | "employee"
+            | "viewer";
+          department?: string | null;
+          permissions?: Json;
+          is_active?: boolean;
+          joined_at?: string;
+          last_active?: string;
         };
         Relationships: [];
       };
@@ -102,437 +444,180 @@ export type Database = {
       user_profiles: {
         Row: {
           id: string;
-          user_type: UserType;
-          full_name: string | null;
-          company_id: string | null;
-          mosque_id: string | null;
+          tenant_id: string;
+          full_name: string;
+          email: string;
+          phone: string | null;
           department: string | null;
-          english_level: string | null;
-          assessment_completed: boolean;
-          assessment_score: number | null;
-          specialization: string | null;
-          total_challenges_completed: number | null;
-          average_challenge_score: number | null;
-          is_admin: boolean;
-          is_super_admin: boolean | null;
-          admin_permissions: Json | null;
-          data_access_scope: string | null;
-          created_at: string | null;
-          updated_at: string | null;
+          job_title: string | null;
+          employee_id: string | null;
+          manager_id: string | null;
+          cultural_background:
+            | "arabic"
+            | "western"
+            | "asian"
+            | "mixed"
+            | "other"
+            | null;
+          native_language: string;
+          target_languages: string[];
+          communication_style:
+            | "direct"
+            | "indirect"
+            | "hierarchical"
+            | "collaborative"
+            | null;
+          seniority_level:
+            | "junior"
+            | "mid"
+            | "senior"
+            | "executive"
+            | "c_level"
+            | null;
+          onboarding_completed: boolean;
+          cultural_training_completed: boolean;
+          compliance_training_required: boolean;
+          last_login: string | null;
+          timezone: string;
+          is_active: boolean;
+          created_at: string;
+          updated_at: string;
         };
         Insert: {
           id: string;
-          user_type: UserType;
-          full_name?: string | null;
-          company_id?: string | null;
-          mosque_id?: string | null;
+          tenant_id: string;
+          full_name: string;
+          email: string;
+          phone?: string | null;
           department?: string | null;
-          english_level?: string | null;
-          assessment_completed?: boolean;
-          assessment_score?: number | null;
-          specialization?: string | null;
-          total_challenges_completed?: number | null;
-          average_challenge_score?: number | null;
-          is_admin?: boolean;
-          is_super_admin?: boolean | null;
-          admin_permissions?: Json | null;
-          data_access_scope?: string | null;
-          created_at?: string | null;
-          updated_at?: string | null;
+          job_title?: string | null;
+          employee_id?: string | null;
+          manager_id?: string | null;
+          cultural_background?:
+            | "arabic"
+            | "western"
+            | "asian"
+            | "mixed"
+            | "other"
+            | null;
+          native_language?: string;
+          target_languages?: string[];
+          communication_style?:
+            | "direct"
+            | "indirect"
+            | "hierarchical"
+            | "collaborative"
+            | null;
+          seniority_level?:
+            | "junior"
+            | "mid"
+            | "senior"
+            | "executive"
+            | "c_level"
+            | null;
+          onboarding_completed?: boolean;
+          cultural_training_completed?: boolean;
+          compliance_training_required?: boolean;
+          last_login?: string | null;
+          timezone?: string;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
         };
         Update: {
           id?: string;
-          user_type?: UserType;
-          full_name?: string | null;
-          company_id?: string | null;
-          mosque_id?: string | null;
+          tenant_id?: string;
+          full_name?: string;
+          email?: string;
+          phone?: string | null;
           department?: string | null;
-          english_level?: string | null;
-          assessment_completed?: boolean;
-          assessment_score?: number | null;
-          specialization?: string | null;
-          total_challenges_completed?: number | null;
-          average_challenge_score?: number | null;
-          is_admin?: boolean;
-          is_super_admin?: boolean | null;
-          admin_permissions?: Json | null;
-          data_access_scope?: string | null;
-          created_at?: string | null;
-          updated_at?: string | null;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "user_profiles_company_id_fkey";
-            columns: ["company_id"];
-            referencedRelation: "companies";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "user_profiles_mosque_id_fkey";
-            columns: ["mosque_id"];
-            referencedRelation: "mosques";
-            referencedColumns: ["id"];
-          }
-        ];
-      };
-
-      scenarios: {
-        Row: {
-          id: string;
-          title: string;
-          segment: Segment;
-          difficulty: Difficulty | null;
-          scenario_text: string;
-          expected_response: string | null;
-          cultural_context: string | null;
-          type: string | null;
-          estimated_duration: number | null;
-          created_at: string | null;
-          updated_at: string | null;
-        };
-        Insert: {
-          id?: string;
-          title: string;
-          segment: Segment;
-          difficulty?: Difficulty | null;
-          scenario_text: string;
-          expected_response?: string | null;
-          cultural_context?: string | null;
-          type?: string | null;
-          estimated_duration?: number | null;
-          created_at?: string | null;
-          updated_at?: string | null;
-        };
-        Update: {
-          id?: string;
-          title?: string;
-          segment?: Segment;
-          difficulty?: Difficulty | null;
-          scenario_text?: string;
-          expected_response?: string | null;
-          cultural_context?: string | null;
-          type?: string | null;
-          estimated_duration?: number | null;
-          created_at?: string | null;
-          updated_at?: string | null;
+          job_title?: string | null;
+          employee_id?: string | null;
+          manager_id?: string | null;
+          cultural_background?:
+            | "arabic"
+            | "western"
+            | "asian"
+            | "mixed"
+            | "other"
+            | null;
+          native_language?: string;
+          target_languages?: string[];
+          communication_style?:
+            | "direct"
+            | "indirect"
+            | "hierarchical"
+            | "collaborative"
+            | null;
+          seniority_level?:
+            | "junior"
+            | "mid"
+            | "senior"
+            | "executive"
+            | "c_level"
+            | null;
+          onboarding_completed?: boolean;
+          cultural_training_completed?: boolean;
+          compliance_training_required?: boolean;
+          last_login?: string | null;
+          timezone?: string;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
         };
         Relationships: [];
       };
 
-      user_progress: {
+      analytics_metrics: {
         Row: {
           id: string;
-          user_id: string;
-          scenario_id: string | null;
-          completion_status: ProgressStatus | null;
-          score: number | null;
-          attempts: number | null;
-          last_attempt: string | null;
-          created_at: string | null;
-          updated_at: string | null;
+          tenant_id: string;
+          metric_type: MetricType;
+          metric_name: string;
+          metric_value: number;
+          metric_unit: string | null;
+          department: string | null;
+          time_period: TimePeriod | null;
+          user_segment: string | null;
+          calculation_method: string | null;
+          data_source: string | null;
+          confidence_level: number | null;
+          recorded_date: string;
+          created_at: string;
         };
         Insert: {
           id?: string;
-          user_id: string;
-          scenario_id?: string | null;
-          completion_status?: ProgressStatus | null;
-          score?: number | null;
-          attempts?: number | null;
-          last_attempt?: string | null;
-          created_at?: string | null;
-          updated_at?: string | null;
+          tenant_id: string;
+          metric_type: MetricType;
+          metric_name: string;
+          metric_value: number;
+          metric_unit?: string | null;
+          department?: string | null;
+          time_period?: TimePeriod | null;
+          user_segment?: string | null;
+          calculation_method?: string | null;
+          data_source?: string | null;
+          confidence_level?: number | null;
+          recorded_date?: string;
+          created_at?: string;
         };
         Update: {
           id?: string;
-          user_id?: string;
-          scenario_id?: string | null;
-          completion_status?: ProgressStatus | null;
-          score?: number | null;
-          attempts?: number | null;
-          last_attempt?: string | null;
-          created_at?: string | null;
-          updated_at?: string | null;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "user_progress_user_id_fkey";
-            columns: ["user_id"];
-            referencedRelation: "user_profiles";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "user_progress_scenario_id_fkey";
-            columns: ["scenario_id"];
-            referencedRelation: "scenarios";
-            referencedColumns: ["id"];
-          }
-        ];
-      };
-
-      learning_sessions: {
-        Row: {
-          id: string;
-          user_id: string;
-          scenario_id: string | null;
-          session_duration: number | null;
-          completion_rate: number | null;
-          pronunciation_score: number | null;
-          created_at: string | null;
-          updated_at: string | null;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          scenario_id?: string | null;
-          session_duration?: number | null;
-          completion_rate?: number | null;
-          pronunciation_score?: number | null;
-          created_at?: string | null;
-          updated_at?: string | null;
-        };
-        Update: {
-          id?: string;
-          user_id?: string;
-          scenario_id?: string | null;
-          session_duration?: number | null;
-          completion_rate?: number | null;
-          pronunciation_score?: number | null;
-          created_at?: string | null;
-          updated_at?: string | null;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "learning_sessions_user_id_fkey";
-            columns: ["user_id"];
-            referencedRelation: "user_profiles";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "learning_sessions_scenario_id_fkey";
-            columns: ["scenario_id"];
-            referencedRelation: "scenarios";
-            referencedColumns: ["id"];
-          }
-        ];
-      };
-
-      assessment_sessions: {
-        Row: {
-          id: string;
-          user_id: string;
-          session_type: string | null;
-          user_type_selected: string | null;
-          self_assessment_level: number | null;
-          questions_attempted: number | null;
-          questions_correct: number | null;
-          final_level: string | null;
-          final_score: number | null;
-          completed_at: string | null;
-          created_at: string | null;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          session_type?: string | null;
-          user_type_selected?: string | null;
-          self_assessment_level?: number | null;
-          questions_attempted?: number | null;
-          questions_correct?: number | null;
-          final_level?: string | null;
-          final_score?: number | null;
-          completed_at?: string | null;
-          created_at?: string | null;
-        };
-        Update: {
-          id?: string;
-          user_id?: string;
-          session_type?: string | null;
-          user_type_selected?: string | null;
-          self_assessment_level?: number | null;
-          questions_attempted?: number | null;
-          questions_correct?: number | null;
-          final_level?: string | null;
-          final_score?: number | null;
-          completed_at?: string | null;
-          created_at?: string | null;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "assessment_sessions_user_id_fkey";
-            columns: ["user_id"];
-            referencedRelation: "user_profiles";
-            referencedColumns: ["id"];
-          }
-        ];
-      };
-
-      scenario_results: {
-        Row: {
-          id: string;
-          user_id: string;
-          scenario_id: string;
-          learning_session_id: string | null;
-          english_proficiency_score: number | null;
-          cultural_sensitivity_score: number | null;
-          pronunciation_score: number | null;
-          confidence_score: number | null;
-          overall_score: number | null;
-          completion_time_minutes: number | null;
-          attempts: number | null;
-          created_at: string | null;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          scenario_id: string;
-          learning_session_id?: string | null;
-          english_proficiency_score?: number | null;
-          cultural_sensitivity_score?: number | null;
-          pronunciation_score?: number | null;
-          confidence_score?: number | null;
-          overall_score?: number | null;
-          completion_time_minutes?: number | null;
-          attempts?: number | null;
-          created_at?: string | null;
-        };
-        Update: {
-          id?: string;
-          user_id?: string;
-          scenario_id?: string;
-          learning_session_id?: string | null;
-          english_proficiency_score?: number | null;
-          cultural_sensitivity_score?: number | null;
-          pronunciation_score?: number | null;
-          confidence_score?: number | null;
-          overall_score?: number | null;
-          completion_time_minutes?: number | null;
-          attempts?: number | null;
-          created_at?: string | null;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "scenario_results_user_id_fkey";
-            columns: ["user_id"];
-            referencedRelation: "user_profiles";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "scenario_results_scenario_id_fkey";
-            columns: ["scenario_id"];
-            referencedRelation: "scenarios";
-            referencedColumns: ["id"];
-          }
-        ];
-      };
-
-      user_streaks: {
-        Row: {
-          id: string;
-          user_id: string;
-          current_streak: number | null;
-          longest_streak: number | null;
-          last_activity: string | null;
-          created_at: string | null;
-          updated_at: string | null;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          current_streak?: number | null;
-          longest_streak?: number | null;
-          last_activity?: string | null;
-          created_at?: string | null;
-          updated_at?: string | null;
-        };
-        Update: {
-          id?: string;
-          user_id?: string;
-          current_streak?: number | null;
-          longest_streak?: number | null;
-          last_activity?: string | null;
-          created_at?: string | null;
-          updated_at?: string | null;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "user_streaks_user_id_fkey";
-            columns: ["user_id"];
-            referencedRelation: "user_profiles";
-            referencedColumns: ["id"];
-          }
-        ];
-      };
-
-      achievements: {
-        Row: {
-          id: string;
-          name: string;
-          description: string | null;
-          badge_icon: string | null;
-          achievement_type: string | null;
-          requirements: Json | null;
-          points: number | null;
-          created_at: string | null;
-        };
-        Insert: {
-          id?: string;
-          name: string;
-          description?: string | null;
-          badge_icon?: string | null;
-          achievement_type?: string | null;
-          requirements?: Json | null;
-          points?: number | null;
-          created_at?: string | null;
-        };
-        Update: {
-          id?: string;
-          name?: string;
-          description?: string | null;
-          badge_icon?: string | null;
-          achievement_type?: string | null;
-          requirements?: Json | null;
-          points?: number | null;
-          created_at?: string | null;
+          tenant_id?: string;
+          metric_type?: MetricType;
+          metric_name?: string;
+          metric_value?: number;
+          metric_unit?: string | null;
+          department?: string | null;
+          time_period?: TimePeriod | null;
+          user_segment?: string | null;
+          calculation_method?: string | null;
+          data_source?: string | null;
+          confidence_level?: number | null;
+          recorded_date?: string;
+          created_at?: string;
         };
         Relationships: [];
-      };
-
-      user_achievements: {
-        Row: {
-          id: string;
-          user_id: string;
-          achievement_id: string;
-          earned_at: string | null;
-          scenario_result_id: string | null;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          achievement_id: string;
-          earned_at?: string | null;
-          scenario_result_id?: string | null;
-        };
-        Update: {
-          id?: string;
-          user_id?: string;
-          achievement_id?: string;
-          earned_at?: string | null;
-          scenario_result_id?: string | null;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "user_achievements_user_id_fkey";
-            columns: ["user_id"];
-            referencedRelation: "user_profiles";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "user_achievements_achievement_id_fkey";
-            columns: ["achievement_id"];
-            referencedRelation: "achievements";
-            referencedColumns: ["id"];
-          }
-        ];
       };
     };
     Views: Record<string, never>;

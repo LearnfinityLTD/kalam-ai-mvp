@@ -13,7 +13,7 @@ export const Hero = () => {
       <div className="absolute bottom-32 left-20 w-4 h-4 bg-yellow-400 rounded-full opacity-60" />
 
       {/* Curved Background Shape - Right Side */}
-      <div className="absolute -right-10 top-0 w-[600px] h-[900px]">
+      <div className="absolute -right-10 top-0 w-[600px] h-[900px] hidden lg:block">
         {/* Blue arc */}
 
         <Image

@@ -30,40 +30,28 @@ export default function Footer() {
 
           {/* Center - Links */}
           <div className="flex items-center gap-10 text-sm">
-            <a
-              href="#"
+            <Link
+              href="/privacy-policy"
               className="text-gray-300 hover:text-white transition-colors whitespace-nowrap"
             >
               Privacy Policy
-            </a>
-            <a
-              href="#"
+            </Link>
+            <Link
+              href="/terms-of-use"
               className="text-gray-300 hover:text-white transition-colors whitespace-nowrap"
             >
               Terms of Use
-            </a>
-            <a
-              href="#"
+            </Link>
+            <Link
+              href="/cookies-settings"
               className="text-gray-300 hover:text-white transition-colors whitespace-nowrap"
             >
               Cookies Settings
-            </a>
+            </Link>
           </div>
 
           {/* Right - Social Icons */}
           <div className="flex items-center gap-6">
-            <a
-              href="#"
-              className="text-gray-300 hover:text-white transition-colors"
-              aria-label="Cookie Settings"
-            >
-              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8 0-.29.02-.58.05-.86 2.36-1.05 4.23-2.98 5.21-5.37C11.07 8.33 14.05 10 17.42 10c.78 0 1.53-.09 2.25-.26.21.71.33 1.47.33 2.26 0 4.41-3.59 8-8 8z" />
-                <circle cx="8.5" cy="11.5" r="1.5" />
-                <circle cx="15" cy="9" r="1" />
-                <circle cx="12" cy="15" r="1" />
-              </svg>
-            </a>
             <a
               href="#"
               className="text-gray-300 hover:text-white transition-colors"

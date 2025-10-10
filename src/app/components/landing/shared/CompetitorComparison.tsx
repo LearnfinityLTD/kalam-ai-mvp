@@ -1,7 +1,6 @@
 "use client";
 import React from "react";
-import { Check, X, Award, AlertCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Check, X, Award } from "lucide-react";
 
 export default function CompetitorComparison() {
   const features = [
@@ -106,18 +105,66 @@ export default function CompetitorComparison() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-12">
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
             Why Creators Choose VerifyLearn Over Traditional Reviews
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
             Student reviews and platform quality checks weren&apos;t designed to
             catch plagiarism, fake credentials, or outdated content. Here&apos;s
             how VerifyLearn provides real independent verification.
           </p>
         </div>
 
-        {/* Comparison Table */}
-        <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
+        {/* Mobile Card View */}
+        <div className="lg:hidden space-y-6">
+          {features.map((item, index) => (
+            <div
+              key={index}
+              className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200"
+            >
+              <div className="p-5">
+                <h4 className="font-semibold text-gray-900 mb-2 text-lg">
+                  {item.feature}
+                </h4>
+                <p className="text-sm text-gray-600 mb-4">{item.description}</p>
+
+                <div className="space-y-3 pt-3 border-t border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-700">
+                      Student Reviews
+                    </span>
+                    {item.studentReviews ? (
+                      <Check className="w-5 h-5 text-green-600" />
+                    ) : (
+                      <X className="w-5 h-5 text-gray-300" />
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-700">Platform QA</span>
+                    {item.platformQA ? (
+                      <Check className="w-5 h-5 text-green-600" />
+                    ) : (
+                      <X className="w-5 h-5 text-gray-300" />
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between bg-blue-50 -mx-5 px-5 py-2">
+                    <span className="text-sm font-semibold text-blue-900">
+                      VerifyLearn
+                    </span>
+                    {item.verifylearn ? (
+                      <Check className="w-5 h-5 text-green-600" />
+                    ) : (
+                      <X className="w-5 h-5 text-gray-300" />
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop Table View */}
+        <div className="hidden lg:block bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
           {/* Table Header */}
           <div className="grid grid-cols-4 bg-blue-600 text-white">
             <div className="p-6">
@@ -160,7 +207,7 @@ export default function CompetitorComparison() {
                 {/* Student Reviews Column */}
                 <div className="p-6 text-center border-l border-gray-200 flex items-center justify-center">
                   {item.studentReviews ? (
-                    <Check className="w-6 h-6 text-blue-600" />
+                    <Check className="w-6 h-6 text-green-600" />
                   ) : (
                     <X className="w-6 h-6 text-gray-300" />
                   )}
@@ -169,7 +216,7 @@ export default function CompetitorComparison() {
                 {/* Platform QA Column */}
                 <div className="p-6 text-center border-l border-gray-200 flex items-center justify-center">
                   {item.platformQA ? (
-                    <Check className="w-6 h-6 text-blue-600" />
+                    <Check className="w-6 h-6 text-green-600" />
                   ) : (
                     <X className="w-6 h-6 text-gray-300" />
                   )}
@@ -178,7 +225,7 @@ export default function CompetitorComparison() {
                 {/* VerifyLearn Column */}
                 <div className="p-6 text-center border-l border-gray-200 bg-blue-50/50 flex items-center justify-center">
                   {item.verifylearn ? (
-                    <Check className="w-6 h-6 text-blue-600" />
+                    <Check className="w-6 h-6 text-green-600" />
                   ) : (
                     <X className="w-6 h-6 text-gray-300" />
                   )}
@@ -186,35 +233,11 @@ export default function CompetitorComparison() {
               </div>
             ))}
           </div>
-
-          {/* Bottom CTA
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-8 text-center text-white">
-            <h3 className="text-2xl font-bold mb-4">
-              Ready to Stand Out with Independent Verification?
-            </h3>
-            <p className="text-blue-100 mb-6 max-w-2xl mx-auto">
-              Join 1,200+ course creators who&apos;ve increased conversions by
-              28% with trusted VerifyLearn badges that prove quality beyond
-              student reviews.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Button
-                size="lg"
-                className="bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-50 hover:text-blue-700 px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
-              >
-                Get Your Course Verified - £299
-              </Button>
-              <div className="flex items-center text-blue-100 text-sm">
-                <AlertCircle className="w-4 h-4 mr-2" />
-                <span>48-72 hour turnaround</span>
-              </div>
-            </div>
-          </div>*/}
         </div>
 
         {/* Social Proof */}
         <div className="mt-12 text-center">
-          <div className="flex items-center justify-center space-x-8 text-sm text-gray-600">
+          <div className="flex flex-col sm:flex-row items-center justify-center sm:space-x-8 space-y-4 sm:space-y-0 text-sm text-gray-600">
             <div className="flex items-center">
               <div className="flex -space-x-2 mr-3">
                 <div className="w-8 h-8 bg-blue-500 rounded-full border-2 border-white flex items-center justify-center text-white text-xs font-bold">

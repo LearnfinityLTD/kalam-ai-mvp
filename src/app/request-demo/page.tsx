@@ -163,7 +163,7 @@ export default function DemoPage() {
               {/* Submit Button */}
               <button
                 type="button"
-                className="w-full bg-gradient-to-r from-yellow-400 to-orange-400 hover:from-yellow-500 hover:to-orange-500 text-slate-900 font-bold py-4 rounded-full text-lg transition-all shadow-lg hover:shadow-xl"
+                className="w-full border-2 border-blue-600 text-blue-600 rounded-full font-large hover:bg-blue-50 text-slate-900 transition-colors text-lg  hover:shadow-xl"
               >
                 Get Started
               </button>

@@ -2,7 +2,7 @@ import { Hero } from "@/app/components/landing/shared/Hero";
 import { Features } from "@/app/components/landing/shared/Features";
 import Footer from "@/app/components/landing/shared/LandingFooter";
 import NavBar from "@/app/components/landing/shared/NavBar";
-import { CommunityStats } from "./components/landing/shared/CommunityStats";
+// import { CommunityStats } from "./components/landing/shared/CommunityStats";
 import { FAQ } from "./components/landing/shared/FAQ";
 import { SEOHead } from "@/components/landing/shared/SEOHead";
 import { Pricing } from "@/components/landing/shared/Pricing";
@@ -17,17 +17,17 @@ export default function HomePage() {
       <NavBar />
       <main className="w-full">
         <Hero />
-        <CommunityStats />
+        {/* <CommunityStats /> */}
         <OnboardingFlow />
         <Features />
         <CompetitorComparison />
         <FAQ />
-        <ContactSection
+        {/* <ContactSection
           userType="general"
           title="Ready to Transform Your English Communication?"
           subtitle="Connect with our team to get started or answer any questions"
-        />
-        <Pricing />
+        /> */}
+        {/* <Pricing /> */}
       </main>
       <Footer />
     </div>

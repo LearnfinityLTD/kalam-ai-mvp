@@ -1,7 +1,7 @@
 import { Hero } from "@/app/components/landing/shared/Hero";
 import { UserTypeSelection } from "@/app/components/landing/shared/UserTypeSelection";
 import { Features } from "@/app/components/landing/shared/Features";
-import Footer from "@/app/components/shared/Footer";
+import Footer from "@/app/components/landing/shared/LandingFooter";
 import NavBar from "@/app/components/landing/shared/NavBar";
 import { CommunityStats } from "./components/landing/shared/CommunityStats";
 import { FAQ } from "./components/landing/shared/FAQ";

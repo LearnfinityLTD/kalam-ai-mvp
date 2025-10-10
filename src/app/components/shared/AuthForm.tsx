@@ -146,8 +146,6 @@ export default function AuthForm({ redirectTo }: Props) {
     }
   };
 
-  const nextQ = redirectTo ? `&next=${encodeURIComponent(redirectTo)}` : "";
-
   return (
     <div className="w-full">
       {/* Header */}

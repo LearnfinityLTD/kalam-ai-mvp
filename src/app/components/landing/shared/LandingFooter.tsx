@@ -43,15 +43,6 @@ export default function Footer() {
           {/* UNIQUE BRAND ELEMENT: Trust Badges/Awards */}
           {/* TODO: Replace with actual badges once you have them */}
           <div className="flex gap-4 mt-4">
-            {/* Placeholder badge 1 - Replace with real award */}
-            <div className="bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-center w-24">
-              <div className="text-yellow-400 text-2xl mb-1">🏆</div>
-              <div className="text-[10px] text-gray-400 leading-tight">
-                BEST NEW EDTECH
-              </div>
-              <div className="text-[9px] text-gray-500 mt-0.5">2025</div>
-            </div>
-
             {/* Placeholder badge 2 - Replace with certification */}
             <div className="bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-center w-24">
               <div className="text-green-400 text-2xl mb-1">✓</div>
@@ -295,19 +286,6 @@ export default function Footer() {
 
           {/* Social Icons */}
           <div className="flex gap-4">
-            {/* G2 Badge placeholder */}
-            <Link
-              href="https://g2.com/products/verifylearn"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:opacity-80 transition"
-              aria-label="G2 Reviews"
-            >
-              <div className="w-8 h-8 bg-slate-800 rounded flex items-center justify-center text-xs font-bold text-orange-400">
-                G²
-              </div>
-            </Link>
-
             {/* Twitter/X */}
             <Link
               href="https://twitter.com/verifylearn"

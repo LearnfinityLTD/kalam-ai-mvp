@@ -1,7 +1,6 @@
 "use client";
-import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import Image from "next/image";
 export const Hero = () => {
   const router = useRouter();
@@ -14,7 +13,7 @@ export const Hero = () => {
       <div className="absolute bottom-32 left-20 w-4 h-4 bg-yellow-400 rounded-full opacity-60" />
 
       {/* Curved Background Shape - Right Side */}
-      <div className="absolute -right-40 top-0 w-[900px] h-[900px] opacity-40">
+      <div className="absolute -right-10 top-0 w-[600px] h-[900px]">
         {/* Blue arc */}
 
         <Image
@@ -60,13 +59,13 @@ export const Hero = () => {
               </div>
             </div>
 
-            {/* Social Proof */}
+            {/* Social Proof
             <div className="pt-8 border-t border-gray-200">
               <p className="text-sm text-gray-500 mb-3">
                 Trusted by learners at:
               </p>
               <div className="flex flex-wrap gap-6 items-center opacity-60">
-                {/* Placeholder for company logos */}
+          
 
                 <div className="relative w-10 h-10 sm:w-12 sm:h-12">
                   <Image
@@ -77,8 +76,8 @@ export const Hero = () => {
                     priority
                   />
                 </div>
-              </div>
-            </div>
+              </div> 
+            </div>*/}
           </div>
 
           {/* Right Side - Image Placeholder Area */}

@@ -1,7 +1,6 @@
 "use client";
 import React from "react";
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronDown } from "lucide-react";
@@ -41,7 +40,7 @@ export default function NavBar() {
       className={`fixed top-0 w-full z-50 transition-all duration-200 ${
         isScrolled
           ? ""
-          : "bg-gradient-to-r from-blue-50 via-green-50 to-yellow-50"
+          : "bg-gradient-to-r from-blue-50 via-green-50 to-blue-50"
       }`}
     >
       {/* Navigation - contained and rounded */}

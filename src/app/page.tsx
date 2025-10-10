@@ -1,5 +1,4 @@
 import { Hero } from "@/app/components/landing/shared/Hero";
-import { UserTypeSelection } from "@/app/components/landing/shared/UserTypeSelection";
 import { Features } from "@/app/components/landing/shared/Features";
 import Footer from "@/app/components/landing/shared/LandingFooter";
 import NavBar from "@/app/components/landing/shared/NavBar";
@@ -7,7 +6,6 @@ import { CommunityStats } from "./components/landing/shared/CommunityStats";
 import { FAQ } from "./components/landing/shared/FAQ";
 import { SEOHead } from "@/components/landing/shared/SEOHead";
 import { Pricing } from "@/components/landing/shared/Pricing";
-import { CulturalContext } from "@/components/landing/shared/CulturalContext";
 import { ContactSection } from "@/components/landing/shared/contact/ContactSection";
 import CompetitorComparison from "./components/landing/shared/CompetitorComparison";
 import OnboardingFlow from "./components/landing/shared/OnboardingFlow";
@@ -20,9 +18,7 @@ export default function HomePage() {
       <main className="w-full">
         <Hero />
         <CommunityStats />
-        <UserTypeSelection />
         <OnboardingFlow />
-        <CulturalContext />
         <Features />
         <CompetitorComparison />
         <FAQ />

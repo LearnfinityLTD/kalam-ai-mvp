@@ -1,85 +1,103 @@
 "use client";
 import React from "react";
-import { Check, X, Crown, Shield } from "lucide-react";
+import { Check, X, Award, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function CompetitorComparison() {
   const features = [
     {
-      feature: "Cultural Risk Assessment",
-      generic: false,
-      kalam: true,
+      feature: "Independent Expert Review",
+      studentReviews: false,
+      platformQA: false,
+      verifylearn: true,
       description:
-        "Real-time analysis of cultural appropriateness and miscommunication risk",
+        "PhD-level professionals evaluate content quality, not just friends and family",
     },
     {
-      feature: "Compliance Audit Trail",
-      generic: false,
-      kalam: true,
-      description: "Automated documentation for regulatory compliance",
-    },
-    {
-      feature: "Knowledge Transfer Scoring",
-      generic: false,
-      kalam: true,
-      description: "90%+ clarity scores for audit requirements",
-    },
-    {
-      feature: "Multi-Cultural AI Engine",
-      generic: false,
-      kalam: true,
+      feature: "Plagiarism Detection",
+      studentReviews: false,
+      platformQA: false,
+      verifylearn: true,
       description:
-        "Specialized algorithms for Arabic-English, Chinese-English cultural patterns",
+        "AI-powered screening catches copied content and fake credentials",
     },
     {
-      feature: "Enterprise Security",
-      generic: false,
-      kalam: true,
-      description: "SOC 2, GDPR, regional data residency compliance",
-    },
-    {
-      feature: "ROI Measurement",
-      generic: false,
-      kalam: true,
-      description: "Quantify prevented losses and compliance savings",
-    },
-    {
-      feature: "API Integration",
-      generic: false,
-      kalam: true,
+      feature: "Instructor Credential Verification",
+      studentReviews: false,
+      platformQA: false,
+      verifylearn: true,
       description:
-        "Seamless integration with enterprise communication platforms",
+        "We verify real expertise—LinkedIn profiles, portfolios, published work",
     },
     {
-      feature: "Generic Language Training",
-      generic: true,
-      kalam: false,
-      description: "Basic language skills without cultural context",
-    },
-    {
-      feature: "One-Size-Fits-All Content",
-      generic: true,
-      kalam: false,
+      feature: "Content Currency Check",
+      studentReviews: false,
+      platformQA: false,
+      verifylearn: true,
       description:
-        "Same content regardless of cultural context or business needs",
+        "Identifies outdated tools, deprecated code, and obsolete practices",
     },
     {
-      feature: "Limited Business Context",
-      generic: true,
-      kalam: false,
-      description: "No understanding of enterprise compliance requirements",
+      feature: "Pedagogical Quality Assessment",
+      studentReviews: false,
+      platformQA: false,
+      verifylearn: true,
+      description:
+        "Teaching structure, clarity, and learning effectiveness measured",
     },
     {
-      feature: "Real-Time Risk Prevention",
-      generic: false,
-      kalam: true,
-      description: "Prevent costly cultural incidents before they occur",
+      feature: "Transparent Scoring Rubric",
+      studentReviews: false,
+      platformQA: true,
+      verifylearn: true,
+      description: "Public 0-100 score with detailed breakdown by category",
     },
     {
-      feature: "Government Reporting",
-      generic: false,
-      kalam: true,
-      description: "Automated reporting for nationalization compliance",
+      feature: "Fast Turnaround Time",
+      studentReviews: true,
+      platformQA: false,
+      verifylearn: true,
+      description:
+        "48-72 hours standard, 24-48 hours priority (vs 4-8 weeks for QM)",
+    },
+    {
+      feature: "Affordable for Individual Creators",
+      studentReviews: true,
+      platformQA: false,
+      verifylearn: true,
+      description:
+        "£299-499 per course (Quality Matters costs £3,000+ per course)",
+    },
+    {
+      feature: "Manipulation-Resistant",
+      studentReviews: false,
+      platformQA: true,
+      verifylearn: true,
+      description:
+        "Can't be gamed by fake reviews, friends, or review manipulation",
+    },
+    {
+      feature: "Catches Issues Students Miss",
+      studentReviews: false,
+      platformQA: false,
+      verifylearn: true,
+      description:
+        "Students can't detect plagiarism, fake credentials, or technical errors",
+    },
+    {
+      feature: "Trusted Badge for Marketing",
+      studentReviews: false,
+      platformQA: true,
+      verifylearn: true,
+      description: "Display verified quality to increase conversions by 25-40%",
+    },
+    {
+      feature: "Free Re-Verification",
+      studentReviews: false,
+      platformQA: false,
+      verifylearn: true,
+      description:
+        "One free re-review after making improvements based on feedback",
     },
   ];
 
@@ -89,46 +107,51 @@ export default function CompetitorComparison() {
         {/* Header */}
         <div className="text-center mb-12">
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-            Why Enterprises Choose Kalam AI Over Generic Solutions
+            Why Creators Choose VerifyLearn Over Traditional Reviews
           </h2>
           <p className="text-xl text-slate-300 max-w-3xl mx-auto">
-            Traditional training platforms weren&apos;t built for
-            enterprise-scale cultural risk management. Here&apos;s how Kalam AI
-            addresses real compliance and business challenges.
+            Student reviews and platform quality checks weren&apos;t designed to
+            catch plagiarism, fake credentials, or outdated content. Here&apos;s
+            how VerifyLearn provides real independent verification.
           </p>
         </div>
 
         {/* Comparison Table */}
         <div className="bg-slate-800 rounded-2xl shadow-xl overflow-hidden border border-slate-700">
           {/* Table Header */}
-          <div className="grid grid-cols-3 bg-slate-900 text-white">
+          <div className="grid grid-cols-4 bg-slate-900 text-white">
             <div className="p-6">
-              <h3 className="text-lg font-semibold">Capabilities</h3>
+              <h3 className="text-lg font-semibold">Quality Assurance</h3>
             </div>
             <div className="p-6 text-center border-l border-slate-700">
               <div className="flex items-center justify-center mb-2">
                 <div className="w-8 h-8 bg-slate-600 rounded-lg flex items-center justify-center mr-2">
-                  <span className="text-xs font-bold">🏢</span>
+                  <span className="text-xs">⭐</span>
                 </div>
-                <h3 className="text-lg font-semibold">Generic Platforms</h3>
+                <h3 className="text-base font-semibold">Student Reviews</h3>
               </div>
-              <p className="text-sm text-slate-400">
-                Rosetta Stone, Babbel, etc.
-              </p>
+              <p className="text-xs text-slate-400">Udemy, Coursera, etc.</p>
             </div>
-            <div className="p-6 text-center border-l border-slate-700 bg-emerald-600 relative">
+            <div className="p-6 text-center border-l border-slate-700">
+              <div className="flex items-center justify-center mb-2">
+                <div className="w-8 h-8 bg-slate-600 rounded-lg flex items-center justify-center mr-2">
+                  <span className="text-xs">✓</span>
+                </div>
+                <h3 className="text-base font-semibold">Platform QA</h3>
+              </div>
+              <p className="text-xs text-slate-400">Quality Matters, OSCQR</p>
+            </div>
+            <div className="p-6 text-center border-l border-slate-700 bg-blue-600 relative">
               <div className="absolute top-2 right-2">
-                <Crown className="w-4 h-4 text-yellow-300" />
+                <Award className="w-4 h-4 text-yellow-300" />
               </div>
               <div className="flex items-center justify-center mb-2">
-                <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center mr-2 text-white font-bold text-xs">
-                  كلام
+                <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center mr-2 text-white font-bold text-xs">
+                  VL
                 </div>
-                <h3 className="text-lg font-semibold">Kalam AI</h3>
+                <h3 className="text-base font-semibold">VerifyLearn</h3>
               </div>
-              <p className="text-sm text-emerald-100">
-                Enterprise Cultural Intelligence
-              </p>
+              <p className="text-xs text-blue-100">Independent Verification</p>
             </div>
           </div>
 
@@ -137,7 +160,7 @@ export default function CompetitorComparison() {
             {features.map((item, index) => (
               <div
                 key={index}
-                className="grid grid-cols-3 hover:bg-slate-700/50 transition-colors"
+                className="grid grid-cols-4 hover:bg-slate-700/50 transition-colors"
               >
                 {/* Feature Name */}
                 <div className="p-6">
@@ -147,12 +170,12 @@ export default function CompetitorComparison() {
                   <p className="text-sm text-slate-400">{item.description}</p>
                 </div>
 
-                {/* Generic Apps Column */}
+                {/* Student Reviews Column */}
                 <div className="p-6 text-center border-l border-slate-700 flex items-center justify-center">
-                  {item.generic ? (
+                  {item.studentReviews ? (
                     <div className="flex items-center text-yellow-500">
                       <Check className="w-5 h-5 mr-2" />
-                      <span className="text-sm font-medium">Basic</span>
+                      <span className="text-sm font-medium">Available</span>
                     </div>
                   ) : (
                     <div className="flex items-center text-red-400">
@@ -162,13 +185,28 @@ export default function CompetitorComparison() {
                   )}
                 </div>
 
-                {/* Kalam AI Column */}
-                <div className="p-6 text-center border-l border-slate-700 bg-emerald-900/20 flex items-center justify-center">
-                  {item.kalam ? (
-                    <div className="flex items-center text-emerald-400">
+                {/* Platform QA Column */}
+                <div className="p-6 text-center border-l border-slate-700 flex items-center justify-center">
+                  {item.platformQA ? (
+                    <div className="flex items-center text-purple-400">
+                      <Check className="w-5 h-5 mr-2" />
+                      <span className="text-sm font-medium">Limited</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center text-red-400">
+                      <X className="w-5 h-5 mr-2" />
+                      <span className="text-sm font-medium">Not Available</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* VerifyLearn Column */}
+                <div className="p-6 text-center border-l border-slate-700 bg-blue-900/20 flex items-center justify-center">
+                  {item.verifylearn ? (
+                    <div className="flex items-center text-blue-400">
                       <Check className="w-5 h-5 mr-2" />
                       <span className="text-sm font-semibold">
-                        Enterprise-Grade
+                        Full Coverage
                       </span>
                     </div>
                   ) : (
@@ -183,30 +221,25 @@ export default function CompetitorComparison() {
           </div>
 
           {/* Bottom CTA */}
-          <div className="bg-gradient-to-r from-emerald-600 to-blue-600 p-8 text-center text-white">
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-8 text-center text-white">
             <h3 className="text-2xl font-bold mb-4">
-              Ready for Enterprise-Grade Cultural Intelligence?
+              Ready to Stand Out with Independent Verification?
             </h3>
-            <p className="text-emerald-100 mb-6 max-w-2xl mx-auto">
-              Join Fortune 500 companies who&apos;ve eliminated cultural
-              miscommunication risks and achieved regulatory compliance with
-              measurable ROI.
+            <p className="text-blue-100 mb-6 max-w-2xl mx-auto">
+              Join 1,200+ course creators who&apos;ve increased conversions by
+              28% with trusted VerifyLearn badges that prove quality beyond
+              student reviews.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Button
                 size="lg"
-                className="bg-white border-2 border-emerald-600 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
-                onClick={() =>
-                  document
-                    .getElementById("demo-section")
-                    ?.scrollIntoView({ behavior: "smooth" })
-                }
+                className="bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-50 hover:text-blue-700 px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
               >
-                Schedule Enterprise Demo
+                Get Your Course Verified - £299
               </Button>
-              <div className="flex items-center text-emerald-100 text-sm">
-                <Shield className="w-4 h-4 mr-2" />
-                <span>SOC 2 & GDPR Compliant</span>
+              <div className="flex items-center text-blue-100 text-sm">
+                <AlertCircle className="w-4 h-4 mr-2" />
+                <span>48-72 hour turnaround</span>
               </div>
             </div>
           </div>
@@ -217,24 +250,24 @@ export default function CompetitorComparison() {
           <div className="flex items-center justify-center space-x-8 text-sm text-slate-400">
             <div className="flex items-center">
               <div className="flex -space-x-2 mr-3">
-                <div className="w-8 h-8 bg-emerald-500 rounded-full border-2 border-slate-900 flex items-center justify-center text-white text-xs font-bold">
-                  F
-                </div>
                 <div className="w-8 h-8 bg-blue-500 rounded-full border-2 border-slate-900 flex items-center justify-center text-white text-xs font-bold">
-                  500
+                  U
+                </div>
+                <div className="w-8 h-8 bg-indigo-500 rounded-full border-2 border-slate-900 flex items-center justify-center text-white text-xs font-bold">
+                  C
                 </div>
                 <div className="w-8 h-8 bg-purple-500 rounded-full border-2 border-slate-900 flex items-center justify-center text-white text-xs font-bold">
-                  G
+                  S
                 </div>
-                <div className="w-8 h-8 bg-amber-500 rounded-full border-2 border-slate-900 flex items-center justify-center text-white text-xs font-bold">
+                <div className="w-8 h-8 bg-blue-400 rounded-full border-2 border-slate-900 flex items-center justify-center text-white text-xs font-bold">
                   +
                 </div>
               </div>
-              <span>45+ Enterprise clients trust Kalam AI</span>
+              <span>1,200+ courses verified across all platforms</span>
             </div>
             <div className="flex items-center">
               <div className="flex text-yellow-400 mr-2">{"★".repeat(5)}</div>
-              <span>99% compliance audit success rate</span>
+              <span>28% average sales increase for verified creators</span>
             </div>
           </div>
         </div>

@@ -1,33 +1,27 @@
 import React from "react";
-import {
-  Calendar,
-  Settings,
-  TrendingUp,
-  ArrowRight,
-  Clock,
-} from "lucide-react";
+import { FileUp, Search, Award, ArrowRight, Clock } from "lucide-react";
 
 export default function OnboardingFlow() {
   const steps = [
     {
       number: 1,
-      title: "Risk Assessment",
-      description: "Comprehensive cultural risk audit",
-      icon: Settings,
-      color: "emerald" as const,
-    },
-    {
-      number: 2,
-      title: "Pilot Implementation",
-      description: "30-day proof of concept",
-      icon: Calendar,
+      title: "Submit Your Course",
+      description: "Upload course materials & details",
+      icon: FileUp,
       color: "blue" as const,
     },
     {
+      number: 2,
+      title: "Expert Review",
+      description: "PhD-level evaluation & scoring",
+      icon: Search,
+      color: "indigo" as const,
+    },
+    {
       number: 3,
-      title: "Enterprise Rollout",
-      description: "Full-scale deployment & ROI tracking",
-      icon: TrendingUp,
+      title: "Get Verified",
+      description: "Receive VerifyScore & badge",
+      icon: Award,
       color: "purple" as const,
     },
   ];
@@ -38,15 +32,15 @@ export default function OnboardingFlow() {
         {/* Header */}
         <div className="text-center mb-12">
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
-            Enterprise Implementation Process
+            How Course Verification Works
           </h2>
           <p className="text-lg text-gray-600 max-w-xl mx-auto mb-4">
-            Proven methodology for Fortune 500 cultural intelligence deployment
-            with measurable ROI from day one.
+            Simple 3-step process to get your independent quality rating and
+            boost your course credibility with learners.
           </p>
-          <div className="flex items-center justify-center text-emerald-600 font-semibold">
+          <div className="flex items-center justify-center text-blue-600 font-semibold">
             <Clock className="w-4 h-4 mr-2" />
-            <span className="text-sm">Typical implementation: 30-90 days</span>
+            <span className="text-sm">Standard turnaround: 48-72 hours</span>
           </div>
         </div>
 
@@ -55,8 +49,8 @@ export default function OnboardingFlow() {
           {steps.map((step, index) => {
             const IconComponent = step.icon;
             const colorClasses = {
-              emerald: "bg-emerald-500 text-white",
               blue: "bg-blue-500 text-white",
+              indigo: "bg-indigo-500 text-white",
               purple: "bg-purple-500 text-white",
             };
 
@@ -94,6 +88,21 @@ export default function OnboardingFlow() {
               </React.Fragment>
             );
           })}
+        </div>
+
+        {/* CTA Section */}
+        <div className="mt-12 text-center">
+          <p className="text-sm text-gray-600 mb-4">
+            One free re-verification included after improvements
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <button className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition">
+              Get Verified - £299
+            </button>
+            <button className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition">
+              View Sample Report
+            </button>
+          </div>
         </div>
       </div>
     </div>

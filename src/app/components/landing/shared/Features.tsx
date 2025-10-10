@@ -3,72 +3,72 @@ import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-  Brain,
+  SearchCheck,
   Shield,
   BarChart3,
-  Clock,
-  FileCheck,
-  Globe,
+  FileText,
+  Award,
   Users,
   Zap,
-  Lock,
+  Eye,
+  TrendingUp,
 } from "lucide-react";
 
 export const Features = () => {
   const features = [
     {
-      icon: Brain,
-      title: "Cultural Intelligence Engine",
+      icon: SearchCheck,
+      title: "Expert Course Review",
       description:
-        "AI-powered analysis of cultural appropriateness, hierarchy respect, and communication effectiveness across multiple cultures",
-    },
-    {
-      icon: FileCheck,
-      title: "Compliance Audit Trail",
-      description:
-        "Automated documentation generation for regulatory compliance with timestamped cultural interaction logs",
+        "PhDs and 10+ year professionals thoroughly evaluate every aspect of your course—content accuracy, teaching quality, and learning outcomes",
     },
     {
       icon: Shield,
-      title: "Risk Assessment Dashboard",
+      title: "Plagiarism Detection",
       description:
-        "Real-time identification and scoring of cultural miscommunication risks before they become costly incidents",
+        "Advanced AI screening catches copied content, fake credentials, and misrepresented expertise that student reviews miss",
     },
     {
-      icon: Globe,
-      title: "Multi-Cultural Support",
+      icon: FileText,
+      title: "Detailed VerifyScore Report",
       description:
-        "Specialized algorithms for Arabic-English, Chinese-English, and other high-risk cultural communication patterns",
+        "Comprehensive 500-word analysis with your 0-100 VerifyScore, specific improvement recommendations, and quality benchmarks",
     },
     {
-      icon: BarChart3,
-      title: "Enterprise Analytics",
+      icon: Award,
+      title: "Verified Course Badge",
       description:
-        "ROI measurement, knowledge transfer effectiveness, and compliance metrics with executive reporting",
+        "Display the trusted VerifyLearn badge on your course landing page to boost conversions by 25-40% with independent credibility",
     },
     {
-      icon: Clock,
-      title: "Real-Time Intervention",
+      icon: TrendingUp,
+      title: "Conversion Optimization",
       description:
-        "Instant feedback and correction suggestions during live communications to prevent cultural missteps",
+        "Verified courses see 28% higher conversion rates—buyers trust independent quality ratings more than star reviews alone",
+    },
+    {
+      icon: Eye,
+      title: "Quality Transparency",
+      description:
+        "Public rubric shows exactly how courses are scored: content quality, instructor credentials, pedagogy, and production value",
     },
     {
       icon: Users,
-      title: "Team Knowledge Transfer",
+      title: "B2B Market Access",
       description:
-        "Structured capture and validation of expert knowledge with cultural context for effective handovers",
+        "Enterprise L&D teams require verified courses for corporate training—unlock Fortune 500 clients with certification",
     },
     {
       icon: Zap,
-      title: "API Integration",
+      title: "Fast Turnaround",
       description:
-        "Seamless integration with existing enterprise communication platforms, HR systems, and compliance tools",
+        "Standard verification in 48-72 hours, Priority in 24-48 hours. Plus one free re-verification after you make improvements",
     },
     {
-      icon: Lock,
-      title: "Enterprise Security",
+      icon: BarChart3,
+      title: "Creator Analytics",
       description:
-        "SOC 2 Type II, GDPR compliance, regional data residency, and enterprise-grade access controls",
+        "Track how verification impacts your sales, compare your VerifyScore to category averages, and monitor student feedback trends",
     },
   ];
 
@@ -79,17 +79,18 @@ export const Features = () => {
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
+          viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <Badge className="bg-emerald-100 text-emerald-800 px-4 py-2 text-sm font-medium mb-4">
-            Enterprise-Grade Cultural Intelligence
+          <Badge className="bg-blue-100 text-blue-800 px-4 py-2 text-sm font-medium mb-4">
+            Independent Course Verification
           </Badge>
           <h2 className="text-4xl font-bold text-gray-900 mb-4">
-            Prevent $80B in Communication Losses
+            Catch What Student Reviews Miss
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Advanced AI platform designed for enterprise-scale cross-cultural
-            risk management and compliance automation
+            Expert-verified quality ratings that protect learners from bad
+            courses and help creators stand out with proven credibility
           </p>
         </motion.div>
 
@@ -100,11 +101,12 @@ export const Features = () => {
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.05 }}
+              viewport={{ once: true }}
             >
-              <Card className="h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group border-2 border-gray-100 hover:border-emerald-200">
+              <Card className="h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group border-2 border-gray-100 hover:border-blue-200">
                 <CardContent className="p-6">
-                  <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-emerald-200 group-hover:scale-110 transition-all">
-                    <feature.icon className="h-6 w-6 text-emerald-600" />
+                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-blue-200 group-hover:scale-110 transition-all">
+                    <feature.icon className="h-6 w-6 text-blue-600" />
                   </div>
                   <h3 className="text-xl font-semibold mb-3 text-gray-900">
                     {feature.title}

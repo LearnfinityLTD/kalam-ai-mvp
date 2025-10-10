@@ -54,7 +54,17 @@ export default function Footer() {
 
             {/* Placeholder badge 3 - Replace with user count milestone */}
             <div className="bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-center w-24">
-              <div className="text-blue-400 text-2xl mb-1">★</div>
+              <div className="text-blue-400 text-1xl mb-1">
+                <div className="relative w-15 h-15 sm:w-15 sm:h-15 text-center">
+                  <Image
+                    src="/star.png"
+                    alt="Verify Learn Star"
+                    fill
+                    className="object-contain"
+                    priority
+                  />
+                </div>
+              </div>
               <div className="text-[10px] text-gray-400 leading-tight">
                 COURSES VERIFIED
               </div>

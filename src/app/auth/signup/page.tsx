@@ -109,7 +109,7 @@ function SignUpForm() {
         };
       default:
         return {
-          title: "Join KalamAI",
+          title: "Join VerifyLearn",
           subtitle: "Start your learning journey",
           icon: Shield,
           color: "green",
@@ -240,7 +240,7 @@ function SignUpForm() {
             </div>
 
             <h2 className="text-2xl font-bold text-gray-900 text-center mb-6">
-              Why Choose KalamAI?
+              Why Choose VerifyLearn?
             </h2>
 
             <div className="space-y-4">

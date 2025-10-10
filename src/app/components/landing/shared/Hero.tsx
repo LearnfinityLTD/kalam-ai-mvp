@@ -1,145 +1,120 @@
 "use client";
-import { motion } from "framer-motion";
-import { Button } from "@/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { TrendingUp, Shield, Globe, Building2 } from "lucide-react";
-
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
+import Image from "next/image";
 export const Hero = () => {
+  const router = useRouter();
+
   return (
-    <section className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 min-h-screen flex items-center pt-20">
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+    <section className="relative min-h-[90vh] bg-gradient-to-br from-blue-50 via-green-50 to-yellow-50 overflow-hidden pt-32 pb-20">
+      {/* Decorative Elements */}
+      <div className="absolute top-20 right-10 w-3 h-3 bg-blue-400 rounded-full animate-pulse" />
+      <div className="absolute top-40 right-1/4 w-2 h-2 bg-green-400 rounded-full" />
+      <div className="absolute bottom-32 left-20 w-4 h-4 bg-yellow-400 rounded-full opacity-60" />
 
-      <div className="container mx-auto px-4 relative z-10">
+      {/* Curved Background Shape - Right Side */}
+      <div className="absolute -right-40 top-0 w-[900px] h-[900px] opacity-40">
+        {/* Blue arc */}
+
+        <Image
+          src="/shield.png"
+          alt="Verify Logo"
+          fill
+          className="object-contain"
+          priority
+        />
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-center lg:text-left"
-          >
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="mb-6"
-            >
-              <Badge className="bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 px-6 py-3 text-sm font-medium mb-4">
-                Enterprise Cultural Intelligence Platform
-              </Badge>
-            </motion.div>
-
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
-              Eliminate $80B in
-              <span className="text-emerald-400 block">
-                Communication Costs
-              </span>
+          {/* Left Content */}
+          <div className="space-y-8">
+            {/* Main Headline */}
+            <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
+              Stop Buying Bad Courses.{" "}
+              <span className="text-blue-600">Start Learning Smart.</span>
             </h1>
 
-            <p className="text-xl text-blue-100 mb-8 leading-relaxed max-w-2xl">
-              AI-powered cross-cultural communication platform that prevents
-              costly miscommunication, accelerates knowledge transfer, and
-              ensures compliance with nationalization mandates.
+            {/* Subheadline */}
+            <p className="text-xl text-gray-600 leading-relaxed max-w-xl">
+              VerifyLearn&apos;s independent verification system catches
+              plagiarism, fake credentials, and outdated content that student
+              reviews miss—so you invest in courses that actually deliver
+              results.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 mb-8 justify-center lg:justify-start">
-              <Button
-                size="lg"
-                className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
-                onClick={() =>
-                  document
-                    .getElementById("demo-section")
-                    ?.scrollIntoView({ behavior: "smooth" })
-                }
-              >
-                Schedule Enterprise Demo
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-2 border-white/30 text-white px-8 py-4 text-lg hover:bg-white/10"
-              >
-                View ROI Calculator
-              </Button>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 text-sm text-blue-200">
-              <div className="flex items-center">
-                <Shield className="h-5 w-5 mr-2 text-emerald-400" />
-                GCC Compliance Ready
+            {/* Trust Indicators */}
+            <div className="flex flex-col sm:flex-row gap-4 text-sm text-gray-700">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5 text-green-500" />
+                <span className="font-medium">100+ Courses Verified</span>
               </div>
-              <div className="flex items-center">
-                <Globe className="h-5 w-5 mr-2 text-emerald-400" />
-                Multi-Cultural AI
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5 text-green-500" />
+                <span className="font-medium">48-Hour Turnaround</span>
               </div>
-              <div className="flex items-center">
-                <Building2 className="h-5 w-5 mr-2 text-emerald-400" />
-                Enterprise Grade
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="relative"
-          >
-            <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-white/20 relative">
-              <div className="absolute -top-4 -right-4 w-8 h-8 bg-emerald-500 rounded-full animate-pulse"></div>
-
-              <div className="flex items-center mb-6">
-                <div className="w-12 h-12 bg-emerald-500/20 rounded-full flex items-center justify-center mr-4">
-                  <TrendingUp className="h-6 w-6 text-emerald-400" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-lg text-white">
-                    Real-Time Risk Assessment
-                  </h3>
-                  <p className="text-sm text-blue-200">
-                    Cross-Cultural Communication Analysis
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div className="bg-red-500/20 p-4 rounded-lg border border-red-400/30">
-                  <p className="text-sm text-red-200 mb-2 font-medium">
-                    High Risk Communication Detected:
-                  </p>
-                  <p className="font-medium text-white text-sm">
-                    &quot;We need this done immediately without delay&quot;
-                  </p>
-                  <p className="text-xs text-red-300 mt-2">
-                    Risk: Direct command style inappropriate for hierarchical
-                    culture
-                  </p>
-                </div>
-
-                <div className="bg-emerald-500/20 p-4 rounded-lg border border-emerald-400/30">
-                  <p className="text-sm text-emerald-200 mb-2 font-medium">
-                    AI Recommendation:
-                  </p>
-                  <p className="font-medium text-white text-sm">
-                    &quot;When convenient, we would be honored if you could
-                    prioritize this request&quot;
-                  </p>
-                </div>
-
-                <div className="flex justify-between items-center pt-4">
-                  <div className="text-3xl font-bold text-emerald-400">
-                    Risk Reduced: 87%
-                  </div>
-                  <Badge className="bg-emerald-500/20 text-emerald-300 px-3 py-1 border border-emerald-400/30">
-                    Compliance Achieved
-                  </Badge>
-                </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5 text-green-500" />
+                <span className="font-medium">Expert Reviewers</span>
               </div>
             </div>
 
-            <div className="absolute -z-10 top-10 -left-10 w-20 h-20 bg-emerald-400/20 rounded-full animate-bounce"></div>
-            <div className="absolute -z-10 bottom-10 -right-10 w-16 h-16 bg-blue-400/20 rounded-full animate-pulse"></div>
-          </motion.div>
+            {/* Social Proof */}
+            <div className="pt-8 border-t border-gray-200">
+              <p className="text-sm text-gray-500 mb-3">
+                Trusted by learners at:
+              </p>
+              <div className="flex flex-wrap gap-6 items-center opacity-60">
+                {/* Placeholder for company logos */}
+
+                <div className="relative w-10 h-10 sm:w-12 sm:h-12">
+                  <Image
+                    src="/companies/learnfinity-logo.png"
+                    alt="Verify Logo"
+                    fill
+                    className="object-contain"
+                    priority
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Side - Image Placeholder Area */}
+          <div className="relative lg:block hidden">
+            {/* Main circular image container with overlapping profile cards */}
+            <div className="relative w-full h-[600px]">
+              {/* Decorative sparkle */}
+              <div className="absolute bottom-12 right-12 z-30">
+                <svg
+                  className="w-8 h-8 text-yellow-400 animate-pulse"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
+
+      {/* Scroll Indicator */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+        <svg
+          className="w-6 h-6 text-gray-400"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 14l-7 7m0 0l-7-7m7 7V3"
+          />
+        </svg>
       </div>
     </section>
   );

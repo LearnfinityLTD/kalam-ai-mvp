@@ -11,7 +11,6 @@ import {
   Shield,
   Globe,
 } from "lucide-react";
-import Link from "next/link";
 
 export const UserTypeSelection = () => {
   const solutions = [

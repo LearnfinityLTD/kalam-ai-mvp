@@ -102,14 +102,14 @@ export default function CompetitorComparison() {
   ];
 
   return (
-    <div className="py-16 bg-slate-900">
+    <div className="py-16 bg-gray-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-12">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
             Why Creators Choose VerifyLearn Over Traditional Reviews
           </h2>
-          <p className="text-xl text-slate-300 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Student reviews and platform quality checks weren&apos;t designed to
             catch plagiarism, fake credentials, or outdated content. Here&apos;s
             how VerifyLearn provides real independent verification.
@@ -117,110 +117,77 @@ export default function CompetitorComparison() {
         </div>
 
         {/* Comparison Table */}
-        <div className="bg-slate-800 rounded-2xl shadow-xl overflow-hidden border border-slate-700">
+        <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
           {/* Table Header */}
-          <div className="grid grid-cols-4 bg-slate-900 text-white">
+          <div className="grid grid-cols-4 bg-blue-600 text-white">
             <div className="p-6">
               <h3 className="text-lg font-semibold">Quality Assurance</h3>
             </div>
-            <div className="p-6 text-center border-l border-slate-700">
-              <div className="flex items-center justify-center mb-2">
-                <div className="w-8 h-8 bg-slate-600 rounded-lg flex items-center justify-center mr-2">
-                  <span className="text-xs">⭐</span>
-                </div>
-                <h3 className="text-base font-semibold">Student Reviews</h3>
-              </div>
-              <p className="text-xs text-slate-400">Udemy, Coursera, etc.</p>
+            <div className="p-6 text-center border-l border-blue-500">
+              <h3 className="text-base font-semibold mb-1">Student Reviews</h3>
+              <p className="text-xs text-blue-100">Udemy, Coursera, etc.</p>
             </div>
-            <div className="p-6 text-center border-l border-slate-700">
-              <div className="flex items-center justify-center mb-2">
-                <div className="w-8 h-8 bg-slate-600 rounded-lg flex items-center justify-center mr-2">
-                  <span className="text-xs">✓</span>
-                </div>
-                <h3 className="text-base font-semibold">Platform QA</h3>
-              </div>
-              <p className="text-xs text-slate-400">Quality Matters, OSCQR</p>
+            <div className="p-6 text-center border-l border-blue-500">
+              <h3 className="text-base font-semibold mb-1">Platform QA</h3>
+              <p className="text-xs text-blue-100">Quality Matters, OSCQR</p>
             </div>
-            <div className="p-6 text-center border-l border-slate-700 bg-blue-600 relative">
+            <div className="p-6 text-center border-l border-blue-500 bg-blue-700 relative">
               <div className="absolute top-2 right-2">
                 <Award className="w-4 h-4 text-yellow-300" />
               </div>
-              <div className="flex items-center justify-center mb-2">
-                <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center mr-2 text-white font-bold text-xs">
-                  VL
-                </div>
-                <h3 className="text-base font-semibold">VerifyLearn</h3>
-              </div>
+              <h3 className="text-base font-semibold mb-1">VerifyLearn</h3>
               <p className="text-xs text-blue-100">Independent Verification</p>
             </div>
           </div>
 
           {/* Feature Rows */}
-          <div className="divide-y divide-slate-700">
+          <div>
             {features.map((item, index) => (
               <div
                 key={index}
-                className="grid grid-cols-4 hover:bg-slate-700/50 transition-colors"
+                className={`grid grid-cols-4 border-b border-gray-200 last:border-b-0 ${
+                  index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                }`}
               >
                 {/* Feature Name */}
                 <div className="p-6">
-                  <h4 className="font-semibold text-white mb-1">
+                  <h4 className="font-semibold text-gray-900 mb-1">
                     {item.feature}
                   </h4>
-                  <p className="text-sm text-slate-400">{item.description}</p>
+                  <p className="text-sm text-gray-600">{item.description}</p>
                 </div>
 
                 {/* Student Reviews Column */}
-                <div className="p-6 text-center border-l border-slate-700 flex items-center justify-center">
+                <div className="p-6 text-center border-l border-gray-200 flex items-center justify-center">
                   {item.studentReviews ? (
-                    <div className="flex items-center text-yellow-500">
-                      <Check className="w-5 h-5 mr-2" />
-                      <span className="text-sm font-medium">Available</span>
-                    </div>
+                    <Check className="w-6 h-6 text-blue-600" />
                   ) : (
-                    <div className="flex items-center text-red-400">
-                      <X className="w-5 h-5 mr-2" />
-                      <span className="text-sm font-medium">Not Available</span>
-                    </div>
+                    <X className="w-6 h-6 text-gray-300" />
                   )}
                 </div>
 
                 {/* Platform QA Column */}
-                <div className="p-6 text-center border-l border-slate-700 flex items-center justify-center">
+                <div className="p-6 text-center border-l border-gray-200 flex items-center justify-center">
                   {item.platformQA ? (
-                    <div className="flex items-center text-purple-400">
-                      <Check className="w-5 h-5 mr-2" />
-                      <span className="text-sm font-medium">Limited</span>
-                    </div>
+                    <Check className="w-6 h-6 text-blue-600" />
                   ) : (
-                    <div className="flex items-center text-red-400">
-                      <X className="w-5 h-5 mr-2" />
-                      <span className="text-sm font-medium">Not Available</span>
-                    </div>
+                    <X className="w-6 h-6 text-gray-300" />
                   )}
                 </div>
 
                 {/* VerifyLearn Column */}
-                <div className="p-6 text-center border-l border-slate-700 bg-blue-900/20 flex items-center justify-center">
+                <div className="p-6 text-center border-l border-gray-200 bg-blue-50/50 flex items-center justify-center">
                   {item.verifylearn ? (
-                    <div className="flex items-center text-blue-400">
-                      <Check className="w-5 h-5 mr-2" />
-                      <span className="text-sm font-semibold">
-                        Full Coverage
-                      </span>
-                    </div>
+                    <Check className="w-6 h-6 text-blue-600" />
                   ) : (
-                    <div className="flex items-center text-slate-500">
-                      <X className="w-5 h-5 mr-2" />
-                      <span className="text-sm">N/A</span>
-                    </div>
+                    <X className="w-6 h-6 text-gray-300" />
                   )}
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Bottom CTA */}
+          {/* Bottom CTA
           <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-8 text-center text-white">
             <h3 className="text-2xl font-bold mb-4">
               Ready to Stand Out with Independent Verification?
@@ -242,24 +209,24 @@ export default function CompetitorComparison() {
                 <span>48-72 hour turnaround</span>
               </div>
             </div>
-          </div>
+          </div>*/}
         </div>
 
         {/* Social Proof */}
         <div className="mt-12 text-center">
-          <div className="flex items-center justify-center space-x-8 text-sm text-slate-400">
+          <div className="flex items-center justify-center space-x-8 text-sm text-gray-600">
             <div className="flex items-center">
               <div className="flex -space-x-2 mr-3">
-                <div className="w-8 h-8 bg-blue-500 rounded-full border-2 border-slate-900 flex items-center justify-center text-white text-xs font-bold">
+                <div className="w-8 h-8 bg-blue-500 rounded-full border-2 border-white flex items-center justify-center text-white text-xs font-bold">
                   U
                 </div>
-                <div className="w-8 h-8 bg-indigo-500 rounded-full border-2 border-slate-900 flex items-center justify-center text-white text-xs font-bold">
+                <div className="w-8 h-8 bg-indigo-500 rounded-full border-2 border-white flex items-center justify-center text-white text-xs font-bold">
                   C
                 </div>
-                <div className="w-8 h-8 bg-purple-500 rounded-full border-2 border-slate-900 flex items-center justify-center text-white text-xs font-bold">
+                <div className="w-8 h-8 bg-purple-500 rounded-full border-2 border-white flex items-center justify-center text-white text-xs font-bold">
                   S
                 </div>
-                <div className="w-8 h-8 bg-blue-400 rounded-full border-2 border-slate-900 flex items-center justify-center text-white text-xs font-bold">
+                <div className="w-8 h-8 bg-blue-400 rounded-full border-2 border-white flex items-center justify-center text-white text-xs font-bold">
                   +
                 </div>
               </div>

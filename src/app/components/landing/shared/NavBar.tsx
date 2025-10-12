@@ -121,7 +121,7 @@ export default function NavBar() {
                     Verified Course Directory
                   </Link>
                   <Link
-                    href="/products/verifylearn-badge"
+                    href="/verifylearn-badge"
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   >
                     VerifyLearn Badge

@@ -243,7 +243,7 @@ export default function VerifyLearnBadgePage() {
                   </h3>
                   <p className="text-gray-600">
                     We verify code quality, up-to-date content, and plagiarism -
-                    things platform reviews can't check
+                    things platform reviews can&apos;t check
                   </p>
                 </div>
               </div>
@@ -840,10 +840,10 @@ export default function VerifyLearnBadgePage() {
               </h3>
               <p className="text-gray-600">
                 Platform reviews show popularity and student satisfaction, but
-                don't verify technical accuracy, content quality, or plagiarism.
-                Our expert reviewers check what platform reviews can't - whether
-                the code is correct, content is up-to-date, and teaching is
-                effective.
+                don&apos;t verify technical accuracy, content quality, or
+                plagiarism. Our expert reviewers check what platform reviews
+                can&apos;t - whether the code is correct, content is up-to-date,
+                and teaching is effective.
               </p>
             </div>
 
@@ -861,7 +861,7 @@ export default function VerifyLearnBadgePage() {
 
             <div className="bg-white rounded-lg shadow p-6">
               <h3 className="font-bold text-lg mb-2">
-                What if my course doesn't pass verification?
+                What if my course doesn&apos;t pass verification?
               </h3>
               <p className="text-gray-600">
                 All courses receive a score (0-100) and grade (A+ to F). If you
@@ -899,8 +899,8 @@ export default function VerifyLearnBadgePage() {
               </h3>
               <p className="text-gray-600">
                 Currently, we focus on tech courses (web development, software
-                engineering, data science, DevOps, cloud). We're expanding to
-                business, design, and marketing courses in Q2 2025.
+                engineering, data science, DevOps, cloud). We&apos;re expanding
+                to business, design, and marketing courses in Q2 2025.
               </p>
             </div>
           </div>
@@ -914,7 +914,7 @@ export default function VerifyLearnBadgePage() {
             Ready to Build Trust with Your Learners?
           </h2>
           <p className="text-xl text-blue-100 mb-8">
-            Join 50+ course creators who've increased their sales with
+            Join 50+ course creators who&apos;ve increased their sales with
             VerifyLearn verification
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

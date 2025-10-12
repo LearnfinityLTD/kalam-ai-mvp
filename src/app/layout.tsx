@@ -2,7 +2,6 @@ import "./globals.css";
 import { Geist, Geist_Mono } from "next/font/google";
 import Providers from "./providers";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { I18nProvider } from "@/lib/i18n/context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,11 +23,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <I18nProvider>
-          <TooltipProvider delayDuration={200}>
-            <Providers>{children}</Providers>
-          </TooltipProvider>
-        </I18nProvider>
+        <TooltipProvider delayDuration={200}>
+          <Providers>{children}</Providers>
+        </TooltipProvider>
       </body>
     </html>
   );

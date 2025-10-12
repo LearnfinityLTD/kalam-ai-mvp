@@ -38,9 +38,7 @@ export default function NavBar() {
   return (
     <header
       className={`fixed top-0 w-full z-50 transition-all duration-200 ${
-        isScrolled
-          ? ""
-          : "bg-gradient-to-r from-blue-50 via-green-50 to-blue-50"
+        isScrolled ? "" : ""
       }`}
     >
       {/* Navigation - contained and rounded */}
@@ -71,8 +69,8 @@ export default function NavBar() {
                 <ChevronDown className="w-4 h-4" />
               </button>
               {activeDropdown === "products" && (
-                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-6 w-96 bg-white rounded-2xl shadow-xl py-6 px-6 z-50">
-                  <Link
+                <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
+                  {/* <Link
                     href="/products/course-verification"
                     className="block mb-6"
                   >
@@ -83,10 +81,7 @@ export default function NavBar() {
                       Independent quality assessment
                     </p>
                   </Link>
-                  <Link
-                    href="/products/verified-directory"
-                    className="block mb-6"
-                  >
+                  <Link href="/verified-courses" className="block mb-6">
                     <h3 className="text-lg font-semibold text-gray-900 mb-1">
                       Verified Course Directory
                     </h3>
@@ -112,6 +107,30 @@ export default function NavBar() {
                     <p className="text-sm text-gray-600">
                       Integration for platforms
                     </p>
+                  </Link> */}
+                  <Link
+                    href="/products/course-verification"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Course Verification
+                  </Link>
+                  <Link
+                    href="/verified-courses"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Verified Course Directory
+                  </Link>
+                  <Link
+                    href="/products/verifylearn-badge"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    VerifyLearn Badge
+                  </Link>
+                  <Link
+                    href="/products/platform-ap"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Platform API
                   </Link>
                 </div>
               )}

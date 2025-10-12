@@ -1,16 +1,23 @@
 "use client";
 import React from "react";
-import { Shield, Mail, Lock, Eye, FileText } from "lucide-react";
-
+import { Mail, Lock, Eye, FileText } from "lucide-react";
+import Image from "next/image";
 export default function PrivacyPolicyPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-blue-50 via-green-50 to-yellow-50 py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 bg-blue-600 rounded-xl mb-6">
-            <Shield className="w-7 h-7 text-white" />
+          <div className="relative w-15 h-15 sm:w-15 sm:h-15 text-center">
+            <Image
+              src="/shield.png"
+              alt="Verify Learn Shield"
+              fill
+              className="object-contain"
+              priority
+            />
           </div>
+
           <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
             Privacy Policy
           </h1>

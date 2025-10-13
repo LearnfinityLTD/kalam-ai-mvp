@@ -16,44 +16,29 @@ export default function LearnfinityCaseStudy() {
       </Head>
       <main className="min-h-screen bg-white text-gray-900 font-sans">
         {/* Hero Section */}
-        <section className="bg-gradient-to-r from-blue-50 to-indigo-100 py-20 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-7xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Learnfinity Boosts Enrollment by Integrating Independent Course Verification into Its Platform
-            </h1>
-            <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-              Learnfinity partnered with VerifyLearn to ensure every course meets rigorous quality standards, transforming student trust and driving significant growth in a competitive edtech landscape.
-            </p>
-            <div className="flex justify-center mb-8">
+        <section className="bg-gradient-to-b from-blue-50 to-white py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+          <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="text-left">
+              <span className="inline-block text-blue-700 text-sm font-semibold uppercase mb-2">Customer Story</span>
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
+                Learnfinity Boosts Enrollment by Integrating Independent Course Verification
+              </h1>
+            </div>
+            <div className="relative w-full md:w-1/3">
               <Image
                 src="/case-study/learnfinity/lf66.png"
-                alt="Learnfinity branded image of online tech courses"
-                width={600}
-                height={400}
-                className="w-full max-w-md mx-auto rounded-lg shadow-lg"
+                alt="Learnfinity branded image of tech education tools"
+                width={400}
+                height={300}
+                className="w-full rounded-lg shadow-lg object-cover"
               />
-            </div>
-            <div className="grid md:grid-cols-3 gap-6 max-w-2xl mx-auto mb-8">
-              <div className="bg-white p-6 rounded-lg shadow-md">
-                <h3 className="text-2xl font-bold text-blue-600 mb-2">100%</h3>
-                <p className="text-gray-600">Courses Verified</p>
-              </div>
-              <div className="bg-white p-6 rounded-lg shadow-md">
-                <h3 className="text-2xl font-bold text-blue-600 mb-2">48h</h3>
-                <p className="text-gray-600">Average Turnaround</p>
-              </div>
-              <div className="bg-white p-6 rounded-lg shadow-md">
-                <h3 className="text-2xl font-bold text-blue-600 mb-2">92+</h3>
-                <p className="text-gray-600">Avg Quality Score</p>
+              <div className="absolute -bottom-4 -right-4 bg-white rounded-full p-4 flex items-center justify-center">
+                <span className="text-2xl font-bold text-blue-600">Learnfinity</span>
               </div>
             </div>
-            <div className="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-6 max-w-2xl mx-auto">
-              <blockquote className="italic text-gray-700 text-lg md:text-xl font-medium">
-                &ldquo;VerifyLearn has been instrumental in elevating our platform&apos;s credibility. The badges are a game-changer.&rdquo;
-              </blockquote>
-            </div>
-            <p className="text-sm text-gray-500 mt-4">— Learnfinity Team, Platform Founder</p>
           </div>
+          <div className="absolute top-0 left-0 w-1/3 h-full bg-blue-100 opacity-50 rounded-r-full"></div>
+          <div className="absolute top-1/2 right-0 w-1/4 h-1/2 bg-blue-200 opacity-30 rounded-l-full"></div>
         </section>
 
         {/* Summary Section */}

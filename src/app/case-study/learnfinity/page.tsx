@@ -1,8 +1,4 @@
 // pages/case-study/learnfinity.js (or app/case-study/learnfinity/page.js for App Router)
-// This is a full Next.js page component using Tailwind CSS for styling.
-// Assumes Tailwind is configured in your project (e.g., via globals.css with @tailwind directives).
-// Place images in /public folder: e.g., /public/images/learnfinity-hero.jpg, /public/images/verify-team-headshot.jpg
-// For production, optimize images with Next.js Image component.
 
 import Image from 'next/image';
 import Head from 'next/head';

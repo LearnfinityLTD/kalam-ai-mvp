@@ -2,8 +2,8 @@
 
 import Image from 'next/image';
 import Head from 'next/head';
-import Footer from "../components/shared/TempFooter";
-import NavBar from "../components/landing/shared/NavBar";
+import Footer from "../../components/shared/TempFooter";
+import NavBar from "../../components/landing/shared/NavBar";
 export default function LearnfinityCaseStudy() {
   return (
     <>

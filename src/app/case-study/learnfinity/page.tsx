@@ -87,7 +87,7 @@ export default function LearnfinityCaseStudy() {
           <div className="max-w-4xl mx-auto">
             <h2 className="text-3xl font-semibold mb-8 text-gray-900">Solution</h2>
             <p className="text-lg text-gray-700 leading-relaxed mb-6">
-              VerifyLearn provided a rigorous 4-stage verification process: content accuracy review by tech experts, instructor credential validation, AI-powered plagiarism detection, and pedagogical quality assessment. Integrated seamlessly into Learnfinity's platform, every course received the VerifyLearn badge upon passing—ensuring fast 48-hour turnarounds and a 92+ average quality score.
+              VerifyLearn provided a rigorous 4-stage verification process: content accuracy review by tech experts, instructor credential validation, AI-powered plagiarism detection, and pedagogical quality assessment. Integrated seamlessly into Learnfinity&apos;s platform, every course received the VerifyLearn badge upon passing—ensuring fast 48-hour turnarounds and a 92+ average quality score.
             </p>
             <p className="text-lg text-gray-700 leading-relaxed mb-6">
               This independent seal, likened to the &quot;Good Housekeeping Seal&quot; for education, allowed Learnfinity to highlight verified tech courses, building trust and differentiating in a crowded market.
@@ -95,7 +95,7 @@ export default function LearnfinityCaseStudy() {
             <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-6 mt-6">
               <div>
                 <blockquote className="italic text-gray-700 text-lg font-medium mb-2">
-                  &ldquo;Adding VerifyLearn verification to our Learnfinity courses has transformed how students perceive our content. Since displaying the verified badges, we've seen a noticeable increase in enrollments - students tell us the independent verification gives them confidence they're investing in quality education. Being able to demonstrate third-party validation of our technical accuracy and instructor credentials has helped us stand out in a crowded market. It's the credibility boost every serious course platform needs.&rdquo;
+                  &ldquo;Adding VerifyLearn verification to our Learnfinity courses has transformed how students perceive our content. Since displaying the verified badges, we&apos;ve seen a noticeable increase in enrollments - students tell us the independent verification gives them confidence they&apos;re investing in quality education. Being able to demonstrate third-party validation of our technical accuracy and instructor credentials has helped us stand out in a crowded market. It&apos;s the credibility boost every serious course platform needs.&rdquo;
                 </blockquote>
                 <p className="text-sm text-gray-500">— Learnfinity Team, Platform Founder</p>
               </div>
@@ -111,7 +111,7 @@ export default function LearnfinityCaseStudy() {
               Post-integration, Learnfinity reported a surge in enrollments, with students citing the VerifyLearn badges as a key decision factor. The platform now boasts 100% verified courses, fostering long-term loyalty and positioning it as a leader in quality tech education. Future plans include expanding verification to new course launches for sustained growth.
             </p>
             <p className="text-lg text-gray-700 leading-relaxed mb-6">
-              VerifyLearn's model not only protected against common pitfalls like outdated content but also unlocked evergreen trust in an ever-evolving edtech ecosystem.
+              VerifyLearn&apos;s model not only protected against common pitfalls like outdated content but also unlocked evergreen trust in an ever-evolving edtech ecosystem.
             </p>
             <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-6 mt-6">
               <div>

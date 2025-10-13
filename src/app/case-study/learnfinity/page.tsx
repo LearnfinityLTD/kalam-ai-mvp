@@ -2,10 +2,12 @@
 
 import Image from 'next/image';
 import Head from 'next/head';
-
+import Footer from "../components/shared/TempFooter";
+import NavBar from "../components/landing/shared/NavBar";
 export default function LearnfinityCaseStudy() {
   return (
     <>
+      <NavBar />
       <Head>
         <title>Learnfinity Boosts Enrollment with VerifyLearn Verification | VerifyLearn</title>
         <meta name="description" content="Discover how Learnfinity partnered with VerifyLearn to verify 100% of their courses, achieving a 92+ average quality score and driving enrollment growth through credible, independent validation." />
@@ -119,6 +121,7 @@ export default function LearnfinityCaseStudy() {
           </div>
         </section>
       </main>
+      <Footer />
     </>
   );
 }
